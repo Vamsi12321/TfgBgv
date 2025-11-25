@@ -1,0 +1,911 @@
+"use client";
+import { useEffect, useState } from "react";
+import { PlusCircle, X, Edit, Trash2, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://maihoo.onrender.com";
+
+/* -------------------------------------------- */
+/* NORMALIZE CANDIDATE (fixes uncontrolled inputs) */
+/* -------------------------------------------- */
+const normalizeCandidate = (c = {}) => ({
+  _id: c._id ?? "",
+  firstName: c.firstName ?? "",
+  middleName: c.middleName ?? "",
+  lastName: c.lastName ?? "",
+  fatherName: c.fatherName ?? "",
+  dob: c.dob ?? "",
+  gender: c.gender ?? "male",
+
+  phone: c.phone ?? "",
+  email: c.email ?? "",
+
+  aadhaarNumber: c.aadhaarNumber ?? "",
+  panNumber: c.panNumber ?? "",
+
+  uanNumber: c.uanNumber ?? "",
+  passportNumber: c.passportNumber ?? "",
+  bankAccountNumber: c.bankAccountNumber ?? "",
+
+  address: c.address ?? "",
+  district: c.district ?? "",
+  state: c.state ?? "",
+  pincode: c.pincode ?? "",
+});
+
+export default function ManageCandidatesPage() {
+  const [organizations, setOrganizations] = useState([]);
+  const [selectedOrg, setSelectedOrg] = useState("");
+  const [candidates, setCandidates] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
+
+  const [newCandidate, setNewCandidate] = useState(normalizeCandidate({}));
+  const [editCandidate, setEditCandidate] = useState(normalizeCandidate({}));
+
+  const [saving, setSaving] = useState(false);
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false);
+  const [orgSearch, setOrgSearch] = useState("");
+
+  const [modal, setModal] = useState({
+    show: false,
+    type: "info",
+    message: "",
+  });
+
+  const showError = (msg) =>
+    setModal({ show: true, type: "error", message: msg.detail });
+
+  const showSuccess = (msg) =>
+    setModal({ show: true, type: "success", message: msg });
+
+  /* ----------------------------------------------------
+   VALIDATION UTILITIES
+---------------------------------------------------- */
+
+  const isEmpty = (v) => !v || String(v).trim() === "";
+
+  const digitOnly = (v) => v.replace(/\D/g, "");
+
+  /* Aadhaar → 12 digits only */
+  const isValidAadhaar = (v) => /^\d{12}$/.test(v);
+
+  /* PAN → ABCDE1234F */
+  const isValidPAN = (v) => /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(v);
+
+  /* Phone → 10 digits */
+  const isValidPhone = (v) => /^\d{10}$/.test(v);
+
+  /* Passport optional → A1234567 */
+  const isValidPassport = (v) => v === "" || /^[A-PR-WY][1-9]\d{6}$/.test(v);
+
+  /* UAN optional → digits only */
+  const isValidUAN = (v) => v === "" || /^[0-9]{10,12}$/.test(v);
+
+  /* Bank Account optional → 9 to 18 digits */
+  const isValidAccount = (v) => v === "" || /^[0-9]{9,18}$/.test(v);
+
+  /* Pincode → 6 digits */
+  const isValidPincode = (v) => /^[1-9][0-9]{5}$/.test(v);
+
+  /* -------------------------------------------- */
+  /* FETCH ORGANIZATIONS */
+  /* -------------------------------------------- */
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/secure/getOrganizations`, {
+          credentials: "include",
+        });
+        const data = await res.json();
+        if (res.ok) setOrganizations(data.organizations || []);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, []);
+
+  /* -------------------------------------------- */
+  /* GET CANDIDATES WHEN ORG SELECTED */
+  /* -------------------------------------------- */
+  const loadCandidates = async () => {
+    if (!selectedOrg) return;
+    setLoading(true);
+    try {
+      const res = await fetch(
+        `${API_BASE}/secure/getCandidates?orgId=${selectedOrg}`,
+        { credentials: "include" }
+      );
+      const data = await res.json();
+      if (res.ok) setCandidates(data.candidates || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedOrg) loadCandidates();
+  }, [selectedOrg]);
+
+  /* -------------------------------------------- */
+  /* ADD CANDIDATE */
+  /* -------------------------------------------- */
+  const handleAddChange = (e) => {
+    let { name, value } = e.target;
+
+    if (name === "panNumber") {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    }
+
+    if (name === "aadhaarNumber") {
+      value = value.replace(/\D/g, "").slice(0, 12);
+    }
+
+    if (name === "phone") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    setNewCandidate((p) => ({ ...p, [name]: value }));
+  };
+
+  const handleAdd = async () => {
+    if (!validateCandidate(newCandidate, showError)) return;
+
+    setSaving(true);
+
+    try {
+      const payload = { ...newCandidate, organizationId: selectedOrg };
+
+      const res = await fetch(`${API_BASE}/secure/addCandidate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showError(data.detail || "Failed to add candidate");
+        return;
+      }
+
+      showSuccess("Candidate added successfully!");
+      setShowAddModal(false);
+      setNewCandidate(normalizeCandidate({}));
+      await loadCandidates();
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* -------------------------------------------- */
+  /* EDIT CANDIDATE */
+  /* -------------------------------------------- */
+  const handleEditChange = (e) => {
+    let { name, value } = e.target;
+
+    if (name === "panNumber") {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    }
+
+    if (name === "aadhaarNumber") {
+      value = value.replace(/\D/g, "").slice(0, 12);
+    }
+
+    if (name === "phone") {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+
+    setEditCandidate((p) => ({ ...p, [name]: value }));
+  };
+
+  const handleEdit = async () => {
+    if (!validateCandidate(editCandidate, showError)) return;
+
+    setSaving(true);
+
+    try {
+      const payload = {
+        operation: "edit",
+        candidateId: editCandidate._id,
+        organizationId: selectedOrg,
+        updates: { ...editCandidate },
+      };
+
+      const res = await fetch(`${API_BASE}/secure/modifyCandidate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showError(data.detail || "Failed to update candidate");
+        return;
+      }
+
+      showSuccess("Candidate updated!");
+      setShowEditModal(false);
+      setEditCandidate(normalizeCandidate({}));
+      await loadCandidates();
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* -------------------------------------------- */
+  /* DELETE CANDIDATE */
+  /* -------------------------------------------- */
+  const handleDelete = async () => {
+    setSaving(true);
+    try {
+      const payload = {
+        operation: "delete",
+        candidateId: selectedCandidate._id,
+        organizationId: selectedOrg,
+      };
+
+      const res = await fetch(`${API_BASE}/secure/modifyCandidate`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        showError(data.detail || data.message || "Delete failed.");
+        return;
+      }
+
+      showSuccess("Candidate deleted successfully.");
+      setShowDeleteModal(false);
+      await loadCandidates();
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+  /* ----------------------------------------------------
+   MASTER VALIDATION FUNCTION
+---------------------------------------------------- */
+  const validateCandidate = (c, showError) => {
+    // Mandatory fields
+    const required = [
+      "firstName",
+      "lastName",
+      "fatherName",
+      "phone",
+      "email",
+      "aadhaarNumber",
+      "panNumber",
+      "address",
+      "district",
+      "state",
+      "pincode",
+      "dob",
+      "gender",
+    ];
+
+    for (let key of required) {
+      if (isEmpty(c[key])) {
+        showError(`${key.replace(/([A-Z])/g, " $1")} is required`);
+        return false;
+      }
+    }
+
+    // Aadhaar
+    if (!isValidAadhaar(c.aadhaarNumber)) {
+      showError("Invalid Aadhaar number. Must be 12 digits.");
+      return false;
+    }
+
+    // PAN
+    if (!isValidPAN(c.panNumber)) {
+      showError("Invalid PAN format. Must be ABCDE1234F.");
+      return false;
+    }
+
+    // Phone
+    if (!isValidPhone(c.phone)) {
+      showError("Invalid phone number. Must be 10 digits.");
+      return false;
+    }
+
+    // Pincode
+    if (!isValidPincode(c.pincode)) {
+      showError("Invalid Pincode. Must be 6 digits.");
+      return false;
+    }
+
+    // Passport optional
+    if (!isValidPassport(c.passportNumber || "")) {
+      showError("Invalid Passport Number.");
+      return false;
+    }
+
+    // UAN optional
+    if (!isValidUAN(c.uanNumber || "")) {
+      showError("Invalid UAN Number.");
+      return false;
+    }
+
+    // Bank Account optional
+    if (!isValidAccount(c.bankAccountNumber || "")) {
+      showError("Invalid Bank Account Number.");
+      return false;
+    }
+
+    return true;
+  };
+  const enhancedOnChange = (e) => {
+    let { name, value } = e.target;
+
+    // Auto formatting
+    if (name === "aadhaarNumber") value = digitOnly(value);
+    if (name === "phone") value = digitOnly(value);
+    if (name === "pincode") value = digitOnly(value);
+    if (name === "uanNumber") value = digitOnly(value);
+    if (name === "bankAccountNumber") value = digitOnly(value);
+
+    if (name === "panNumber") value = value.toUpperCase();
+    if (name === "passportNumber") value = value.toUpperCase();
+
+    onChange({ target: { name, value } });
+  };
+
+  /* -------------------------------------------- */
+  /* UI START */
+  /* -------------------------------------------- */
+  return (
+    <div className="min-h-screen bg-gray-50 p-6 text-gray-900">
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* HEADER */}
+        <div className="flex justify-between items-center flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-[#ff004f]">
+              Manage Candidates
+            </h1>
+
+            <p className="text-gray-700 mt-1">
+              Add, edit, and delete candidates for your organization.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              if (!selectedOrg) {
+                setModal({
+                  show: true,
+                  type: "error",
+                  message:
+                    "Please select an organization before adding a candidate.",
+                });
+                return;
+              }
+              setNewCandidate(normalizeCandidate({}));
+              setShowAddModal(true);
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg 
+    
+    ${
+      selectedOrg
+        ? "bg-[#ff004f] hover:bg-[#e60047] text-white"
+        : "bg-gray-300 cursor-not-allowed text-gray-600"
+    }`}
+          >
+            <PlusCircle size={18} />
+            Add Candidate
+          </button>
+        </div>
+
+        {/* ORGANIZATION SELECT */}
+        <div className="bg-white p-4 rounded-lg shadow border">
+          <label className="block text-sm font-medium mb-2 text-gray-800">
+            Select Organization
+          </label>
+          {/* SEARCHABLE ORG DROPDOWN */}
+          <div className="relative">
+            <div
+              onClick={() => setShowOrgDropdown(!showOrgDropdown)}
+              className="w-full border rounded-lg p-3 bg-white cursor-pointer flex justify-between items-center shadow-sm"
+            >
+              <span className="text-gray-800">
+                {selectedOrg
+                  ? organizations.find((o) => o._id === selectedOrg)
+                      ?.organizationName
+                  : "Select Organization"}
+              </span>
+              <span className="text-gray-500">▾</span>
+            </div>
+
+            {showOrgDropdown && (
+              <div className="absolute left-0 right-0 bg-white border rounded-lg shadow-xl mt-2 z-20 max-h-64 overflow-y-auto">
+                {/* Search box */}
+                <div className="p-2 border-b bg-white sticky top-0">
+                  <input
+                    type="text"
+                    placeholder="Search organization..."
+                    className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-red-500"
+                    value={orgSearch}
+                    onChange={(e) => setOrgSearch(e.target.value)}
+                  />
+                </div>
+
+                {/* List */}
+                {organizations
+                  .filter((o) =>
+                    o.organizationName
+                      .toLowerCase()
+                      .includes(orgSearch.toLowerCase())
+                  )
+                  .map((o) => (
+                    <div
+                      key={o._id}
+                      onClick={() => {
+                        setSelectedOrg(o._id);
+                        setShowOrgDropdown(false);
+                      }}
+                      className="px-4 py-2 cursor-pointer hover:bg-[#ffeef3]
+ text-sm"
+                    >
+                      {o.organizationName}
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* LIST */}
+        <div className="bg-white p-6 rounded-lg shadow border text-gray-900">
+          {loading ? (
+            <div className="text-center py-10 text-gray-600">Loading...</div>
+          ) : candidates.length === 0 ? (
+            <div className="text-center py-10 text-gray-600">
+              No candidates found.
+            </div>
+          ) : (
+            <>
+              {/* DESKTOP TABLE */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-[#ffeef3] text-[#ff004f] uppercase text-xs">
+                      <th className="p-3 text-left">Name</th>
+                      <th className="p-3 text-left">Phone</th>
+                      <th className="p-3 text-left">Email</th>
+                      <th className="p-3 text-left">Aadhaar</th>
+                      <th className="p-3 text-left">PAN</th>
+                      <th className="p-3 text-left">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {candidates.map((c) => (
+                      <tr
+                        key={c._id}
+                        className="border-b hover:bg-[#ffeef3]
+ transition"
+                      >
+                        <td className="p-3">
+                          {c.firstName} {c.lastName}
+                        </td>
+                        <td className="p-3">{c.phone}</td>
+                        <td className="p-3">{c.email}</td>
+                        <td className="p-3">{c.aadhaarNumber}</td>
+                        <td className="p-3">{c.panNumber}</td>
+                        <td className="p-3">
+                          <div className="flex gap-2">
+                            <button
+                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition"
+                              onClick={() => {
+                                setEditCandidate(normalizeCandidate(c));
+                                setShowEditModal(true);
+                              }}
+                            >
+                              <Edit size={18} />
+                            </button>
+
+                            <button
+                              className="p-2 text-red-600 hover:text-red-800 hover:bg-[#ffeef3]
+ rounded transition"
+                              onClick={() => {
+                                setSelectedCandidate(normalizeCandidate(c));
+                                setShowDeleteModal(true);
+                              }}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* MOBILE CARDS */}
+              <div className="md:hidden grid gap-4">
+                {candidates.map((c) => (
+                  <div
+                    key={c._id}
+                    className="border rounded-lg p-4 shadow bg-white"
+                  >
+                    <div className="font-semibold text-lg">
+                      {c.firstName} {c.lastName}
+                    </div>
+
+                    <div className="text-sm mt-1 text-gray-700">
+                      📞 {c.phone}
+                    </div>
+                    <div className="text-sm text-gray-700">✉️ {c.email}</div>
+
+                    <div className="text-sm text-gray-700 mt-2">
+                      Aadhaar: {c.aadhaarNumber}
+                    </div>
+                    <div className="text-sm text-gray-700">
+                      PAN: {c.panNumber}
+                    </div>
+
+                    <div className="flex gap-3 mt-4">
+                      <button
+                        className="flex-1 py-2 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
+                        onClick={() => {
+                          setEditCandidate(normalizeCandidate(c));
+                          setShowEditModal(true);
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        className="flex-1 py-2 rounded border border-red-500 text-red-600 hover:bg-[#ffeef3]
+ transition"
+                        onClick={() => {
+                          setSelectedCandidate(normalizeCandidate(c));
+                          setShowDeleteModal(true);
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* MODALS */}
+      {showAddModal && (
+        <Modal title="Add Candidate" onClose={() => setShowAddModal(false)}>
+          <CandidateForm
+            data={newCandidate}
+            onChange={handleAddChange}
+            onSubmit={handleAdd}
+            saving={saving}
+            submitText="Add Candidate"
+          />
+        </Modal>
+      )}
+
+      {showEditModal && (
+        <Modal title="Edit Candidate" onClose={() => setShowEditModal(false)}>
+          <CandidateForm
+            data={editCandidate}
+            onChange={handleEditChange}
+            onSubmit={handleEdit}
+            saving={saving}
+            submitText="Save Changes"
+          />
+        </Modal>
+      )}
+
+      {showDeleteModal && (
+        <Modal
+          title="Delete Candidate"
+          onClose={() => setShowDeleteModal(false)}
+        >
+          <p className="text-gray-800">
+            Are you sure you want to delete{" "}
+            <strong>
+              {selectedCandidate?.firstName} {selectedCandidate?.lastName}
+            </strong>
+            ?
+          </p>
+
+          <button
+            onClick={handleDelete}
+            disabled={saving}
+            className="mt-6 w-full bg-red-600 text-white py-2 rounded hover:bg-red-700"
+          >
+            {saving ? <Loader2 className="animate-spin mx-auto" /> : "Delete"}
+          </button>
+        </Modal>
+      )}
+
+      {/* GLOBAL MODAL */}
+      {modal.show && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white p-6 rounded-xl shadow-xl w-full max-w-md"
+          >
+            <h2
+              className={`text-lg font-semibold ${
+                modal.type === "error" ? "text-red-600" : "text-green-600"
+              }`}
+            >
+              {modal.type === "error" ? "Error" : "Success"}
+            </h2>
+
+            <p className="mt-3 text-gray-700 whitespace-pre-wrap">
+              {modal.message}
+            </p>
+
+            <button
+              onClick={() => setModal({ show: false, type: "", message: "" })}
+              className="mt-5 w-full py-2 rounded bg-gray-200 hover:bg-gray-300"
+            >
+              OK
+            </button>
+          </motion.div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------- */
+/* MODAL COMPONENT */
+/* -------------------------------------------- */
+function Modal({ title, children, onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="
+          bg-white rounded-xl shadow-xl p-6 w-full max-w-lg text-gray-900
+          max-h-[90vh] overflow-y-auto   /* 🔥 FIX: ENABLE SCROLL */
+        "
+      >
+        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pb-2">
+          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
+          <button onClick={onClose} className="text-gray-600 hover:text-black">
+            <X size={22} />
+          </button>
+        </div>
+
+        {children}
+      </motion.div>
+    </div>
+  );
+}
+
+/* -------------------------------------------- */
+/* FORM COMPONENT — WITH FULL NEW FIELDS */
+/* -------------------------------------------- */
+function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
+  return (
+    <div className="text-gray-900">
+      {/* FULL NAME */}
+      <h3 className="font-semibold text-lg mb-3 text-[#ff004f]">
+        Personal Details
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input
+          name="firstName"
+          value={data.firstName}
+          onChange={onChange}
+          placeholder="First Name*"
+          className="border p-2 rounded"
+        />
+
+        <input
+          name="middleName"
+          value={data.middleName}
+          onChange={onChange}
+          placeholder="Middle Name (Optional)"
+          className="border p-2 rounded"
+        />
+
+        <input
+          name="lastName"
+          value={data.lastName}
+          onChange={onChange}
+          placeholder="Last Name*"
+          className="border p-2 rounded"
+        />
+      </div>
+
+      {/* FATHER NAME */}
+      <input
+        name="fatherName"
+        value={data.fatherName}
+        onChange={onChange}
+        placeholder="Father's Name*"
+        className="border p-2 rounded w-full mt-4"
+      />
+
+      {/* DOB + GENDER PREMIUM */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Date of Birth*
+          </label>
+          <input
+            type="date"
+            name="dob"
+            value={data.dob}
+            onChange={onChange}
+            className="border p-2 rounded w-full"
+          />
+        </div>
+
+        {/* 🔥 PREMIUM GENDER BUTTONS */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Gender*</label>
+          <div className="flex gap-3">
+            {["male", "female", "other"].map((g) => (
+              <button
+                key={g}
+                type="button"
+                onClick={() =>
+                  onChange({ target: { name: "gender", value: g } })
+                }
+                className={`px-4 py-2 rounded-md border flex-1 capitalize ${
+                  data.gender === g
+                    ? "bg-red-600 text-white border-red-600"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* CONTACT */}
+      <h3 className="font-semibold text-lg mt-6 mb-3 text-red-600">
+        Contact Details
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input
+          name="phone"
+          value={data.phone}
+          onChange={onChange}
+          placeholder="Phone Number*"
+          className="border p-2 rounded"
+        />
+
+        <input
+          name="email"
+          value={data.email}
+          onChange={onChange}
+          placeholder="Email*"
+          type="email"
+          className="border p-2 rounded"
+        />
+      </div>
+
+      {/* IDENTITY */}
+      <h3 className="font-semibold text-lg mt-6 mb-3 text-red-600">
+        Identity Details
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <input
+          name="aadhaarNumber"
+          value={data.aadhaarNumber}
+          onChange={onChange}
+          placeholder="Aadhaar* (12 digits)"
+          className="border p-2 rounded"
+        />
+
+        <input
+          name="panNumber"
+          value={data.panNumber}
+          onChange={onChange}
+          placeholder="PAN* (ABCDE1234F)"
+          className="border p-2 rounded uppercase"
+        />
+
+        <input
+          name="uanNumber"
+          value={data.uanNumber}
+          onChange={onChange}
+          placeholder="UAN Number"
+          className="border p-2 rounded"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+        <input
+          name="passportNumber"
+          value={data.passportNumber}
+          onChange={onChange}
+          placeholder="Passport Number (Optional)"
+          className="border p-2 rounded uppercase"
+        />
+
+        <input
+          name="bankAccountNumber"
+          value={data.bankAccountNumber}
+          onChange={onChange}
+          placeholder="Bank Account Number (Optional)"
+          className="border p-2 rounded"
+        />
+
+        <input
+          name="pincode"
+          value={data.pincode}
+          onChange={onChange}
+          placeholder="Pincode*"
+          className="border p-2 rounded"
+        />
+      </div>
+
+      {/* ADDRESS */}
+      <h3 className="font-semibold text-lg mt-6 mb-3 text-red-600">
+        Address Details
+      </h3>
+
+      <textarea
+        name="address"
+        value={data.address}
+        onChange={onChange}
+        placeholder="Full Address*"
+        rows={3}
+        className="border p-2 rounded w-full"
+      />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <input
+          name="district"
+          value={data.district}
+          onChange={onChange}
+          placeholder="District*"
+          className="border p-2 rounded"
+        />
+
+        <input
+          name="state"
+          value={data.state}
+          onChange={onChange}
+          placeholder="State*"
+          className="border p-2 rounded"
+        />
+      </div>
+
+      {/* SUBMIT BUTTON */}
+      <button
+        onClick={onSubmit}
+        disabled={saving}
+        className="mt-6 w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 flex items-center justify-center"
+      >
+        {saving ? <Loader2 className="animate-spin" /> : submitText}
+      </button>
+    </div>
+  );
+}
