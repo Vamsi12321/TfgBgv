@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://maihoo.onrender.com";
 
-export default function ConsentPage({ searchParams }) {
+export default function ConsentClient({ searchParams }) {
   const token = searchParams.token;
 
   const [data, setData] = useState(null);
