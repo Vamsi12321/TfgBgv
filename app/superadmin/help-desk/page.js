@@ -237,7 +237,7 @@ export default function SuperAdminTicketsPage() {
 
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch =
-      ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       filters.status === "All" || ticket.status === filters.status;

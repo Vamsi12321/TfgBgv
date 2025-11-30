@@ -27,17 +27,29 @@ import {
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://maihoo.onrender.com";
 
-export default function SuperAdminTicketsPage() {
+export default function OrgHelpDeskPage() {
   const [tickets, setTickets] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
   const [filters, setFilters] = useState({
     status: "All",
     priority: "All",
     category: "All",
   });
+
+  // Create Ticket
+  const [newTicket, setNewTicket] = useState({
+    subject: "",
+    description: "",
+    category: "",
+    priority: "MEDIUM",
+  });
+  const [creating, setCreating] = useState(false);
 
   // Comment
   const [comment, setComment] = useState("");
@@ -51,8 +63,25 @@ export default function SuperAdminTicketsPage() {
   const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
+    const storedUser = localStorage.getItem("bgvUser");
+    if (storedUser) setCurrentUser(JSON.parse(storedUser));
+    fetchCategories();
     fetchTickets();
   }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/secure/ticket/categories`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCategories(data.categories || []);
+      }
+    } catch (err) {
+      console.error("Error fetching categories:", err);
+    }
+  };
 
   const fetchTickets = async () => {
     try {
@@ -73,6 +102,43 @@ export default function SuperAdminTicketsPage() {
       console.error("Error fetching tickets:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCreateTicket = async () => {
+    if (!newTicket.subject || !newTicket.description || !newTicket.category) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setCreating(true);
+      const res = await fetch(`${API_BASE}/secure/ticket/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          subject: newTicket.subject,
+          description: newTicket.description,
+          category: newTicket.category,
+          priority: newTicket.priority,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert(`Ticket ${data.ticketId} created successfully!`);
+        setShowCreateModal(false);
+        setNewTicket({ subject: "", description: "", category: "", priority: "MEDIUM" });
+        fetchTickets();
+      } else {
+        alert(data.detail || "Failed to create ticket");
+      }
+    } catch (err) {
+      console.error("Error creating ticket:", err);
+      alert("Network error. Please try again.");
+    } finally {
+      setCreating(false);
     }
   };
 
@@ -237,7 +303,7 @@ export default function SuperAdminTicketsPage() {
 
   const filteredTickets = tickets.filter((ticket) => {
     const matchesSearch =
-      ticket.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      ticket.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       ticket.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus =
       filters.status === "All" || ticket.status === filters.status;
@@ -288,13 +354,22 @@ export default function SuperAdminTicketsPage() {
     >
       <div className="p-4 sm:p-8">
         <PageHeader
-          title="All Support Tickets"
-          subtitle="Manage and respond to support tickets from all organizations"
-          breadcrumbs={["Support", "All Tickets"]}
+          title="Support Tickets"
+          subtitle="Create and manage support tickets"
+          breadcrumbs={["Support", "Tickets"]}
           action={
-            <Button variant="outline" icon={RefreshCw} onClick={fetchTickets}>
-              Refresh
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="primary"
+                icon={Plus}
+                onClick={() => setShowCreateModal(true)}
+              >
+                Create Ticket
+              </Button>
+              <Button variant="outline" icon={RefreshCw} onClick={fetchTickets}>
+                Refresh
+              </Button>
+            </div>
           }
         />
 
@@ -415,6 +490,105 @@ export default function SuperAdminTicketsPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {/* Create Ticket Modal */}
+        {showCreateModal && (
+          <Modal
+            isOpen={showCreateModal}
+            onClose={() => setShowCreateModal(false)}
+            title="Create New Ticket"
+            size="lg"
+          >
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Subject *
+                </label>
+                <input
+                  type="text"
+                  placeholder="Brief description of the issue"
+                  value={newTicket.subject}
+                  onChange={(e) =>
+                    setNewTicket({ ...newTicket, subject: e.target.value })
+                  }
+                  maxLength={200}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={newTicket.category}
+                  onChange={(e) =>
+                    setNewTicket({ ...newTicket, category: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] outline-none"
+                >
+                  <option value="">Select Category...</option>
+                  {categories.map((cat) => (
+                    <option key={cat.value} value={cat.value} title={cat.description}>
+                      {cat.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Priority *
+                </label>
+                <select
+                  value={newTicket.priority}
+                  onChange={(e) =>
+                    setNewTicket({ ...newTicket, priority: e.target.value })
+                  }
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] outline-none"
+                >
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="CRITICAL">Critical</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  placeholder="Detailed description of the issue..."
+                  value={newTicket.description}
+                  onChange={(e) =>
+                    setNewTicket({ ...newTicket, description: e.target.value })
+                  }
+                  rows={6}
+                  maxLength={2000}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] outline-none resize-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCreateModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="primary"
+                  onClick={handleCreateTicket}
+                  loading={creating}
+                  icon={Plus}
+                >
+                  Create Ticket
+                </Button>
+              </div>
+            </div>
+          </Modal>
         )}
 
         {/* Ticket Detail Modal */}
