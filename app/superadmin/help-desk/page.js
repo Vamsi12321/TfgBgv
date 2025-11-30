@@ -93,6 +93,11 @@ export default function SuperAdminTicketsPage() {
       setLoading(false);
     }
   };
+const normalizeStatus = (s) => s?.toUpperCase().trim();
+const isClosed = (status) => {
+  const s = normalizeStatus(status);
+  return s === "CLOSED" || s === "CLOSE" || s.includes("CLOSED");
+};
 
   // ===========================
   // LOAD TICKET DETAILS
@@ -324,6 +329,17 @@ export default function SuperAdminTicketsPage() {
     };
     return variants[status] || "default";
   };
+// ===========================
+// SUMMARY COUNTERS
+// ===========================
+const ticketStats = {
+  total: tickets.length,
+  open: tickets.filter(t => t.status === "OPEN").length,
+  inProgress: tickets.filter(t => t.status === "IN_PROGRESS").length,
+  resolved: tickets.filter(t => t.status === "RESOLVED").length,
+  reopened: tickets.filter(t => t.status === "REOPENED").length,
+  closed: tickets.filter(t => t.status === "CLOSED").length,
+};
 
   const getPriorityBadge = (priority) => {
     const variants = {
@@ -364,6 +380,40 @@ export default function SuperAdminTicketsPage() {
             </Button>
           }
         />
+{/* SUMMARY CARDS */}
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 mb-6 mt-4">
+
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+    <p className="text-sm text-gray-500">Total Tickets</p>
+    <h2 className="text-2xl font-bold text-gray-900">{ticketStats.total}</h2>
+  </div>
+
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+    <p className="text-sm text-gray-500">Open</p>
+    <h2 className="text-2xl font-bold text-blue-600">{ticketStats.open}</h2>
+  </div>
+
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+    <p className="text-sm text-gray-500">In Progress</p>
+    <h2 className="text-2xl font-bold text-yellow-600">{ticketStats.inProgress}</h2>
+  </div>
+
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+    <p className="text-sm text-gray-500">Resolved</p>
+    <h2 className="text-2xl font-bold text-green-600">{ticketStats.resolved}</h2>
+  </div>
+
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+    <p className="text-sm text-gray-500">Reopened</p>
+    <h2 className="text-2xl font-bold text-rose-600">{ticketStats.reopened}</h2>
+  </div>
+
+  <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+    <p className="text-sm text-gray-500">Closed</p>
+    <h2 className="text-2xl font-bold text-gray-600">{ticketStats.closed}</h2>
+  </div>
+
+</div>
 
         {/* FILTERS */}
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-6">
@@ -644,15 +694,17 @@ export default function SuperAdminTicketsPage() {
                   </Button>
 
                   {/* REOPEN */}
-                  {selectedTicket.status === "CLOSED" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleReopenTicket}
-                      disabled={changingStatus}
-                    >
-                      Reopen Ticket
-                    </Button>
+                 {isClosed(selectedTicket.status) && (
+  <Button
+    variant="outline"
+    size="sm"
+    onClick={handleReopenTicket}
+    disabled={changingStatus}
+  >
+    Reopen Ticket
+  </Button>
+)}
+
                   )}
                 </div>
 
