@@ -1,19 +1,22 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const API_BASE =
   process.env.NEXT_PUBLIC_API_BASE_URL || "https://maihoo.onrender.com";
 
-export default function ConsentClient({ searchParams }) {
-  const token = searchParams?.token;
+export default function ConsentClient() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+
+  console.log("token:", token);
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // 🚨 EARLY CHECK: No token → return immediately
   if (!token) {
     return (
       <div className="p-10 text-center text-red-600 text-xl font-semibold">
@@ -24,15 +27,12 @@ export default function ConsentClient({ searchParams }) {
 
   useEffect(() => {
     (async () => {
-      try {
-        const res = await fetch(
-          `${API_BASE}/public/verification-consent/${token}`
-        );
-        const json = await res.json();
-        setData(json);
-      } finally {
-        setLoading(false);
-      }
+      const res = await fetch(
+        `${API_BASE}/public/verification-consent/${token}`
+      );
+      const json = await res.json();
+      setData(json);
+      setLoading(false);
     })();
   }, [token]);
 
@@ -97,11 +97,7 @@ export default function ConsentClient({ searchParams }) {
 
       <div className="bg-yellow-50 p-4 rounded-xl border leading-relaxed text-sm">
         <strong>Self-Declaration:</strong>
-        <p className="mt-2 text-gray-700">
-          I hereby give consent to the organization to perform the verification
-          checks listed above. I understand that the information provided by me
-          will be used solely for the purpose of background verification.
-        </p>
+        <p className="mt-2 text-gray-700">I hereby give consent...</p>
       </div>
 
       <div className="flex gap-4">
