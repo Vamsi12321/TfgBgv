@@ -1,10 +1,10 @@
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
-export const revalidate = 0;
+export const revalidate = false;
 export const runtime = "nodejs";
 
-import ConsentClient from "./client";
+import ClientPage from "./client";
 
 export default function Page() {
-  return <ConsentClient />;
+  return <ClientPage />;
 }

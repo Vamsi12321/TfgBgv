@@ -5,6 +5,6 @@ export const runtime = "nodejs";
 
 import ConsentClient from "./client";
 
-export default function Page({ searchParams }) {
-  return <ConsentClient searchParams={searchParams} />;
+export default function Page() {
+  return <ConsentClient />;
 }
