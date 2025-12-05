@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Filter, X, Loader2 } from "lucide-react";
+import { Filter, X, Loader2,CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useOrgState } from "../../context/OrgStateContext";
 
@@ -165,8 +165,8 @@ export default function OrgVerificationsPage() {
       {/* Header */}
       <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-red-600">
-            Organization Verifications
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <CheckCircle2 size={24} /> Organization Verifications
           </h1>
           <p className="text-gray-600 text-sm">
             Manage and track your candidates’ background verifications.
@@ -180,8 +180,76 @@ export default function OrgVerificationsPage() {
         </button>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm mb-6">
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-blue-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-blue-700 text-sm font-semibold">Total Verifications</p>
+            <div className="p-2 bg-blue-200 rounded-lg">
+              <svg className="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-gray-700">{filteredCandidates.length}</p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-orange-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-orange-700 text-sm font-semibold">Overall Completion</p>
+            <div className="p-2 bg-orange-200 rounded-lg">
+              <svg className="w-5 h-5 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-orange-600">
+            {filteredCandidates.length > 0
+              ? Math.round(
+                  filteredCandidates.reduce((sum, c) => sum + (c.completionPercentage || 0), 0) /
+                    filteredCandidates.length
+                )
+              : 0}%
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-green-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-green-700 text-sm font-semibold">Completed</p>
+            <div className="p-2 bg-green-200 rounded-lg">
+              <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-green-600">
+            {filteredCandidates.filter((c) => getDisplayStatus(c) === "COMPLETED").length}
+          </p>
+        </div>
+
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-red-50 to-red-100 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-red-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-red-700 text-sm font-semibold">Failed</p>
+            <div className="p-2 bg-red-200 rounded-lg">
+              <svg className="w-5 h-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-red-600">
+            {filteredCandidates.filter((c) => getDisplayStatus(c) === "FAILED").length}
+          </p>
+        </div>
+      </div>
+
+      {/* Enhanced Filters */}
+      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-gray-100">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+            <Filter size={20} className="text-[#ff004f]" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-800">Filter Verifications</h3>
+        </div>
         <div className="flex flex-wrap gap-3 items-center">
           {/* Status Filter */}
           <div className="min-w-[140px]">
@@ -262,20 +330,14 @@ export default function OrgVerificationsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm text-gray-700">
-              <thead className="bg-red-50 text-gray-800 border-b">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold">
-                    Candidate
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold">Stage</th>
-                  <th className="px-4 py-3 text-left font-semibold">
-                    Initiated By
-                  </th>
-                  <th className="px-4 py-3 text-left font-semibold">Status</th>
-                  <th className="px-4 py-3 text-left font-semibold">
-                    Progress
-                  </th>
-                  <th className="px-4 py-3 text-right font-semibold">Action</th>
+                  <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">👤 Candidate</th>
+                  <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">📊 Stage</th>
+                  <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">👨‍💼 Initiated By</th>
+                  <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">✅ Status</th>
+                  <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">📈 Progress</th>
+                  <th className="px-4 py-4 text-right font-semibold tracking-wide text-gray-700">⚙️ Action</th>
                 </tr>
               </thead>
               <tbody>

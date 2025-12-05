@@ -580,13 +580,13 @@ export default function SuperAdminAICVVerificationPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 md:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
-          <div className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white p-6 md:p-8 rounded-2xl shadow-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <Shield size={32} />
-              <h1 className="text-3xl md:text-4xl font-bold">AI CV Verification</h1>
-            </div>
-            <p className="text-white/90 text-sm md:text-base">
-              Validate candidate resumes using AI-powered analysis for authenticity and consistency
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <Shield size={24} className="text-[#ff004f]" />
+              AI CV Verification
+            </h1>
+            <p className="text-gray-600 text-sm mt-1">
+              Validate candidate resumes using AI-powered analysis
             </p>
           </div>
 

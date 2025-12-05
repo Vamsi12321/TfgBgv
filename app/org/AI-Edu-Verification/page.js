@@ -12,15 +12,15 @@ import {
   ChevronUp,
   AlertCircle,
   X,
-  Building2,
   User,
   FileText,
   Shield,
-  Receipt
+  GraduationCap,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { safeHtml2Canvas } from "@/utils/safeHtml2Canvas";
+import { useOrgState } from "../../context/OrgStateContext";
 
 // -------------------------------------------------
 // MODALS
@@ -92,18 +92,17 @@ function ErrorModal({ isOpen, onClose, message, details }) {
 // -------------------------------------------------
 // MAIN PAGE
 // -------------------------------------------------
-export default function SuperAdminAIEducationValidationPage() {
-  const [organizations, setOrganizations] = useState([]);
+export default function OrgAIEducationValidationPage() {
+  const { aiEduVerificationState = {}, setAiEduVerificationState = () => {} } = useOrgState();
+
   const [candidates, setCandidates] = useState([]);
-  const [selectedOrg, setSelectedOrg] = useState("");
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [verificationId, setVerificationId] = useState("");
   const [documentFile, setDocumentFile] = useState(null);
 
-  const [analysis, setAnalysis] = useState(null);
-  const [finalRemarks, setFinalRemarks] = useState("");
+  const [analysis, setAnalysis] = useState(aiEduVerificationState.analysis || null);
+  const [finalRemarks, setFinalRemarks] = useState(aiEduVerificationState.finalRemarks || "");
 
-  const [loadingOrgs, setLoadingOrgs] = useState(false);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [loadingValidation, setLoadingValidation] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
@@ -123,31 +122,20 @@ export default function SuperAdminAIEducationValidationPage() {
 
   const pdfRef = useRef(null);
 
-  // Load Organizations
+  // Save state on unmount
   useEffect(() => {
-    setLoadingOrgs(true);
-    fetch(`/api/proxy/secure/getOrganizations`, { credentials: "include" })
-      .then((res) => res.json())
-      .then((data) => setOrganizations(data.organizations || []))
-      .catch((err) =>
-        setErrorModal({
-          isOpen: true,
-          message: "Failed to load organizations",
-          details: err.message,
-        })
-      )
-      .finally(() => setLoadingOrgs(false));
-  }, []);
+    return () => {
+      setAiEduVerificationState({
+        analysis,
+        finalRemarks,
+      });
+    };
+  }, [analysis, finalRemarks, setAiEduVerificationState]);
 
   // Load Candidates
   useEffect(() => {
-    if (!selectedOrg) {
-      setCandidates([]);
-      return;
-    }
-
     setLoadingCandidates(true);
-    fetch(`/api/proxy/secure/getCandidates?orgId=${selectedOrg}`, {
+    fetch(`/api/proxy/secure/getCandidates`, {
       credentials: "include",
     })
       .then((res) => res.json())
@@ -160,11 +148,9 @@ export default function SuperAdminAIEducationValidationPage() {
         })
       )
       .finally(() => setLoadingCandidates(false));
-  }, [selectedOrg]);
+  }, []);
 
-  // -------------------------------------------------
-  // FETCH VERIFICATION (TO GET verificationId)
-  // -------------------------------------------------
+  // Fetch Verification
   const fetchVerification = async (candId) => {
     setAnalysis(null);
     setLoadingResults(true);
@@ -191,7 +177,6 @@ export default function SuperAdminAIEducationValidationPage() {
 
       setVerificationId(ver._id);
 
-      // If a check already exists → load results
       const allChecks = [
         ...(ver.stages?.primary || []),
         ...(ver.stages?.secondary || []),
@@ -216,9 +201,7 @@ export default function SuperAdminAIEducationValidationPage() {
     }
   };
 
-  // -------------------------------------------------
-  // RUN VALIDATION
-  // -------------------------------------------------
+  // Run Validation
   const runValidation = async () => {
     if (!selectedCandidate) {
       return setErrorModal({
@@ -260,9 +243,6 @@ export default function SuperAdminAIEducationValidationPage() {
       if (!res.ok) throw new Error(await res.text());
 
       const data = await res.json();
-
-      // 🔥 DO NOT CALL loadResults here
-      // 🔥 Because backend returns CORRECT analysis already
       setAnalysis({ analysis: data.analysis });
 
       setSuccessModal({
@@ -280,9 +260,7 @@ export default function SuperAdminAIEducationValidationPage() {
     }
   };
 
-  // -------------------------------------------------
-  // LOAD RESULTS
-  // -------------------------------------------------
+  // Load Results
   const loadResults = async (vId) => {
     setLoadingResults(true);
 
@@ -307,9 +285,7 @@ export default function SuperAdminAIEducationValidationPage() {
     }
   };
 
-  // -------------------------------------------------
-  // SUBMIT FINAL DECISION
-  // -------------------------------------------------
+  // Submit Final Decision
   const submitDecision = async (status) => {
     if (!verificationId) {
       return setErrorModal({
@@ -354,9 +330,7 @@ export default function SuperAdminAIEducationValidationPage() {
     }
   };
 
-  // -------------------------------------------------
-  // EXPORT PDF
-  // -------------------------------------------------
+  // Export PDF
   const exportPDF = async () => {
     try {
       const input = pdfRef.current;
@@ -385,12 +359,9 @@ export default function SuperAdminAIEducationValidationPage() {
     }
   };
 
-  // -------------------------------------------------
   // JSX UI
-  // -------------------------------------------------
   return (
     <>
-      {/* MODALS */}
       <SuccessModal
         isOpen={successModal.isOpen}
         onClose={() => setSuccessModal({ isOpen: false, message: "" })}
@@ -406,13 +377,11 @@ export default function SuperAdminAIEducationValidationPage() {
         details={errorModal.details}
       />
 
-      {/* MAIN PAGE */}
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 md:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* HEADER */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Shield size={24} className="text-[#ff004f]" />
+              <GraduationCap size={24} />
               AI Education Validation
             </h1>
             <p className="text-gray-600 text-sm mt-1">
@@ -421,44 +390,13 @@ export default function SuperAdminAIEducationValidationPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* LEFT PANEL */}
             <div className="lg:col-span-1">
               <div className="bg-white p-6 rounded-2xl shadow-lg border space-y-6 sticky top-6">
                 <h2 className="text-xl font-bold text-black flex items-center gap-2">
                   <Sparkles className="text-[#ff004f]" />
                   Selection Panel
                 </h2>
-                {/* ORG DROPDOWN */}
-                <div>
-                  <label className="font-semibold flex items-center gap-2 mb-2 text-black">
-                    <Building2 size={16} className="text-[#ff004f]" />
-                    Organization
-                  </label>
 
-                  <select
-                    value={selectedOrg}
-                    onChange={(e) => {
-                      setSelectedOrg(e.target.value);
-                      setSelectedCandidate(null);
-                      setAnalysis(null);
-                      setVerificationId("");
-                      setDocumentFile(null);
-                    }}
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#ff004f] focus:ring-2 focus:ring-[#ff004f]/20 transition"
-                    disabled={loadingOrgs}
-                  >
-                    <option value="">
-                      {loadingOrgs ? "Loading..." : "-- Select Organization --"}
-                    </option>
-                    {organizations.map((org) => (
-                      <option key={org._id} value={org._id}>
-                        {org.organizationName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* CANDIDATE DROPDOWN */}
                 <div>
                   <label className="font-semibold flex items-center gap-2 mb-2 text-black">
                     <User size={16} className="text-[#ff004f]" />
@@ -477,7 +415,7 @@ export default function SuperAdminAIEducationValidationPage() {
                       if (c) fetchVerification(c._id);
                     }}
                     className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#ff004f] focus:ring-2 focus:ring-[#ff004f]/20 transition"
-                    disabled={!selectedOrg || loadingCandidates}
+                    disabled={loadingCandidates}
                   >
                     <option value="">
                       {loadingCandidates
@@ -492,7 +430,6 @@ export default function SuperAdminAIEducationValidationPage() {
                   </select>
                 </div>
 
-                {/* SELECTED CANDIDATE INFO */}
                 {selectedCandidate && (
                   <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
                     <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
@@ -509,7 +446,6 @@ export default function SuperAdminAIEducationValidationPage() {
                   </div>
                 )}
 
-                {/* DOCUMENT UPLOAD */}
                 <div>
                   <label className="font-semibold mb-3 flex items-center gap-2 text-black">
                     <FileText size={16} className="text-[#ff004f]" />
@@ -555,7 +491,6 @@ export default function SuperAdminAIEducationValidationPage() {
                   )}
                 </div>
 
-                {/* RUN VALIDATION */}
                 <button
                   onClick={runValidation}
                   disabled={
@@ -578,9 +513,7 @@ export default function SuperAdminAIEducationValidationPage() {
               </div>
             </div>
 
-            {/* RIGHT PANEL */}
             <div className="lg:col-span-2 space-y-6">
-              {/* NO RESULTS */}
               {!analysis && !loadingResults && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -596,13 +529,11 @@ export default function SuperAdminAIEducationValidationPage() {
                     No Analysis Available
                   </h3>
                   <p className="text-gray-500 max-w-md mx-auto">
-                    Select an organization and candidate, upload their education
-                    certificate, then run the AI validation to see results here.
+                    Select a candidate, upload their education certificate, then run the AI validation to see results here.
                   </p>
                 </motion.div>
               )}
 
-              {/* LOADING */}
               {loadingResults && (
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -632,7 +563,6 @@ export default function SuperAdminAIEducationValidationPage() {
                 </motion.div>
               )}
 
-              {/* RESULTS */}
               {analysis && (
                 <ResultsSection
                   analysis={analysis}
@@ -643,6 +573,7 @@ export default function SuperAdminAIEducationValidationPage() {
                   submitDecision={submitDecision}
                   exportPDF={exportPDF}
                   submittingFinal={submittingFinal}
+                  pdfRef={pdfRef}
                 />
               )}
             </div>
@@ -653,9 +584,7 @@ export default function SuperAdminAIEducationValidationPage() {
   );
 }
 
-// -------------------------------------------------
-// RESULTS SECTION
-// -------------------------------------------------
+// Results Section Component
 function ResultsSection({
   analysis,
   expanded,
@@ -665,27 +594,17 @@ function ResultsSection({
   submitDecision,
   exportPDF,
   submittingFinal,
+  pdfRef,
 }) {
-  // FIX: use ONLY the nested analysis object
   let ai;
 
-  // CASE 1: results endpoint → aiAnalysis
   if (analysis?.aiAnalysis && typeof analysis.aiAnalysis === "object") {
     ai = analysis.aiAnalysis;
-  }
-
-  // CASE 2: validation endpoint → analysis
-  else if (analysis?.analysis && typeof analysis.analysis === "object") {
+  } else if (analysis?.analysis && typeof analysis.analysis === "object") {
     ai = analysis.analysis;
-  }
-
-  // CASE 3: fallback direct shape (rare)
-  else if (typeof analysis === "object") {
+  } else if (typeof analysis === "object") {
     ai = analysis;
-  }
-
-  // INVALID FORMAT
-  else {
+  } else {
     return (
       <div className="p-6 border rounded-xl bg-red-50 text-red-700">
         Invalid analysis response format.
@@ -696,7 +615,6 @@ function ResultsSection({
   const toggle = (key) =>
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // Map API response fields - show all fields even if UNKNOWN
   const authenticityScore = ai.authenticity_score ?? ai.score ?? 0;
   const verificationStatus = ai.verification_status || ai.status || "PENDING";
   const summary = ai.summary || ai.recommendation || "";
@@ -715,7 +633,6 @@ function ResultsSection({
   const documentType = ai.document_type || "Not Specified";
   const extractedTextQuality = ai.extracted_text_quality || "Not Specified";
 
-  // Status color - lighter backgrounds with black text
   const statusColor =
     verificationStatus === "VERIFIED"
       ? "bg-green-50 text-black border border-green-200"
@@ -723,7 +640,6 @@ function ResultsSection({
       ? "bg-red-50 text-black border border-red-200"
       : "bg-yellow-50 text-black border border-yellow-200";
 
-  // Score color - lighter backgrounds with black text
   const scoreColor =
     authenticityScore >= 80
       ? "bg-green-50 text-black border border-green-200"
@@ -733,11 +649,11 @@ function ResultsSection({
 
   return (
     <motion.div
+      ref={pdfRef}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border space-y-6"
     >
-      {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-black flex items-center gap-2">
@@ -757,7 +673,6 @@ function ResultsSection({
         </button>
       </div>
 
-      {/* STATUS & SCORE BADGES */}
       <div className="flex flex-wrap gap-3">
         <span
           className={`px-4 py-2 rounded-lg font-semibold text-sm ${scoreColor}`}
@@ -779,7 +694,6 @@ function ResultsSection({
         )}
       </div>
 
-      {/* EDUCATION DETAILS GRID - Always show all fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-5 bg-gray-50 rounded-xl border border-gray-200">
         <h3 className="col-span-full font-bold text-lg text-black mb-2 flex items-center gap-2">
           <FileText size={18} className="text-[#ff004f]" />
@@ -854,7 +768,6 @@ function ResultsSection({
         </div>
       </div>
 
-      {/* SUMMARY */}
       {summary && (
         <div className="p-5 bg-blue-50 rounded-xl border border-blue-200">
           <h3 className="font-bold text-black mb-2 flex items-center gap-2">
@@ -865,7 +778,6 @@ function ResultsSection({
         </div>
       )}
 
-      {/* POSITIVE FINDINGS */}
       {positiveFindings && positiveFindings.length > 0 && (
         <CollapsibleSection
           title="Positive Findings"
@@ -878,7 +790,6 @@ function ResultsSection({
         />
       )}
 
-      {/* RED FLAGS */}
       {redFlags && redFlags.length > 0 && (
         <CollapsibleSection
           title="Red Flags & Issues"
@@ -895,7 +806,6 @@ function ResultsSection({
         />
       )}
 
-      {/* FINAL REMARKS */}
       <div className="space-y-2">
         <label className="font-bold text-black flex items-center gap-2">
           <FileText size={16} className="text-[#ff004f]" />
@@ -910,7 +820,6 @@ function ResultsSection({
         />
       </div>
 
-      {/* ACTION BUTTONS */}
       <div className="flex flex-col sm:flex-row gap-4 pt-4">
         <button
           onClick={() => submitDecision("COMPLETED")}
@@ -946,9 +855,7 @@ function ResultsSection({
   );
 }
 
-// -------------------------------------------------
-// UTIL COMPONENT
-// -------------------------------------------------
+// Collapsible Section Component
 function CollapsibleSection({
   title,
   list,

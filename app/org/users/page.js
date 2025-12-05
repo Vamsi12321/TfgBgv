@@ -8,6 +8,7 @@ import {
   Loader2,
   ShieldCheck,
   UserPlus,
+  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useOrgState } from "../../context/OrgStateContext";
@@ -154,8 +155,8 @@ export default function OrgUsersPage() {
   return (
     <div className="p-4 sm:p-6 md:p-8 text-gray-900 space-y-6 bg-gray-50 min-h-screen">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          <ShieldCheck className="text-[#ff004f]" /> Organization Users
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <ShieldCheck size={24} /> Organization Users
         </h1>
         <button
           onClick={() => setShowModal(true)}
@@ -165,10 +166,16 @@ export default function OrgUsersPage() {
         </button>
       </div>
 
-      {/* 🔹 Filter */}
-      <div className="flex flex-wrap gap-3 bg-white p-4 rounded-xl shadow border border-gray-200">
+      {/* Enhanced Filter */}
+      <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+            <Users size={20} className="text-[#ff004f]" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-800">Filter Users</h3>
+        </div>
         <select
-          className="border rounded-lg px-3 py-2 bg-gray-50 text-sm focus:ring-2 focus:ring-[#ff004f]"
+          className="w-full sm:w-auto border-2 border-gray-200 rounded-xl px-4 py-3 bg-white text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition"
           value={filterRole}
           onChange={(e) => setFilterRole(e.target.value)}
         >
@@ -187,15 +194,15 @@ export default function OrgUsersPage() {
           {/* ✅ Desktop Table */}
           <div className="hidden md:block bg-white rounded-xl shadow border border-gray-200 overflow-x-auto">
             <table className="min-w-full border-collapse text-sm">
-              <thead className="bg-gray-100">
-                <tr className="text-gray-700">
-                  <th className="p-3 text-left font-semibold">Name</th>
-                  <th className="p-3 text-left font-semibold">Email</th>
-                  <th className="p-3 text-left font-semibold">Phone</th>
-                  <th className="p-3 text-left font-semibold">Role</th>
-                  <th className="p-3 text-left font-semibold">Status</th>
-                  <th className="p-3 text-left font-semibold">Created By</th>
-                  <th className="p-3 text-center font-semibold">Actions</th>
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase text-xs tracking-wide">
+                <tr>
+                  <th className="p-4 text-left font-semibold text-gray-700">👤 Name</th>
+                  <th className="p-4 text-left font-semibold text-gray-700">✉️ Email</th>
+                  <th className="p-4 text-left font-semibold text-gray-700">📞 Phone</th>
+                  <th className="p-4 text-left font-semibold text-gray-700">🎭 Role</th>
+                  <th className="p-4 text-left font-semibold text-gray-700">✅ Status</th>
+                  <th className="p-4 text-left font-semibold text-gray-700">👨‍💼 Created By</th>
+                  <th className="p-4 text-center font-semibold text-gray-700">⚙️ Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -253,7 +260,7 @@ export default function OrgUsersPage() {
             {filteredUsers.map((u) => (
               <div
                 key={u._id}
-                className="bg-white border border-gray-200 rounded-xl shadow-sm p-4 space-y-3"
+                className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl shadow-lg p-5 hover:shadow-2xl transition-all transform hover:scale-[1.02] space-y-3"
               >
                 <div className="flex justify-between items-center">
                   <div>

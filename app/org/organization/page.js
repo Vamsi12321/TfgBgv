@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Plus,
   UploadCloud,
+  Building
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useOrgState } from "../../context/OrgStateContext";
@@ -208,8 +209,8 @@ export default function OrganizationProfilePage() {
       {/* Header */}
       <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-[#ff004f] flex items-center gap-2">
-            <Building2 /> Organization Profile
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Building size={24} /> Organization Profile
           </h1>
           <p className="text-gray-600 mt-1">
             Manage and update your organization’s information.

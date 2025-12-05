@@ -690,20 +690,20 @@ export default function OrgCandidateSelfVerification() {
   /* PAGE UI                                         */
   /* ---------------------------------------------- */
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 px-4 sm:px-6 md:px-10 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900 px-3 sm:px-4 md:px-6 py-4">
       {/* Global Modals */}
       {modal.open && modal.type !== "confirmClose" && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex justify-center items-center p-4">
-          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl border">
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border-2 border-gray-100">
             <h2
-              className={`text-xl font-semibold mb-2 ${
+              className={`text-2xl font-black mb-3 ${
                 modal.type === "error" ? "text-red-600" : "text-green-600"
               }`}
             >
               {modal.title}
             </h2>
 
-            <p className="text-gray-700 whitespace-pre-wrap mb-4">
+            <p className="text-gray-700 whitespace-pre-wrap mb-6 leading-relaxed">
               {modal.message}
             </p>
 
@@ -718,13 +718,13 @@ export default function OrgCandidateSelfVerification() {
                       type: "info",
                     })
                   }
-                  className="w-1/2 py-2 rounded-lg bg-gray-300 hover:bg-gray-400"
+                  className="w-1/2 py-3 rounded-xl bg-white border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 font-semibold transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmRemoveCheck}
-                  className="w-1/2 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
+                  className="w-1/2 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 text-white hover:shadow-lg font-bold transition-all"
                 >
                   Yes, Remove
                 </button>
@@ -739,10 +739,10 @@ export default function OrgCandidateSelfVerification() {
                     type: "info",
                   })
                 }
-                className={`mt-2 w-full py-2 rounded-lg text-white ${
+                className={`mt-2 w-full py-3 rounded-xl text-white font-bold transition-all hover:shadow-lg ${
                   modal.type === "error"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-green-600 hover:bg-green-700"
+                    ? "bg-gradient-to-r from-red-500 to-red-600"
+                    : "bg-gradient-to-r from-green-500 to-green-600"
                 }`}
               >
                 Close
@@ -753,15 +753,17 @@ export default function OrgCandidateSelfVerification() {
       )}
 
       {/* PAGE HEADER — ENHANCED WITH GRADIENT */}
-      <div className="max-w-7xl mx-auto space-y-8">
-        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white p-6 md:p-8 rounded-2xl shadow-xl">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="bg-gradient-to-r from-[#ff004f] via-[#ff3366] to-[#ff6f6f] text-white p-6 md:p-8 rounded-xl shadow-2xl border-2 border-[#ff004f]/20">
           <div className="flex justify-between items-center flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
-                <UserCheck size={36} className="text-white" />
+              <h1 className="text-2xl md:text-3xl font-black flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <UserCheck size={28} className="text-white" />
+                </div>
                 Self Verification Services
               </h1>
-              <p className="text-white/90 mt-2 text-sm md:text-base">
+              <p className="text-white/95 mt-3 text-sm md:text-base font-medium">
                 Initiate candidate self-verification with automated API checks
               </p>
             </div>
@@ -769,11 +771,13 @@ export default function OrgCandidateSelfVerification() {
         </div>
 
         {/* INFORMATIVE BANNER */}
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 shadow-md overflow-hidden">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="text-blue-600 flex-shrink-0 mt-1" size={24} />
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+              <AlertCircle className="text-white" size={22} />
+            </div>
             <div className="flex-1">
-              <h3 className="font-bold text-blue-900 mb-2">Self-Verification Information</h3>
+              <h3 className="font-black text-blue-900 mb-3 text-lg">Self-Verification Information</h3>
               <div className="text-sm text-blue-800 space-y-2">
                 <p className="flex items-center gap-2">
                   <span className="font-semibold">🔐 Candidate Initiated:</span>

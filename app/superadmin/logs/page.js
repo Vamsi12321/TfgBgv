@@ -15,6 +15,8 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  FileBarChart
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSuperAdminState } from "../../context/SuperAdminStateContext";
@@ -299,25 +301,35 @@ export default function LogsOptimizedPage() {
       {/* OUTER WRAPPER LIKE USERS & ROLES */}
       <div className="max-w-[1200px] mx-auto">
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-extrabold text-[#ff004f]">
-            Activity Logs
-          </h1>
-
-          <div className="flex items-center gap-3">
-            {/* Download Visible Logs */}
-            <button
-              onClick={downloadVisibleCSV}
-              className="flex items-center gap-2 bg-[#ff004f] text-white px-4 py-2 rounded-lg shadow hover:bg-[#e60047] transition"
-            >
-              <Download size={18} />
-              Download Page
-            </button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <FileBarChart size={24} className="text-[#ff004f]" />
+              Activity Logs
+            </h1>
+            <p className="text-gray-600 text-sm mt-1">Track system activities and user actions</p>
           </div>
+
+          <button
+            onClick={downloadVisibleCSV}
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047]"
+          >
+            <Download size={18} />
+            Download
+          </button>
         </div>
 
-        {/* FILTER PANEL */}
-        <div className="bg-white rounded-xl shadow-sm p-3 mb-6">
+        {/* SUPERB FILTER PANEL */}
+        <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-gray-100">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+              <svg className="w-5 h-5 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold text-gray-800">Filter Logs</h3>
+          </div>
+          
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
             {/* ROLE */}
             <div>
@@ -393,17 +405,17 @@ export default function LogsOptimizedPage() {
 
         {/* TABLE WRAPPER */}
         <div className="  overflow-hidden">
-          {/* DESKTOP TABLE */}
-          <div className="hidden md:block overflow-x-auto">
+          {/* SUPERB DESKTOP TABLE */}
+          <div className="hidden md:block overflow-x-auto bg-white rounded-2xl shadow-xl border-2 border-gray-100">
             <table className="w-full table-fixed text-sm">
-              <thead className="bg-[#ffeef3] text-[#ff004f]">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className="px-3 py-2 text-left w-[50px]">#</th>
-                  <th className="px-3 py-2 text-left w-[150px]">Action</th>
-                  <th className="px-3 py-2 text-left w-[240px]">Email</th>
-                  <th className="px-3 py-2 text-left w-[140px]">Role</th>
-                  <th className="px-3 py-2 text-left w-[120px]">Status</th>
-                  <th className="px-3 py-2 text-left w-[160px]">Timestamp</th>
+                  <th className="px-4 py-4 text-left w-[50px] font-semibold text-gray-700">#</th>
+                  <th className="px-4 py-4 text-left w-[150px] font-semibold text-gray-700">⚡ Action</th>
+                  <th className="px-4 py-4 text-left w-[240px] font-semibold text-gray-700">✉️ Email</th>
+                  <th className="px-4 py-4 text-left w-[140px] font-semibold text-gray-700">🎭 Role</th>
+                  <th className="px-4 py-4 text-left w-[120px] font-semibold text-gray-700">✅ Status</th>
+                  <th className="px-4 py-4 text-left w-[160px] font-semibold text-gray-700">🕐 Timestamp</th>
                 </tr>
               </thead>
               <tbody>
@@ -414,25 +426,27 @@ export default function LogsOptimizedPage() {
                     <tr
                       key={log._id}
                       onClick={() => openDrawer(log)}
-                      className="border-t hover:bg-gray-50 cursor-pointer"
+                      className={`transition-all cursor-pointer group hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] hover:shadow-md ${
+                        idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                      }`}
                     >
-                      <td className="px-3 py-2">{idx}</td>
-                      <td className="px-3 py-2 truncate flex items-center gap-2">
+                      <td className="px-4 py-4 font-semibold text-gray-700">{idx}</td>
+                      <td className="px-4 py-4 truncate flex items-center gap-2 group-hover:text-[#ff004f] transition-colors">
                         {getIcon(log.action)}
-                        <span className="truncate">{log.action}</span>
+                        <span className="truncate font-medium">{log.action}</span>
                       </td>
-                      <td className="px-3 py-2 truncate">{log.userEmail}</td>
-                      <td className="px-3 py-2 truncate">{log.userRole}</td>
-                      <td className="px-3 py-2 truncate">
+                      <td className="px-4 py-4 truncate text-gray-600">{log.userEmail}</td>
+                      <td className="px-4 py-4 truncate text-gray-600">{log.userRole}</td>
+                      <td className="px-4 py-4 truncate">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs ${getStatusColor(
+                          className={`px-3 py-1.5 rounded-full text-xs font-bold ${getStatusColor(
                             log.status
                           )}`}
                         >
                           {log.status}
                         </span>
                       </td>
-                      <td className="px-3 py-2 truncate">
+                      <td className="px-4 py-4 truncate text-gray-600 text-xs">
                         {formatDate(log.timestamp)}
                       </td>
                     </tr>

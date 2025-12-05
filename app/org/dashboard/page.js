@@ -299,10 +299,10 @@ export default function OrgAdminDashboard() {
      UI STARTS HERE
   --------------------------------------------------- */
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-3 sm:p-4">
       <PageHeader
         title={role === "ORG_HR" ? "HR Dashboard" : "Verifications Overview"}
-        subtitle="Monitor and manage your verification activities"
+        subtitle="Monitor and manage your verification activities in real-time"
         action={
           <Link href="/org/verifications">
             <Button variant="primary" icon={ArrowRight} iconPosition="right">
@@ -329,10 +329,12 @@ export default function OrgAdminDashboard() {
       {/* CHARTS ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
         {/* STAGE BAR CHART */}
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp size={16} className="text-[#ff004f]" />
-            <h2 className="text-base text-black font-semibold">
+        <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-lg flex items-center justify-center shadow-md">
+              <TrendingUp size={20} className="text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">
               Stage Breakdown
             </h2>
           </div>
@@ -353,10 +355,12 @@ export default function OrgAdminDashboard() {
         </div>
 
         {/* PIE CHART */}
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex items-center gap-2 mb-4">
-            <Activity size={16} className="text-[#ff004f]" />
-            <h2 className="text-base text-black font-semibold">
+        <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 hover:shadow-xl transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+              <Activity size={20} className="text-white" />
+            </div>
+            <h2 className="text-lg font-bold text-gray-900">
               Status Overview
             </h2>
           </div>
@@ -385,17 +389,20 @@ export default function OrgAdminDashboard() {
       </div>
 
       {/* RECENT ACTIVITY */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <div className="flex items-center gap-2 mb-4">
-          <Activity size={16} className="text-[#ff004f]" />
-          <h2 className="text-base text-black font-semibold">
+      <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 hover:shadow-xl transition-all duration-300">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+            <Activity size={20} className="text-white" />
+          </div>
+          <h2 className="text-lg font-bold text-gray-900">
             Recent Activity
           </h2>
         </div>
 
         {activityLoading ? (
-          <div className="flex items-center justify-center py-6">
-            <Loader2 className="animate-spin text-[#ff004f]" size={18} />
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-12 h-12 border-4 border-[#ff004f] border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-600 font-medium text-sm">Loading activities...</p>
           </div>
         ) : (
           (() => {
@@ -430,20 +437,22 @@ export default function OrgAdminDashboard() {
 function ActivityGroup({ title, logs }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold text-gray-500 uppercase mb-2">
+      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+        <div className="h-px flex-1 bg-gray-200"></div>
         {title}
+        <div className="h-px flex-1 bg-gray-200"></div>
       </h3>
 
       <div className="space-y-2">
         {logs.map((a, i) => (
           <div
             key={i}
-            className="flex justify-between items-start bg-gray-50 hover:bg-gray-100 p-3 rounded-lg transition"
+            className="flex justify-between items-start bg-gradient-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 p-4 rounded-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 hover:shadow-md"
           >
-            <div className="flex items-start gap-2">
-              <span className={`text-[14px] ${a.iconColor}`}>{a.icon}</span>
+            <div className="flex items-start gap-3">
+              <span className={`text-base ${a.iconColor} flex-shrink-0`}>{a.icon}</span>
 
-              <p className="text-sm text-gray-700 leading-snug">
+              <p className="text-sm text-gray-700 leading-relaxed font-medium">
                 {a.actionText}
               </p>
             </div>

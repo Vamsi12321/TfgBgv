@@ -14,6 +14,7 @@ import {
   CheckCircle,
   ToggleLeft,
   ToggleRight,
+  Building2,
 } from "lucide-react";
 import { useSuperAdminState } from "../../context/SuperAdminStateContext";
 
@@ -201,27 +202,31 @@ export default function OrganizationsPage() {
       : `/logos/${url}`;
 
   return (
-    <div className="p-4 md:p-8 text-gray-900 bg-gray-50 min-h-screen">
-      {/* ----------------------------------------------------
-         MODAL
-      ---------------------------------------------------- */}
-      {modal.show && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-[9999]">
-          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-[90%] text-center">
-            {modal.type === "error" ? (
-              <AlertCircle
-                size={48}
-                className="mx-auto text-red-500 mb-3 animate-pulse"
-              />
-            ) : (
-              <CheckCircle size={48} className="mx-auto text-green-600 mb-3" />
-            )}
+    <div className="text-gray-900 bg-gray-50 min-h-screen">
+        {/* ----------------------------------------------------
+           ENHANCED MODAL WITH ANIMATIONS
+        ---------------------------------------------------- */}
+        {modal.show && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-[9999] animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-[90%] text-center transform animate-in slide-in-from-bottom-4 duration-300">
+            <div className={`w-20 h-20 mx-auto mb-4 rounded-full flex items-center justify-center ${
+              modal.type === "error" ? "bg-red-100" : "bg-green-100"
+            }`}>
+              {modal.type === "error" ? (
+                <AlertCircle
+                  size={40}
+                  className="text-red-600 animate-pulse"
+                />
+              ) : (
+                <CheckCircle size={40} className="text-green-600 animate-bounce" />
+              )}
+            </div>
 
-            <h2 className="text-xl font-semibold mb-2">
-              {modal.type === "error" ? "Operation Failed" : "Success"}
+            <h2 className="text-2xl font-bold mb-3 text-gray-900">
+              {modal.type === "error" ? "⚠️ Operation Failed" : "✅ Success!"}
             </h2>
 
-            <p className="text-gray-700 mb-5 whitespace-pre-line">
+            <p className="text-gray-600 mb-6 leading-relaxed whitespace-pre-line">
               {modal.message}
             </p>
 
@@ -229,33 +234,39 @@ export default function OrganizationsPage() {
               onClick={() =>
                 setModal({ show: false, type: "error", message: "" })
               }
-              className={`px-5 py-2.5 rounded-lg text-white shadow-md ${
+              className={`px-8 py-3 rounded-xl text-white font-semibold shadow-lg transition-all transform hover:scale-105 active:scale-95 ${
                 modal.type === "error"
-                  ? "bg-red-500 hover:bg-red-600"
-                  : "bg-green-600 hover:bg-green-700"
+                  ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                  : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
               }`}
             >
-              Close
+              Got it!
             </button>
           </div>
         </div>
       )}
 
       {/* ----------------------------------------------------
-         HEADER
+         SUPERB ENHANCED HEADER WITH GRADIENT
       ---------------------------------------------------- */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-        <h1 className="text-3xl font-bold text-[#ff004f]">Organizations</h1>
+      {/* HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Building2 size={24} className="text-[#ff004f]" />
+            Organizations
+          </h1>
+          <p className="text-gray-600 text-sm mt-1">Manage registered organizations</p>
+        </div>
 
         <button
           onClick={openAddDrawer}
           disabled={loading || actionLoading}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-white font-medium w-full sm:w-auto shadow-md transition 
-            ${
-              loading || actionLoading
-                ? "bg-[#ff004f]/60 cursor-not-allowed"
-                : "bg-[#ff004f] hover:bg-[#e60047]"
-            }`}
+          className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg ${
+            loading || actionLoading
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-[#ff004f] hover:bg-[#e60047]"
+          }`}
         >
           <PlusCircle size={18} />
           Add Organization
@@ -263,41 +274,46 @@ export default function OrganizationsPage() {
       </div>
 
       {/* ----------------------------------------------------
-         SEARCH + SORT UI
+         SUPERB ENHANCED SEARCH + SORT UI WITH GRADIENT
       ---------------------------------------------------- */}
-      <div className="bg-white p-4 rounded-xl shadow-md border border-gray-200 flex flex-col sm:flex-row gap-3 items-center mb-6">
-        <div className="relative w-full">
-          <Search
-            size={20}
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
-          />
-
-          <input
-            placeholder="Search organizations..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setOrganizationsFilters({ search: e.target.value });
-            }}
-            className="w-full pl-12 pr-4 py-3 
-               rounded-full border border-gray-300 
-               bg-white shadow-sm 
-               focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f]
-               text-gray-800 placeholder-gray-500"
-          />
+      <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-8">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+            <Search size={20} className="text-[#ff004f]" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-800">Search & Filter</h3>
         </div>
+        
+        <div className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="relative w-full flex-1">
+            <input
+              placeholder="🔍 Search by organization name..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setOrganizationsFilters({ search: e.target.value });
+              }}
+              className="w-full px-4 py-3 
+                 rounded-xl border-2 border-gray-200 
+                 bg-white shadow-sm 
+                 focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f]
+                 text-gray-800 placeholder-gray-500 font-medium
+                 transition-all"
+            />
+          </div>
 
-        <button
-          onClick={() => setSortAsc(!sortAsc)}
-          className="flex items-center gap-2 px-2 py-2 rounded-full border border-gray-300 bg-white shadow-sm text-gray-700 hover:bg-gray-100 transition-all"
-        >
-          {sortAsc ? (
-            <SortAsc size={14} className="text-gray-600" />
-          ) : (
-            <SortDesc size={14} className="text-gray-600" />
-          )}
-          <span className="text-sm">{sortAsc ? "A → Z" : "Z → A"}</span>
-        </button>
+          <button
+            onClick={() => setSortAsc(!sortAsc)}
+            className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-gray-200 bg-white shadow-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 hover:border-[#ff004f] transition-all font-medium whitespace-nowrap"
+          >
+            {sortAsc ? (
+              <SortAsc size={18} className="text-[#ff004f]" />
+            ) : (
+              <SortDesc size={18} className="text-[#ff004f]" />
+            )}
+            <span className="text-sm font-semibold">{sortAsc ? "A → Z" : "Z → A"}</span>
+          </button>
+        </div>
       </div>
 
       {/* ----------------------------------------------------
@@ -310,24 +326,24 @@ export default function OrganizationsPage() {
         </div>
       ) : (
         <>
-          <div className="hidden md:block bg-white px-6 py-5 rounded-2xl shadow-md border border-gray-200 overflow-x-auto">
+          <div className="hidden md:block bg-white px-4 py-4 rounded-2xl shadow-xl border-2 border-gray-100 overflow-x-auto">
             <table className="w-full border-collapse min-w-[900px]">
-              <thead className="bg-[#ff004f]/10">
-                <tr className="text-gray-700 text-sm">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <tr className="text-sm text-gray-700">
                   {[
-                    "Logo",
-                    "Organization",
-                    "SPOC",
-                    "Email",
-                    "Domain",
-                    "Status",
-                    "Actions",
+                    { label: "Logo", icon: "🖼️" },
+                    { label: "Organization", icon: "🏢" },
+                    { label: "SPOC", icon: "👤" },
+                    { label: "Email", icon: "✉️" },
+                    { label: "Domain", icon: "🌐" },
+                    { label: "Status", icon: "✅" },
+                    { label: "Actions", icon: "⚙️" },
                   ].map((header) => (
                     <th
-                      key={header}
-                      className="p-3 text-left font-semibold uppercase tracking-wide"
+                      key={header.label}
+                      className="p-4 text-left font-bold tracking-wide"
                     >
-                      {header}
+                      {header.icon} {header.label}
                     </th>
                   ))}
                 </tr>
@@ -338,9 +354,9 @@ export default function OrganizationsPage() {
                   filteredOrgs.map((org, i) => (
                     <tr
                       key={org._id}
-                      className={`border-b ${
-                        i % 2 === 0 ? "bg-gray-50" : "bg-white"
-                      } hover:bg-[#ff004f]/10 transition text-gray-800`}
+                      className={`transition-all group hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] hover:shadow-md ${
+                        i % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                      } text-gray-800`}
                     >
                       <td className="p-3">
                         <img
@@ -429,87 +445,106 @@ export default function OrganizationsPage() {
           </div>
 
           {/* ----------------------------------------------------
-             MOBILE CARDS
+             ENHANCED MOBILE CARDS WITH GRADIENT
           ---------------------------------------------------- */}
-          <div className="grid md:hidden gap-4 mt-4">
-            {filteredOrgs.map((org) => (
-              <div
-                key={org._id}
-                className="bg-white shadow-md rounded-xl p-4 border hover:border-[#ff004f]/40 hover:shadow-lg transition"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={getLogoSrc(org.logoUrl)}
-                      alt="logo"
-                      className="w-10 h-10 rounded-full border object-cover"
-                    />
+          <div className="grid md:hidden gap-5 mt-6">
+            {filteredOrgs.length > 0 ? (
+              filteredOrgs.map((org) => (
+                <div
+                  key={org._id}
+                  className="bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-2xl p-5 border-2 border-gray-200 hover:border-[#ff004f] hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3 flex-1">
+                      <img
+                        src={getLogoSrc(org.logoUrl)}
+                        alt="logo"
+                        className="w-14 h-14 rounded-xl border-2 border-gray-200 object-cover shadow-md"
+                      />
 
-                    <div>
-                      <p className="font-semibold text-base">
-                        {org.organizationName}
-                      </p>
-                      <p className="text-sm text-gray-600">{org.email}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-lg text-gray-900 truncate">
+                          {org.organizationName}
+                        </p>
+                        <p className="text-sm text-gray-600 truncate">{org.email}</p>
+                      </div>
+                    </div>
+
+                    <button 
+                      onClick={() => handleStatusToggle(org)}
+                      className="flex-shrink-0"
+                    >
+                      {org.isActive ? (
+                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                          Active
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold">
+                          Inactive
+                        </span>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-semibold text-gray-700 min-w-[70px]">Domain:</span>
+                      <span className="text-gray-600 truncate">{org.subDomain || "—"}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-semibold text-gray-700 min-w-[70px]">SPOC:</span>
+                      <span className="text-gray-600 truncate">{org.spocName || "—"}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-semibold text-gray-700 min-w-[70px]">Services:</span>
+                      <span className="text-gray-600">{org.services?.length || 0}</span>
                     </div>
                   </div>
 
-                  <button onClick={() => handleStatusToggle(org)}>
-                    {org.isActive ? (
-                      <span className="text-green-600 font-semibold">
-                        Active
-                      </span>
-                    ) : (
-                      <span className="text-red-500 font-semibold">
-                        Inactive
-                      </span>
-                    )}
-                  </button>
+                  <div className="flex justify-end gap-3 pt-3 border-t border-gray-200">
+                    <button
+                      onClick={() => setDrawer({ show: true, org, mode: "view" })}
+                      className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all font-medium"
+                    >
+                      <Info size={16} />
+                      <span className="text-sm">View</span>
+                    </button>
+
+                    <button
+                      onClick={() => setDrawer({ show: true, org, mode: "edit" })}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white rounded-lg hover:shadow-lg transition-all font-medium"
+                    >
+                      <Edit2 size={16} />
+                      <span className="text-sm">Edit</span>
+                    </button>
+                  </div>
                 </div>
-
-                <p className="text-sm text-gray-700 mt-2 truncate">
-                  <span className="font-medium">Domain:</span>{" "}
-                  {org.subDomain || "—"}
-                </p>
-
-                <p className="text-sm text-gray-700 truncate">
-                  <span className="font-medium">SPOC:</span>{" "}
-                  {org.spocName || "—"}
-                </p>
-
-                <div className="flex justify-end gap-3 mt-4">
-                  <button
-                    onClick={() => setDrawer({ show: true, org, mode: "view" })}
-                    className="text-gray-700 hover:text-[#ff004f]"
-                  >
-                    <Info size={18} />
-                  </button>
-
-                  <button
-                    onClick={() => setDrawer({ show: true, org, mode: "edit" })}
-                    className="text-[#ff004f] hover:text-[#d90044] transition"
-                  >
-                    <Edit2 size={18} />
-                  </button>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-12 text-gray-500">
+                <p className="text-lg font-semibold">No organizations found</p>
+                <p className="text-sm mt-2">Try adjusting your search</p>
               </div>
-            ))}
+            )}
           </div>
         </>
       )}
 
-      {/* Drawer Component */}
-      {drawer.show && (
-        <OrganizationDrawer
-          drawer={drawer}
-          setDrawer={setDrawer}
-          showError={showError}
-          showSuccess={showSuccess}
-          fetchOrganizations={fetchOrganizations}
-          actionLoading={actionLoading}
-          setActionLoading={setActionLoading}
-        />
-      )}
-    </div>
+        {/* Drawer Component */}
+        {drawer.show && (
+          <OrganizationDrawer
+            drawer={drawer}
+            setDrawer={setDrawer}
+            showError={showError}
+            showSuccess={showSuccess}
+            fetchOrganizations={fetchOrganizations}
+            actionLoading={actionLoading}
+            setActionLoading={setActionLoading}
+          />
+        )}
+      </div>
   );
 }
 
@@ -710,33 +745,42 @@ function OrganizationDrawer({
   return (
     <div className="fixed inset-0 z-[2000] flex">
       <div
-        className="flex-1 bg-black/40"
+        className="flex-1 bg-black/60 backdrop-blur-sm"
         onClick={() => setDrawer({ show: false, org: null, mode: "" })}
       ></div>
 
       <div
-        className={`w-full sm:w-[420px] md:w-[480px] bg-white h-full shadow-2xl p-6 overflow-y-auto
-          transition-all duration-300
+        className={`w-full sm:w-[420px] md:w-[480px] bg-white h-full shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300
           ${shake ? "animate-[shake_0.4s_ease-in-out]" : ""}
         `}
       >
-        {/* Title */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold text-[#ff004f]">
-            {isView
-              ? "Organization Details"
-              : isEdit
-              ? "Edit Organization"
-              : "Add Organization"}
-          </h2>
-
+        {/* Enhanced Header */}
+        <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] sticky top-0 z-50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <Building2 size={20} className="text-white" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-white">
+                {isView
+                  ? "🏢 Organization Details"
+                  : isEdit
+                  ? "✏️ Edit Organization"
+                  : "➕ Add Organization"}
+              </h2>
+              <p className="text-white/80 text-sm">Manage organization details</p>
+            </div>
+          </div>
           <button
             onClick={() => setDrawer({ show: false, org: null, mode: "" })}
-            className="text-gray-600 hover:text-[#ff004f]"
+            className="text-white hover:bg-white/20 rounded-lg p-1 transition-all"
           >
-            <X size={22} />
+            <X size={24} />
           </button>
         </div>
+        
+        {/* Scrollable Content */}
+        <div className="overflow-y-auto h-full pb-6 p-6">
 
         {/* Logo */}
         <div className="flex justify-center mb-4">
@@ -919,6 +963,7 @@ function OrganizationDrawer({
           >
             Close
           </button>
+        </div>
         </div>
       </div>
     </div>

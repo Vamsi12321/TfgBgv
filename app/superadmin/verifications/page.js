@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Filter, X, Loader2 } from "lucide-react";
+import { Filter, X, Loader2,CheckCheck ,UserCircle2} from "lucide-react";
 import { useSuperAdminState } from "../../context/SuperAdminStateContext";
 
 
@@ -169,54 +169,90 @@ export default function SuperAdminVerificationsPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-6 text-gray-900">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-[#ff004f]">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <CheckCheck size={24} className="text-[#ff004f]" />
             Verifications Summary
           </h1>
-          <p className="text-gray-600 text-sm">
-            Track verification progress across all organizations.
-          </p>
+          <p className="text-gray-600 text-sm mt-1">Track verification progress across organizations</p>
         </div>
 
         <button
           onClick={fetchData}
-          className="px-4 py-2 bg-[#ff004f] hover:bg-[#e60047] text-white rounded-md flex items-center gap-2 shadow"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047]"
         >
-          <Filter size={16} /> Refresh
+          <Filter size={18} /> Refresh
         </button>
       </div>
 
-      {/* SUMMARY CARDS */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="p-5 rounded-2xl bg-white shadow hover:shadow-md transition">
-          <p className="text-gray-500 text-sm">Total Verifications</p>
-          <p className="text-2xl font-extrabold mt-1 text-gray-500">{total}</p>
+      {/* SUPERB SUMMARY CARDS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-white to-gray-50 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-gray-100">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-gray-600 text-sm font-semibold">Total Verifications</p>
+            <div className="p-2 bg-gray-100 rounded-lg">
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-gray-700">{total}</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white shadow hover:shadow-md transition">
-          <p className="text-gray-500 text-sm">Overall Completion</p>
-          <p className="text-2xl font-extrabold mt-1 text-orange-600">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-orange-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-orange-700 text-sm font-semibold">Overall Completion</p>
+            <div className="p-2 bg-orange-200 rounded-lg">
+              <svg className="w-5 h-5 text-orange-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-orange-600">
             {overallPercentage}%
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white shadow hover:shadow-md transition">
-          <p className="text-gray-500 text-sm">Completed</p>
-          <p className="text-2xl font-extrabold mt-1 text-green-600">
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-green-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-green-700 text-sm font-semibold">Completed</p>
+            <div className="p-2 bg-green-200 rounded-lg">
+              <svg className="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-green-600">
             {completed}
           </p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white shadow hover:shadow-md transition">
-          <p className="text-gray-500 text-sm">Failed</p>
-          <p className="text-2xl font-extrabold mt-1 text-red-600">{failed}</p>
+        <div className="p-6 rounded-2xl bg-gradient-to-br from-red-50 to-red-100 shadow-lg hover:shadow-2xl transition-all transform hover:scale-105 border-2 border-red-200">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-red-700 text-sm font-semibold">Failed</p>
+            <div className="p-2 bg-red-200 rounded-lg">
+              <svg className="w-5 h-5 text-red-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-red-600">{failed}</p>
         </div>
       </div>
 
-      {/* FILTERS */}
-      <div className="bg-white rounded-2xl shadow p-5 mb-6">
-        <div className="flex flex-wrap gap-4 items-center">
+      {/* SUPERB FILTERS */}
+      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-gray-100">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+            <svg className="w-5 h-5 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-gray-800">Filter Verifications</h3>
+        </div>
+        
+        <div className="flex flex-wrap gap-4 items-end">
           {/* ORG DROPDOWN */}
           <div className="relative w-full sm:min-w-[220px]">
             <div
@@ -312,28 +348,28 @@ export default function SuperAdminVerificationsPage() {
         </div>
       </div>
 
-      {/* TABLE */}
-      <div className="hidden md:block bg-white rounded-xl shadow overflow-x-auto">
+      {/* SUPERB TABLE */}
+      <div className="hidden md:block bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100">
         {loading ? (
-          <div className="p-10 text-center">
-            <Loader2 className="animate-spin mx-auto" size={28} />
-            <p className="text-gray-600 mt-2">Loading verifications...</p>
+          <div className="p-16 text-center">
+            <Loader2 className="animate-spin mx-auto text-[#ff004f] mb-4" size={40} />
+            <p className="text-gray-600 font-medium text-lg">Loading verifications...</p>
           </div>
         ) : (
           <table className="min-w-full text-sm">
-            <thead className="bg-[#ffeef3] text-[#ff004f]">
+            <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
               <tr>
-                <th className="px-4 py-3 text-left">Candidate</th>
-                <th className="px-4 py-3 text-left">Organization</th>
-                <th className="px-4 py-3 text-left">Stage</th>
-                <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Progress</th>
-                <th className="px-4 py-3 text-left">Initiated By</th>
+                <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">👤 Candidate</th>
+                <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">🏢 Organization</th>
+                <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">📊 Stage</th>
+                <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">✅ Status</th>
+                <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">📈 Progress</th>
+                <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">👨‍💼 Initiated By</th>
               </tr>
             </thead>
 
-            <tbody>
-              {filteredCandidates.map((c) => {
+            <tbody className="divide-y divide-gray-100">
+              {filteredCandidates.map((c, idx) => {
                 const v = verifications.find(
                   (x) => x.candidateId === c.candidateId
                 );
@@ -341,29 +377,40 @@ export default function SuperAdminVerificationsPage() {
                 return (
                   <tr
                     key={c.candidateId}
-                    className="border-t hover:bg-[#fff0f5] cursor-pointer"
+                    className={`transition-all cursor-pointer group hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] hover:shadow-md ${
+                      idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                    }`}
                     onClick={() => openCandidateDetails(c)}
                   >
-                    <td className="px-4 py-3">{c.candidateName}</td>
-                    <td className="px-4 py-3">{c.organizationName}</td>
-                    <td className="px-4 py-3 capitalize">
-                      {c.currentStage || "-"}
+                    <td className="px-4 py-4 font-semibold text-gray-800 group-hover:text-[#ff004f] transition-colors">
+                      {c.candidateName}
+                    </td>
+                    <td className="px-4 py-4 text-gray-600">{c.organizationName}</td>
+                    <td className="px-4 py-4">
+                      <span className="capitalize px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                        {c.currentStage || "-"}
+                      </span>
                     </td>
 
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-4">
                       {getStatusBadge(c.overallStatus)}
                     </td>
 
-                    <td className="px-4 py-3 w-[150px]">
-                      <div className="bg-gray-300 h-2 rounded-full">
-                        <div
-                          className="h-2 bg-green-600 rounded-full"
-                          style={{ width: `${c.completionPercentage}%` }}
-                        />
+                    <td className="px-4 py-4 w-[180px]">
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 bg-gray-200 h-3 rounded-full overflow-hidden shadow-inner">
+                          <div
+                            className="h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
+                            style={{ width: `${c.completionPercentage}%` }}
+                          />
+                        </div>
+                        <span className="text-xs font-bold text-gray-600 min-w-[35px]">
+                          {c.completionPercentage}%
+                        </span>
                       </div>
                     </td>
 
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-4 text-gray-600 font-medium">
                       {v?.initiatedByName || v?.initiatedBy || "-"}
                     </td>
                   </tr>
@@ -382,7 +429,7 @@ export default function SuperAdminVerificationsPage() {
         </div>
       )}
 
-      {/* MOBILE CARDS */}
+      {/* SUPERB MOBILE CARDS */}
       {!loading && (
         <div className="grid md:hidden gap-4 mt-4">
           {filteredCandidates.map((c) => {
@@ -393,28 +440,53 @@ export default function SuperAdminVerificationsPage() {
             return (
               <div
                 key={c.candidateId}
-                className="bg-white  rounded-xl shadow p-4"
+                className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-5 border-2 border-gray-100 hover:shadow-2xl transition-all transform hover:scale-[1.02] cursor-pointer"
                 onClick={() => openCandidateDetails(c)}
               >
-                <h3 className="font-bold text-lg">{c.candidateName}</h3>
-
-                <p className="text-sm text-gray-600">{c.organizationName}</p>
-                <p className="text-sm">Stage: {c.currentStage}</p>
-
-                <div className="mt-1">{getStatusBadge(c.overallStatus)}</div>
-
-                <div className="mt-2">
-                  <div className="bg-gray-200 h-2 rounded-full">
-                    <div
-                      className="h-2 bg-green-600 rounded-full"
-                      style={{ width: `${c.completionPercentage}%` }}
-                    />
+                <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-gray-100">
+                  <div className="p-3 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-xl shadow-md">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-gray-800">{c.candidateName}</h3>
+                    <p className="text-sm text-gray-600 mt-0.5">🏢 {c.organizationName}</p>
                   </div>
                 </div>
 
-                <p className="text-xs mt-2 text-gray-500">
-                  Initiated By: {v?.initiatedByName || v?.initiatedBy || "-"}
-                </p>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-600">Stage:</span>
+                    <span className="capitalize px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+                      {c.currentStage}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-600">Status:</span>
+                    {getStatusBadge(c.overallStatus)}
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-gray-600">Progress:</span>
+                      <span className="text-sm font-bold text-gray-700">{c.completionPercentage}%</span>
+                    </div>
+                    <div className="bg-gray-200 h-3 rounded-full overflow-hidden shadow-inner">
+                      <div
+                        className="h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full transition-all duration-500"
+                        style={{ width: `${c.completionPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-gray-200">
+                    <p className="text-xs text-gray-500 font-medium">
+                      👨‍💼 Initiated By: <span className="text-gray-700 font-semibold">{v?.initiatedByName || v?.initiatedBy || "-"}</span>
+                    </p>
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -429,19 +501,30 @@ export default function SuperAdminVerificationsPage() {
             onClick={() => setSelectedCandidate(null)}
           />
 
-          <div className="fixed right-0 top-0 w-full sm:w-[450px] bg-white h-full z-50 shadow-2xl overflow-y-auto">
-            {/* Drawer Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b sticky top-0 bg-white z-50">
-              <h2 className="text-2xl font-bold text-[#ff004f]">
-                {selectedCandidate.candidateName}
-              </h2>
+          <div className="fixed right-0 top-0 w-full sm:w-[450px] bg-white h-full z-50 shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
+            {/* Enhanced Drawer Header */}
+            <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] sticky top-0 z-50">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <UserCircle2 size={20} className="text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">
+                    👤 {selectedCandidate.candidateName}
+                  </h2>
+                  <p className="text-white/80 text-sm">Verification Details</p>
+                </div>
+              </div>
               <button
                 onClick={() => setSelectedCandidate(null)}
-                className="text-gray-600 hover:text-red-600 transition"
+                className="text-white hover:bg-white/20 rounded-lg p-1 transition-all"
               >
-                <X size={26} />
+                <X size={24} />
               </button>
             </div>
+            
+            {/* Scrollable Content */}
+            <div className="overflow-y-auto h-full pb-6">
 
             <div className="p-6 space-y-6">
               {/* Candidate Details Card */}
@@ -564,6 +647,7 @@ export default function SuperAdminVerificationsPage() {
                 </button>
               </div>
             </div>
+          </div>
           </div>
         </>
       )}

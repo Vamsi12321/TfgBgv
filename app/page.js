@@ -7,10 +7,7 @@ import {
   Users,
   FileCheck,
   Lock,
-  Clock,
   BarChart3,
-  Search,
-  Award,
   CheckCircle,
   CreditCard,
   MapPin,
@@ -25,6 +22,7 @@ import {
   ArrowRight,
   Star,
   Activity,
+  Upload,
 } from "lucide-react";
 
 export default function HomePage() {
@@ -165,34 +163,55 @@ export default function HomePage() {
 
   const features = [
     {
-      icon: <Zap className="w-6 h-6" />,
-      title: "Lightning Fast",
-      description: "Get verification results in minutes, not days",
+      icon: <Sparkles className="w-6 h-6" />,
+      title: "🚀 AI Resume Screening",
+      description: "Bulk upload 100+ resumes, get top 10-20 matches instantly with JD matching - Save 100+ hours per hiring cycle",
+      badge: "AI",
+      gradient: "from-green-500 to-emerald-600",
     },
     {
       icon: <Brain className="w-6 h-6" />,
-      title: "AI-Powered",
-      description: "Advanced AI for accurate fraud detection",
+      title: "🧠 AI CV Validation",
+      description: "Automated fraud detection and authenticity verification with 98% accuracy using machine learning",
+      badge: "AI",
+      gradient: "from-blue-500 to-indigo-600",
     },
     {
-      icon: <Lock className="w-6 h-6" />,
-      title: "Secure & Compliant",
-      description: "Bank-grade security with full compliance",
+      icon: <GraduationCap className="w-6 h-6" />,
+      title: "🎓 AI Education Verification",
+      description: "AI-powered validation of education certificates and credentials with automated document analysis",
+      badge: "AI",
+      gradient: "from-purple-500 to-pink-600",
+    },
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: "🛡️ 12+ Verification Services",
+      description: "Comprehensive checks: PAN, Aadhaar, Employment, Court Records, Credit Reports & more",
+      gradient: "from-red-500 to-rose-600",
     },
     {
       icon: <BarChart3 className="w-6 h-6" />,
-      title: "Real-Time Analytics",
-      description: "Live dashboards and detailed reports",
+      title: "📊 Real-Time Dashboards",
+      description: "Live analytics with completion tracking, status monitoring, and actionable insights",
+      gradient: "from-orange-500 to-amber-600",
     },
     {
-      icon: <Clock className="w-6 h-6" />,
-      title: "24/7 Monitoring",
-      description: "Round-the-clock verification tracking",
+      icon: <Users className="w-6 h-6" />,
+      title: "👥 Multi-Organization Support",
+      description: "Manage multiple organizations with role-based access control and custom workflows",
+      gradient: "from-cyan-500 to-blue-600",
     },
     {
-      icon: <CheckCircle className="w-6 h-6" />,
-      title: "99% Accuracy",
-      description: "Industry-leading verification accuracy",
+      icon: <UserCheck className="w-6 h-6" />,
+      title: "✅ Self-Verification Portal",
+      description: "Candidates can complete verifications independently with guided workflows",
+      gradient: "from-teal-500 to-green-600",
+    },
+    {
+      icon: <Lock className="w-6 h-6" />,
+      title: "🔒 Secure & Compliant",
+      description: "Bank-grade security with consent management, data encryption, and compliance tracking",
+      gradient: "from-gray-700 to-gray-900",
     },
   ];
 
@@ -206,50 +225,63 @@ export default function HomePage() {
       </div>
 
       <div className="relative z-10">
-        {/* Header */}
-        <header className="px-6 py-4 bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
+        {/* Enhanced Header with Better Navbar */}
+        <header className="px-6 py-6 bg-white/95 backdrop-blur-xl sticky top-0 z-50 border-b-2 border-gray-200 shadow-lg">
           <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div className="flex items-center space-x-3 group cursor-pointer">
-              <img
-                src="/logos/maihoo.png"
-                alt="Maihoo"
-                className="h-16 w-auto group-hover:scale-110 transition-transform duration-300"
-              />
+            {/* Maihoo Text Logo - Smaller Size */}
+            <div className="flex items-center group cursor-pointer">
+              <h1 
+                className="text-3xl font-black bg-gradient-to-r from-[#ff004f] via-[#ff3366] to-[#ff0066] bg-clip-text text-transparent group-hover:scale-105 transition-all duration-300"
+                style={{ 
+                  fontFamily: "'Montserrat', 'Poppins', sans-serif", 
+                  letterSpacing: '-0.02em'
+                }}
+              >
+                Maihoo
+              </h1>
             </div>
 
-            {/* Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
+            {/* Enhanced Navigation with Better Styling */}
+            <nav className="hidden md:flex items-center space-x-2">
               <a
                 href="#services"
-                className="text-gray-700 hover:text-[#ff004f] font-medium transition-colors cursor-pointer"
+                className="text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-[#ff004f] hover:to-[#ff3366] font-bold transition-all cursor-pointer text-base flex items-center gap-2 px-5 py-3 rounded-xl hover:shadow-lg group"
               >
+                <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 Services
               </a>
               <a
-                href="#features"
-                className="text-gray-700 hover:text-[#ff004f] font-medium transition-colors cursor-pointer"
+                href="#ai-powered"
+                className="text-white bg-gradient-to-r from-purple-600 to-pink-600 font-black transition-all cursor-pointer text-base flex items-center gap-2 px-5 py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 relative group"
               >
+                <Sparkles className="w-5 h-5 text-yellow-300 animate-pulse" />
+                <span>AI-Powered</span>
+                <span className="absolute -top-2 -right-2 bg-yellow-400 text-xs font-black px-2 py-1 rounded-full text-gray-900 animate-bounce shadow-lg">
+                  HOT
+                </span>
+              </a>
+              <a
+                href="#features"
+                className="text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-[#ff004f] hover:to-[#ff3366] font-bold transition-all cursor-pointer text-base flex items-center gap-2 px-5 py-3 rounded-xl hover:shadow-lg group"
+              >
+                <Star className="w-5 h-5 group-hover:scale-110 transition-transform" />
                 Features
               </a>
               <a
                 href="#process"
-                className="text-gray-700 hover:text-[#ff004f] font-medium transition-colors cursor-pointer"
+                className="text-gray-700 hover:text-white hover:bg-gradient-to-r hover:from-[#ff004f] hover:to-[#ff3366] font-bold transition-all cursor-pointer text-base flex items-center gap-2 px-5 py-3 rounded-xl hover:shadow-lg group"
               >
-                How It Works
+                <Activity className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                Process
               </a>
-              <div className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-red-50 to-rose-50 rounded-full border border-red-200">
-                <Sparkles className="w-4 h-4 text-[#ff004f] animate-pulse" />
-                <span className="text-sm font-bold text-[#ff004f]">
-                  AI Powered
-                </span>
-              </div>
             </nav>
 
             <button
               onClick={() => router.push("/login")}
-              className="px-6 py-2.5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white font-semibold rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-300"
+              className="px-10 py-4 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white font-black rounded-2xl hover:shadow-2xl hover:scale-110 transition-all duration-300 flex items-center gap-3 text-lg shadow-xl"
             >
               Sign In
+              <ArrowRight className="w-5 h-5" />
             </button>
           </div>
         </header>
@@ -320,174 +352,205 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* AI Resume Screening Highlight */}
-        <section className="px-6 py-16 bg-gradient-to-r from-[#ff004f] via-[#ff3366] to-[#ff004f] relative overflow-hidden">
+        {/* AI-Powered Section - Enhanced */}
+        <section id="ai-powered" className="px-6 py-20 bg-gradient-to-br from-purple-900 via-[#ff004f] to-orange-600 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
             <div className="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl animate-blob"></div>
             <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+            <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-yellow-300 rounded-full blur-3xl animate-blob animation-delay-4000"></div>
           </div>
-          <div className="max-w-6xl mx-auto relative z-10">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-white/20 shadow-2xl">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="flex-1 text-white">
-                  <div className="inline-flex items-center gap-2 bg-yellow-400 text-gray-900 px-4 py-2 rounded-full font-bold text-sm mb-4 animate-pulse">
-                    <Star className="w-4 h-4" />
-                    SUPER FEATURE
-                  </div>
-                  <h2 className="text-4xl lg:text-5xl font-extrabold mb-4">
-                    AI Resume Screening
-                  </h2>
-                  <p className="text-xl mb-6 text-white/90">
-                    Upload 100+ resumes and get top 10-20 candidates instantly
-                    based on JD matching!
-                  </p>
-                  <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                      <div className="text-3xl font-bold mb-1">100+</div>
-                      <div className="text-sm text-white/80">Bulk Upload</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                      <div className="text-3xl font-bold mb-1">10-20</div>
-                      <div className="text-sm text-white/80">Top Matches</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                      <div className="text-3xl font-bold mb-1">AI</div>
-                      <div className="text-sm text-white/80">JD Matching</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                      <div className="text-3xl font-bold mb-1">&lt;60s</div>
-                      <div className="text-sm text-white/80">Processing</div>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => router.push("/login")}
-                    className="px-8 py-4 bg-white text-[#ff004f] font-bold rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 inline-flex items-center gap-2"
-                  >
-                    Try AI Screening Now
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
+          
+          <div className="max-w-7xl mx-auto relative z-10">
+            {/* Section Header */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 bg-yellow-400 text-gray-900 px-6 py-3 rounded-full font-bold text-base mb-6 animate-pulse shadow-2xl">
+                <Sparkles className="w-5 h-5" />
+                AI-POWERED VERIFICATION SUITE
+              </div>
+              <h2 className="text-5xl lg:text-6xl font-extrabold text-white mb-4">
+                Next-Gen AI Solutions
+              </h2>
+              <p className="text-xl text-white/90 max-w-3xl mx-auto">
+                Harness the power of artificial intelligence for lightning-fast screening and validation
+              </p>
+            </div>
+
+            {/* Three AI Features Grid - Smaller Cards */}
+            <div className="grid md:grid-cols-3 gap-5 mb-10 max-w-5xl mx-auto">
+              {/* AI Resume Screening */}
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300 hover:scale-105">
+                <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
+                  <Sparkles className="w-7 h-7 text-white" />
                 </div>
-                <div className="flex-1">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 text-white">
-                        <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <CheckCircle className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="font-semibold">
-                            Upload Bulk Resumes
-                          </div>
-                          <div className="text-sm text-white/70">
-                            PDF, DOC, DOCX supported
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 text-white">
-                        <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Brain className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="font-semibold">
-                            AI Analyzes JD Match
-                          </div>
-                          <div className="text-sm text-white/70">
-                            Skills, experience, qualifications
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 text-white">
-                        <div className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Award className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="font-semibold">
-                            Get Top Candidates
-                          </div>
-                          <div className="text-sm text-white/70">
-                            Ranked by match score
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 text-white">
-                        <div className="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
-                          <Zap className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <div className="font-semibold">Instant Results</div>
-                          <div className="text-sm text-white/70">
-                            Save 100+ hours of manual screening
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  🚀 AI Resume Screening
+                </h3>
+                <p className="text-white/80 mb-3 text-xs leading-relaxed">
+                  Upload 100+ resumes, get top 10-20 candidates instantly with JD matching
+                </p>
+                <div className="space-y-1.5 mb-3">
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                    <span>Bulk upload 100+ resumes</span>
                   </div>
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                    <span>JD matching & ranking</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-green-400" />
+                    <span>Results in &lt;60 seconds</span>
+                  </div>
+                </div>
+                <div className="bg-white/10 rounded-lg p-2.5 border border-white/20">
+                  <div className="text-2xl font-bold text-white mb-0.5">100+</div>
+                  <div className="text-xs text-white/70">Hours Saved Per Cycle</div>
                 </div>
               </div>
+
+              {/* AI CV Validation */}
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300 hover:scale-105">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
+                  <Brain className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  🧠 AI CV Validation
+                </h3>
+                <p className="text-white/80 mb-3 text-xs leading-relaxed">
+                  Advanced fraud detection and authenticity verification using ML algorithms
+                </p>
+                <div className="space-y-1.5 mb-3">
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Fraud detection AI</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Authenticity scoring</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-blue-400" />
+                    <span>Instant verification reports</span>
+                  </div>
+                </div>
+                <div className="bg-white/10 rounded-lg p-2.5 border border-white/20">
+                  <div className="text-2xl font-bold text-white mb-0.5">98%</div>
+                  <div className="text-xs text-white/70">Fraud Detection Accuracy</div>
+                </div>
+              </div>
+
+              {/* AI Education Verification */}
+              <div className="bg-white/10 backdrop-blur-lg rounded-xl p-5 border border-white/20 shadow-xl hover:bg-white/15 transition-all duration-300 hover:scale-105">
+                <div className="w-14 h-14 bg-gradient-to-br from-purple-400 to-pink-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
+                  <GraduationCap className="w-7 h-7 text-white" />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  🎓 AI Education Verification
+                </h3>
+                <p className="text-white/80 mb-3 text-xs leading-relaxed">
+                  Automated validation of education certificates with AI document analysis
+                </p>
+                <div className="space-y-1.5 mb-3">
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Certificate validation</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Document authenticity check</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white/90 text-xs">
+                    <CheckCircle className="w-3.5 h-3.5 text-purple-400" />
+                    <span>Automated verification</span>
+                  </div>
+                </div>
+                <div className="bg-white/10 rounded-lg p-2.5 border border-white/20">
+                  <div className="text-2xl font-bold text-white mb-0.5">24hrs</div>
+                  <div className="text-xs text-white/70">Average Verification Time</div>
+                </div>
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div className="text-center">
+              <button
+                onClick={() => router.push("/login")}
+                className="px-10 py-5 bg-white text-[#ff004f] font-bold rounded-2xl hover:shadow-2xl hover:scale-110 transition-all duration-300 inline-flex items-center gap-3 text-lg shadow-xl"
+              >
+                <Zap className="w-6 h-6" />
+                Experience AI-Powered Verification
+                <ArrowRight className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </section>
 
-        {/* Verification Services */}
-        <section id="services" className="px-6 py-20">
+        {/* Verification Services - Horizontal Scroll with Smaller Cards */}
+        <section id="services" className="px-6 py-20 bg-white">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            <div className="text-center mb-12">
+              <div className="inline-block mb-4">
+                <span className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-lg">
+                  🛡️ COMPREHENSIVE SERVICES
+                </span>
+              </div>
+              <h2 className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4">
                 12+ Verification Services
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Comprehensive verification solutions powered by AI and
-                automation
+                Complete verification solutions powered by AI and automation
               </p>
             </div>
 
-            {/* Horizontal Scrolling Showcase */}
+            {/* Horizontal Scrolling Showcase with Smaller Cards */}
             <div className="relative">
-              <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory scrollbar-hide">
+              <div className="flex overflow-x-auto gap-4 pb-6 snap-x snap-mandatory scrollbar-hide">
                 {verificationServices.map((service, index) => (
                   <div
                     key={service.id}
                     className={`flex-shrink-0 ${
-                      service.featured ? "w-80" : "w-64"
-                    } bg-white/80 backdrop-blur-sm rounded-lg px-5 py-4 shadow-lg hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 border ${
+                      service.featured ? "w-72" : "w-56"
+                    } bg-white rounded-xl p-4 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 group hover:-translate-y-2 snap-start animate-fade-in relative ${
                       service.featured
-                        ? "border-[#ff004f] border-2 bg-gradient-to-br from-red-50 to-rose-50"
-                        : "border-red-100/50"
-                    } hover:border-red-200 hover:bg-red-50/30 group hover:-translate-y-2 snap-start animate-fade-in relative`}
+                        ? "border-[#ff004f] bg-gradient-to-br from-red-50 via-orange-50 to-yellow-50"
+                        : "border-gray-200 hover:border-[#ff004f]"
+                    }`}
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {service.badge && (
-                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 text-xs font-black px-2.5 py-1 rounded-full shadow-lg animate-pulse z-10">
                         {service.badge}
                       </div>
                     )}
+                    
                     <div
-                      className={`w-11 h-11 ${
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 text-white shadow-md ${
                         service.featured
-                          ? "bg-gradient-to-br from-yellow-400 to-orange-500"
+                          ? "bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 animate-pulse-slow"
                           : "bg-gradient-to-br from-[#ff004f] to-[#ff3366]"
-                      } rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 text-white ${
-                        service.featured ? "animate-pulse-slow" : ""
                       }`}
                     >
                       {service.icon}
                     </div>
+                    
                     <h3
-                      className={`text-base font-bold ${
+                      className={`text-base font-bold mb-2 ${
                         service.featured ? "text-[#ff004f]" : "text-gray-900"
-                      } mb-1.5`}
+                      }`}
                     >
                       {service.title}
                     </h3>
+                    
                     <p className="text-gray-600 text-xs leading-relaxed">
                       {service.description}
                     </p>
+                    
                     {service.featured && (
-                      <div className="mt-3 flex items-center gap-2 text-xs text-[#ff004f] font-semibold">
-                        <Zap className="w-4 h-4" />
-                        <span>
-                          Bulk Processing • JD Matching • Instant Results
-                        </span>
+                      <div className="mt-3 pt-3 border-t border-orange-200">
+                        <div className="flex items-center gap-1.5 text-xs text-[#ff004f] font-bold">
+                          <Zap className="w-3.5 h-3.5" />
+                          <span>Bulk • JD Match • Instant</span>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -496,53 +559,50 @@ export default function HomePage() {
 
               {/* Scroll Indicator */}
               <div className="text-center mt-4">
-                <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
-                  <span>Scroll to explore all services</span>
-                  <svg
-                    className="w-4 h-4 animate-bounce-horizontal"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+                <p className="text-sm text-gray-500 flex items-center justify-center gap-2 animate-pulse">
+                  <span>← Scroll to explore all services →</span>
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
+        {/* Features Section - Enhanced */}
         <section
           id="features"
-          className="px-6 py-20 bg-gradient-to-b from-white to-red-50"
+          className="px-6 py-20 bg-gradient-to-b from-white via-red-50 to-white"
         >
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+              <div className="inline-block mb-4">
+                <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold px-5 py-2 rounded-full shadow-lg">
+                  ⭐ POWERFUL FEATURES
+                </span>
+              </div>
+              <h2 className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4">
                 Why Choose Us
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Industry-leading features for modern verification needs
+                Industry-leading features powered by AI and automation
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  className="bg-white/80 backdrop-blur-sm rounded-lg px-5 py-4 shadow-lg hover:shadow-2xl hover:shadow-red-500/20 transition-all duration-300 border border-red-100/50 hover:border-red-200 hover:bg-red-50/30 group hover:-translate-y-2 animate-fade-in"
+                  className="bg-white rounded-xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-[#ff004f] group hover:-translate-y-2 animate-fade-in relative overflow-hidden"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className="w-11 h-11 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 text-white">
+                  {feature.badge && (
+                    <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 text-xs font-bold px-2 py-0.5 rounded-full shadow-md animate-pulse">
+                      {feature.badge}
+                    </div>
+                  )}
+                  <div className={`w-12 h-12 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 text-white shadow-md`}>
                     {feature.icon}
                   </div>
-                  <h3 className="text-base font-bold text-gray-900 mb-1.5">
+                  <h3 className="text-base font-bold text-gray-900 mb-2 leading-tight">
                     {feature.title}
                   </h3>
                   <p className="text-gray-600 text-xs leading-relaxed">
@@ -554,61 +614,91 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* How It Works */}
-        <section id="process" className="px-6 py-20">
+        {/* How It Works - Simple 3-Step Process */}
+        <section id="process" className="px-6 py-20 bg-gradient-to-br from-gray-50 via-white to-red-50">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-                Simple Process
+              <div className="inline-block mb-4">
+                <span className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white text-sm font-bold px-6 py-2.5 rounded-full shadow-lg">
+                  ⚡ SIMPLE 3-STEP PROCESS
+                </span>
+              </div>
+              <h2 className="text-5xl lg:text-6xl font-extrabold text-gray-900 mb-4">
+                How It Works
               </h2>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Get started in three easy steps
+                Get verification reports in 3 simple steps
               </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-6 relative">
-              <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] transform -translate-y-1/2 z-0"></div>
+            <div className="grid md:grid-cols-3 gap-6 relative max-w-5xl mx-auto">
+              {/* Connection Line */}
+              <div className="hidden md:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-green-500 transform z-0 rounded-full shadow-md"></div>
 
-              {[
-                {
-                  step: "01",
-                  title: "Select Service",
-                  description: "Choose from 12+ verification services",
-                  icon: <Search className="w-8 h-8" />,
-                },
-                {
-                  step: "02",
-                  title: "Submit Details",
-                  description: "Upload candidate information securely",
-                  icon: <FileCheck className="w-8 h-8" />,
-                },
-                {
-                  step: "03",
-                  title: "Get Results",
-                  description: "Receive verified reports instantly",
-                  icon: <CheckCircle className="w-8 h-8" />,
-                },
-              ].map((item, index) => (
-                <div key={index} className="relative z-10">
-                  <div
-                    className="bg-white/80 backdrop-blur-sm rounded-lg px-5 py-4 shadow-lg border border-red-100/50 hover:shadow-2xl hover:shadow-red-500/20 hover:border-red-200 hover:bg-red-50/30 hover:scale-105 transition-all duration-300 animate-fade-in"
-                    style={{ animationDelay: `${index * 0.2}s` }}
-                  >
-                    <div className="w-14 h-14 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-lg flex items-center justify-center mb-3 text-white shadow-lg mx-auto animate-pulse-slow">
-                      {item.icon}
+              {/* Step 1: Upload Candidate Info */}
+              <div className="relative z-10">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-xl border-3 border-blue-200 hover:shadow-[0_15px_40px_rgba(59,130,246,0.3)] hover:scale-105 transition-all duration-300 animate-fade-in">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mb-4 text-white shadow-xl mx-auto relative transform hover:rotate-6 transition-transform">
+                    <Upload className="w-10 h-10" />
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-black text-base shadow-lg border-3 border-white">
+                      1
                     </div>
-                    <div className="text-5xl font-bold text-red-100 text-center mb-2">
-                      {item.step}
-                    </div>
-                    <h3 className="text-base font-bold text-gray-900 text-center mb-1.5">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600 text-center text-xs">
-                      {item.description}
-                    </p>
                   </div>
+                  <h3 className="text-xl font-black text-blue-900 text-center mb-2">
+                    Upload Candidate Info
+                  </h3>
+                  <p className="text-blue-800 text-center text-sm font-medium leading-relaxed">
+                    Upload candidate details and documents securely
+                  </p>
                 </div>
-              ))}
+              </div>
+
+              {/* Step 2: Select Verification Checks */}
+              <div className="relative z-10">
+                <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 shadow-xl border-3 border-purple-200 hover:shadow-[0_15px_40px_rgba(168,85,247,0.3)] hover:scale-105 transition-all duration-300 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mb-4 text-white shadow-xl mx-auto relative transform hover:rotate-6 transition-transform">
+                    <FileCheck className="w-10 h-10" />
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-black text-base shadow-lg border-3 border-white">
+                      2
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-black text-purple-900 text-center mb-2">
+                    Select Verification Checks
+                  </h3>
+                  <p className="text-purple-800 text-center text-sm font-medium leading-relaxed">
+                    Choose from 12+ services including AI-powered options
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 3: Get Reports Instantly */}
+              <div className="relative z-10">
+                <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 shadow-xl border-3 border-green-200 hover:shadow-[0_15px_40px_rgba(34,197,94,0.3)] hover:scale-105 transition-all duration-300 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                  <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-700 rounded-2xl flex items-center justify-center mb-4 text-white shadow-xl mx-auto relative transform hover:rotate-6 transition-transform">
+                    <Zap className="w-10 h-10" />
+                    <div className="absolute -top-2 -right-2 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-black text-base shadow-lg border-3 border-white">
+                      3
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-black text-green-900 text-center mb-2">
+                    Get Reports Instantly
+                  </h3>
+                  <p className="text-green-800 text-center text-sm font-medium leading-relaxed">
+                    Receive comprehensive verification reports instantly
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="text-center mt-16">
+              <button
+                onClick={() => router.push("/login")}
+                className="px-12 py-5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white font-black rounded-2xl hover:shadow-2xl hover:scale-110 transition-all duration-300 inline-flex items-center gap-3 text-xl shadow-xl"
+              >
+                Start Verification Now
+                <ArrowRight className="w-6 h-6" />
+              </button>
             </div>
           </div>
         </section>
@@ -639,13 +729,10 @@ export default function HomePage() {
               <div>
                 <div className="flex items-center space-x-2 mb-4">
                   <img
-                    src="/logos/maihoo.png"
+                    src="/logos/maihooMain.png"
                     alt="Maihoo"
-                    className="h-6 w-auto"
+                    className="h-8 w-auto"
                   />
-                  <span className="font-bold text-lg text-[#ff004f]">
-                    Maihoo
-                  </span>
                 </div>
                 <p className="text-gray-400 text-sm">
                   AI-powered background verification for modern organizations

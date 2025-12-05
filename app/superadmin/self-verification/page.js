@@ -1038,19 +1038,15 @@ export default function SelfVerificationPage() {
       )}
 
       <div className="max-w-7xl mx-auto space-y-8">
-        {/* PAGE HEADER — ENHANCED WITH GRADIENT */}
-        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white p-6 md:p-8 rounded-2xl shadow-xl">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
-                <UserCheck size={36} className="text-white" />
-                Self Verification Services
-              </h1>
-              <p className="text-white/90 mt-2 text-sm md:text-base">
-                Initiate candidate self-verification with automated API checks
-              </p>
-            </div>
-          </div>
+        {/* HEADER */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <UserCheck size={24} className="text-[#ff004f]" />
+            Self Verification Services
+          </h1>
+          <p className="text-gray-600 text-sm mt-1">
+            Initiate candidate self-verification with automated checks
+          </p>
         </div>
 
         {/* INFORMATIVE BANNER */}

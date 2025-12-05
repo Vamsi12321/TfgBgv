@@ -194,10 +194,10 @@ export default function OrgReportsPage() {
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-gray-900">
-      {/* HEADER SAME AS SUPERADMIN */}
+      {/* HEADER */}
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-[#ff004f] flex items-center gap-2">
-          <FileText /> Reports Overview
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <FileText size={24} /> Reports Overview
         </h1>
 
         <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow">

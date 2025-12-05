@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { PlusCircle, X, Edit, Trash2, Loader2 } from "lucide-react";
+import { PlusCircle, X, Edit, Trash2, Loader2,UserSearch } from "lucide-react";
 import { motion } from "framer-motion";
 import { useOrgState } from "../../context/OrgStateContext";
 
@@ -389,8 +389,8 @@ export default function ManageCandidatesPage() {
         {/* HEADER */}
         <div className="flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-[#ff004f]">
-              Manage Candidates
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <UserSearch size={24} /> Manage Candidates
             </h1>
             <p className="text-gray-700 mt-1">
               Add, edit, and delete candidates for your organization.
@@ -423,13 +423,13 @@ export default function ManageCandidatesPage() {
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-[#ffeef3] text-[#ff004f] uppercase text-xs">
-                      <th className="p-3 text-left">Name</th>
-                      <th className="p-3 text-left">Phone</th>
-                      <th className="p-3 text-left">Email</th>
-                      <th className="p-3 text-left">Aadhaar</th>
-                      <th className="p-3 text-left">PAN</th>
-                      <th className="p-3 text-left">Actions</th>
+                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase text-xs tracking-wide">
+                      <th className="p-4 text-left font-semibold text-gray-700">👤 Name</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">📞 Phone</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">✉️ Email</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">🆔 Aadhaar</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">💳 PAN</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">⚙️ Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -474,12 +474,12 @@ export default function ManageCandidatesPage() {
                 </table>
               </div>
 
-              {/* MOBILE CARDS */}
+              {/* MOBILE CARDS - Enhanced */}
               <div className="md:hidden grid gap-4">
                 {candidates.map((c) => (
                   <div
                     key={c._id}
-                    className="border rounded-lg p-4 shadow bg-white"
+                    className="bg-gradient-to-br from-white to-gray-50 border-2 border-gray-100 rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all transform hover:scale-[1.02]"
                   >
                     <div className="font-semibold text-lg">
                       {c.firstName} {c.lastName}

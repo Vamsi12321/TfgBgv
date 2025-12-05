@@ -14,16 +14,16 @@ export default function StatsCard({
   subtitle,
 }) {
   return (
-    <div className="group relative bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 overflow-hidden">
+    <div className="group relative bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg border-2 border-gray-100 hover:shadow-xl hover:scale-105 hover:border-gray-200 transition-all duration-300 overflow-hidden">
       {/* Gradient Background Effect */}
       <div
-        className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500"
+        className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-5 group-hover:opacity-15 transition-opacity duration-500"
         style={{ backgroundColor: color }}
       />
 
       {/* Accent Line */}
       <div
-        className="absolute top-0 left-0 w-1 h-full transition-all duration-300 group-hover:w-2"
+        className="absolute top-0 left-0 w-1.5 h-full transition-all duration-300 group-hover:w-2"
         style={{ backgroundColor: color }}
       />
 
@@ -31,16 +31,16 @@ export default function StatsCard({
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-            <h3 className="text-3xl font-bold text-gray-900">{value}</h3>
+            <p className="text-sm font-semibold text-gray-600 mb-2">{title}</p>
+            <h3 className="text-3xl font-black text-gray-900">{value}</h3>
           </div>
 
           {Icon && (
             <div
-              className="p-3 rounded-xl transition-transform duration-300 group-hover:scale-110"
-              style={{ backgroundColor: `${color}15` }}
+              className="p-3 rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-md"
+              style={{ backgroundColor: `${color}20` }}
             >
-              <Icon size={16} style={{ color }} />
+              <Icon size={20} style={{ color }} strokeWidth={2.5} />
             </div>
           )}
         </div>

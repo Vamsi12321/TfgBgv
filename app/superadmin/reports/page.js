@@ -10,6 +10,7 @@ import {
   Building2,
   CheckCircle,
   XCircle,
+  
 } from "lucide-react";
 
 import { jsPDF } from "jspdf";
@@ -227,48 +228,60 @@ export default function SuperAdminReportsPage() {
   return (
     <div className="p-6 bg-gray-50 min-h-screen text-gray-900">
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-[#ff004f] flex items-center gap-2">
-          <FileText /> Reports Overview
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <FileText size={24} className="text-[#ff004f]" />
+            Reports
+          </h1>
+          <p className="text-gray-600 text-sm mt-1">Download verification reports</p>
+        </div>
 
-        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl shadow">
-          <Building2 size={18} />
-          <span className="font-medium">All Organizations</span>
+        <div className="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+          <Building2 size={18} className="text-[#ff004f]" />
+          <span className="font-semibold text-gray-700 text-sm">All Organizations</span>
         </div>
       </div>
 
-      {/* ORG SELECTOR */}
-      <div className="bg-white rounded-xl p-4 mb-8 shadow">
-        <div className="border rounded-xl p-4 shadow relative">
-          <label className="text-sm font-medium mb-2 block">
+      {/* SUPERB ORG SELECTOR */}
+      <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-6 mb-8 shadow-xl border-2 border-gray-100">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+            <Building2 size={20} className="text-[#ff004f]" />
+          </div>
+          <label className="text-base font-bold text-gray-800">
             Select Organization
           </label>
+        </div>
+        
+        <div className="relative">
 
           <div
             onClick={() => setShowOrgDropdown((p) => !p)}
-            className="border rounded-lg p-2 w-full bg-gray-50 text-gray-700 cursor-pointer flex justify-between items-center"
+            className="border-2 border-gray-200 rounded-xl p-4 w-full bg-white text-gray-700 cursor-pointer flex justify-between items-center shadow-sm hover:border-[#ff004f]/50 transition-all"
           >
-            {selectedOrg
-              ? organizations.find((o) => o._id === selectedOrg)
-                  ?.organizationName
-              : "-- Select Organization --"}
+            <span className="font-medium">
+              {selectedOrg
+                ? "🏢 " + organizations.find((o) => o._id === selectedOrg)
+                    ?.organizationName
+                : "🌐 Select Organization"}
+            </span>
 
-            <ChevronDown size={18} className="text-gray-500" />
+            <ChevronDown size={20} className="text-gray-400" />
           </div>
 
           {showOrgDropdown && (
-            <div className="absolute bg-white border rounded-lg w-full mt-2 z-20 shadow-xl max-h-72 overflow-hidden">
-              <div className="p-2 border-b bg-gray-50">
+            <div className="absolute bg-white border-2 border-[#ff004f]/20 rounded-xl w-full mt-2 z-30 shadow-2xl overflow-hidden animate-in slide-in-from-top-2 duration-200">
+              <div className="p-3 border-b-2 border-gray-100 bg-gradient-to-r from-[#ff004f]/5 to-[#ff3366]/5">
                 <input
                   value={orgSearch}
                   onChange={(e) => setOrgSearch(e.target.value)}
-                  placeholder="Search organization..."
-                  className="w-full p-2 border rounded-md text-sm"
+                  placeholder="🔍 Search organization..."
+                  className="w-full p-2.5 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all"
                 />
               </div>
 
-              <div className="max-h-56 overflow-y-auto">
+              <div className="max-h-64 overflow-y-auto">
                 {organizations
                   .filter((o) =>
                     o.organizationName
@@ -285,9 +298,9 @@ export default function SuperAdminReportsPage() {
                         setCandidates([]);
                         fetchCandidates(o._id);
                       }}
-                      className="p-3 hover:bg-gray-100 cursor-pointer text-sm"
+                      className="p-3 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 cursor-pointer text-sm font-medium transition-all border-b border-gray-50 last:border-0"
                     >
-                      {o.organizationName}
+                      🏢 {o.organizationName}
                     </div>
                   ))}
               </div>

@@ -1138,19 +1138,12 @@ export default function BGVInitiationPage() {
     <div className="min-h-screen bg-gray-50 text-gray-900 p-6 md:p-10">
       <div className="max-w-6xl mx-auto space-y-8">
         {/* HEADER */}
-        {/* PAGE HEADER — ENHANCED WITH GRADIENT */}
-        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white p-6 md:p-8 rounded-2xl shadow-xl">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
-                <Shield size={36} className="text-white" />
-                Background Verification Services
-              </h1>
-              <p className="text-white/90 mt-2 text-sm md:text-base">
-                Comprehensive verification workflows with AI-powered validation and manual checks
-              </p>
-            </div>
-          </div>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <Shield size={24} className="text-[#ff004f]" />
+            BGV Services
+          </h1>
+          <p className="text-gray-600 text-sm mt-1">Comprehensive verification workflows</p>
         </div>
 
         {/* INFORMATIVE BANNER - SCROLLING TEXT */}

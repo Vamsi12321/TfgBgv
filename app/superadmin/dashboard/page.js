@@ -26,6 +26,7 @@ import {
   XCircle,
   TrendingUp,
   Activity,
+  LayoutDashboard
 } from "lucide-react";
 import StatsCard from "../../components/StatsCard";
 import PageHeader from "../../components/PageHeader";
@@ -415,24 +416,33 @@ export default function SuperAdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       <div className="p-4 sm:p-8">
         {/* HEADER */}
-        <PageHeader
-          title="Verifications Overview"
-          subtitle="Monitor and manage verification activities across all organizations"
-         
-          action={
-            <Link href="/superadmin/verifications">
-              <Button variant="primary" icon={ArrowRight} iconPosition="right">
-                View All Verifications
-              </Button>
-            </Link>
-          }
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <LayoutDashboard size={24} className="text-[#ff004f]" />
+              Dashboard
+            </h1>
+            <p className="text-gray-600 text-sm mt-1">Monitor verification activities</p>
+          </div>
 
-        {/* ORG DROPDOWN */}
-        <div className="mb-6">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">
-            Select Organization
-          </label>
+          <Link href="/superadmin/verifications">
+            <button className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047]">
+              View All
+              <ArrowRight size={18} />
+            </button>
+          </Link>
+        </div>
+
+        {/* SUPERB ORG DROPDOWN */}
+        <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-8">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+              <Building2 size={20} className="text-[#ff004f]" />
+            </div>
+            <label className="text-base font-bold text-gray-800">
+              Select Organization
+            </label>
+          </div>
           <SearchableDropdown
             orgs={orgs}
             selectedOrg={selectedOrg}
@@ -459,15 +469,15 @@ export default function SuperAdminDashboard() {
           ))}
         </div>
 
-        {/* CHARTS */}
+        {/* SUPERB CHARTS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* BAR CHART */}
-          <div className="bg-white rounded-xl p-6 shadow border">
+          <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-gray-100">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-[#ff004f]/10 flex items-center justify-center">
-                <TrendingUp size={20} className="text-[#ff004f]" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 flex items-center justify-center shadow-sm">
+                <TrendingUp size={24} className="text-[#ff004f]" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-bold text-gray-900">
                 Stage-wise Verification Breakdown
               </h2>
             </div>
@@ -516,12 +526,12 @@ export default function SuperAdminDashboard() {
           </div>
 
           {/* PIE CHART */}
-          <div className="bg-white rounded-xl p-6 shadow border">
+          <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-gray-100">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-[#ff004f]/10 flex items-center justify-center">
-                <Activity size={20} className="text-[#ff004f]" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 flex items-center justify-center shadow-sm">
+                <Activity size={24} className="text-[#ff004f]" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">
+              <h2 className="text-lg font-bold text-gray-900">
                 Verification Status Overview
               </h2>
             </div>
@@ -561,13 +571,13 @@ export default function SuperAdminDashboard() {
           </div>
         </div>
 
-        {/* ACTIVITY LOG */}
-        <div className="bg-white rounded-xl p-6 shadow border">
+        {/* SUPERB ACTIVITY LOG */}
+        <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-gray-100">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#ff004f]/10 flex items-center justify-center">
-              <Activity size={20} className="text-[#ff004f]" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 flex items-center justify-center shadow-sm">
+              <Activity size={24} className="text-[#ff004f]" />
             </div>
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-bold text-gray-900">
               Recent Activity
             </h2>
           </div>

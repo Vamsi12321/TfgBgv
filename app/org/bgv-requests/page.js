@@ -25,6 +25,7 @@ import {
   User,
   Mail,
   MapPin,
+  Building
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConsentSection from "@/app/components/ConsentSection";
@@ -793,17 +794,19 @@ export default function OrgBGVRequestsPage() {
       RETURN UI
   --------------------------------------------------------------------- */
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 p-6 md:p-10">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900 p-3 sm:p-4 md:p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* PAGE HEADER — ENHANCED WITH GRADIENT */}
-        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white p-6 md:p-8 rounded-2xl shadow-xl">
+        <div className="bg-gradient-to-r from-[#ff004f] via-[#ff3366] to-[#ff6f6f] text-white p-6 md:p-8 rounded-xl shadow-2xl border-2 border-[#ff004f]/20">
           <div className="flex justify-between items-center flex-wrap gap-4">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
-                <Shield size={36} className="text-white" />
+              <h1 className="text-2xl md:text-3xl font-black flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <Shield size={28} className="text-white" />
+                </div>
                 Background Verification Services
               </h1>
-              <p className="text-white/90 mt-2 text-sm md:text-base">
+              <p className="text-white/95 mt-3 text-sm md:text-base font-medium">
                 Comprehensive verification workflows with AI-powered validation and manual checks
               </p>
             </div>
@@ -811,11 +814,13 @@ export default function OrgBGVRequestsPage() {
         </div>
 
         {/* INFORMATIVE BANNER */}
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 shadow-md overflow-hidden">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="text-blue-600 flex-shrink-0 mt-1" size={24} />
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
+              <AlertCircle className="text-white" size={22} />
+            </div>
             <div className="flex-1">
-              <h3 className="font-bold text-blue-900 mb-2">Important Information</h3>
+              <h3 className="font-black text-blue-900 mb-3 text-lg">Important Information</h3>
               <div className="text-sm text-blue-800 space-y-2">
                 <p className="flex items-center gap-2">
                   <span className="font-semibold">📋 Manual Verification:</span>
@@ -847,26 +852,29 @@ export default function OrgBGVRequestsPage() {
                 fetchCandidateVerification(selectedCandidate)
               }
               disabled={!selectedCandidate || loading}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-2 text-gray-700"
+              className="px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-[#ff004f] hover:bg-gray-50 rounded-xl flex items-center gap-2 text-gray-700 font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
             >
-              <RefreshCcw size={16} /> Refresh
+              <RefreshCcw size={18} /> Refresh
             </button>
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center gap-2"
+              className="px-6 py-2.5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:from-[#ff3366] hover:to-[#ff004f] text-white rounded-xl flex items-center gap-2 font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-md"
             >
-              <PlusCircle size={16} />
+              <PlusCircle size={18} />
               Add Candidate
             </button>
           </div>
         </div>
 
         {/* STEPPER - ENHANCED */}
-        <div className="bg-white border-2 p-6 rounded-2xl shadow-lg">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-gray-900">Verification Progress</h3>
-            <span className="text-sm text-gray-600">
+        <div className="bg-white border-2 border-gray-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+          <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-gray-100">
+            <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
+              <FileCheck className="text-[#ff004f]" size={24} />
+              Verification Progress
+            </h3>
+            <span className="text-sm font-bold text-gray-600 px-3 py-1.5 bg-gray-100 rounded-full">
               {isStageCompleted("primary") && isStageCompleted("secondary") && isStageCompleted("final") 
                 ? "All Stages Complete ✓" 
                 : `Stage ${currentStep + 1} of 3`}

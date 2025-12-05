@@ -10,7 +10,6 @@ import {
   Mail,
   Lock,
   AlertCircle,
-  CheckCircle2,
   Loader2,
 } from "lucide-react";
 
@@ -20,7 +19,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [orgName, setOrgName] = useState("Maihoo");
-  const [logoSrc, setLogoSrc] = useState("/logos/maihoo.png");
   const [loaded, setLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
@@ -30,9 +28,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     const host = window.location.hostname;
-    const parts = host.split(".");
-    if (parts.length > 2 && parts[0] !== "www") {
-      setOrgName(parts[0].toUpperCase());
+    
+    // Detect organization name from subdomain (skip for localhost and IP addresses)
+    if (!(host === "localhost" || host.startsWith("127.") || host.startsWith("192.168.") || /^\d+\.\d+\.\d+\.\d+$/.test(host))) {
+      const parts = host.split(".");
+      if (parts.length > 2 && parts[0] !== "www") {
+        setOrgName(parts[0].toUpperCase());
+      }
     }
 
     const existingUser = localStorage.getItem("bgvUser");
@@ -141,91 +143,112 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      {/* Left Side - Branding & Illustration */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#ff004f] to-[#cc0040] p-12 flex-col justify-between relative overflow-hidden">
-        {/* Decorative Elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+    <div className="h-screen flex overflow-hidden">
+      {/* Left Panel - Red Gradient with Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-[#ff004f] via-[#e60047] to-[#cc0040] relative overflow-hidden">
+        {/* Animated Background Blobs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-blob"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl"></div>
 
-        {/* Logo */}
-        <div className="relative z-10">
-          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 inline-block">
+        {/* Content - Logo at Top, Content Centered */}
+        <div className="relative z-10 flex flex-col h-full w-full max-w-lg mx-auto px-12 py-8">
+          {/* Logo at Top */}
+          <div className="mb-auto">
             <Image
-              src={logoSrc}
-              alt={`${orgName} Logo`}
-              width={140}
-              height={40}
+              src="/logos/maihooMain.png"
+              alt="Maihoo"
+              width={120}
+              height={32}
               priority
-              className="brightness-0 invert"
+              className="brightness-0 invert drop-shadow-2xl"
             />
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="relative z-10 text-white">
-          <h1 className="text-5xl font-bold mb-6 leading-tight">
-            Welcome to
-            <br />
-            <span className="text-white/90">{orgName}</span>
-          </h1>
-          <p className="text-xl text-white/80 mb-8 leading-relaxed">
-            Enterprise Background Verification Platform
-          </p>
+          {/* Welcome Message - Centered */}
+          <div className="text-white mb-10 mt-auto">
+            <h2 className="text-4xl font-black mb-4 leading-tight">
+              Welcome to {orgName}
+            </h2>
+            <p className="text-xl text-white/90 font-semibold mb-2">
+              Enterprise Background Verification
+            </p>
+            <p className="text-base text-white/75 leading-relaxed">
+              Secure, Fast, and AI-Powered Platform
+            </p>
+          </div>
 
           {/* Features */}
-          <div className="space-y-4">
+          <div className="space-y-4 w-full">
             {[
-              "Secure & Compliant Verification",
-              "Real-time Status Tracking",
-              "AI-Powered Screening",
+              { icon: "🔒", text: "Bank-Grade Security & Compliance" },
+              { icon: "⚡", text: "Real-time Status Tracking" },
+              { icon: "🤖", text: "AI-Powered Screening & Validation" },
             ].map((feature, idx) => (
-              <div key={idx} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                  <CheckCircle2 size={18} />
+              <div key={idx} className="flex items-center gap-4 group">
+                <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 group-hover:scale-110 transition-transform shadow-lg flex-shrink-0">
+                  <span className="text-2xl">{feature.icon}</span>
                 </div>
-                <span className="text-white/90">{feature}</span>
+                <span className="text-white/95 text-base font-semibold">{feature.text}</span>
               </div>
             ))}
           </div>
+
+          {/* Trust Badges */}
+          <div className="mt-12 pt-8 border-t border-white/20 w-full mb-auto">
+            <p className="text-white/60 text-sm font-semibold mb-3">Trusted by 500+ Organizations</p>
+            <div className="flex items-center gap-4 text-white/80 text-xs font-bold">
+              <span className="px-3 py-1.5 bg-white/10 rounded-lg border border-white/20">ISO 27001</span>
+              <span className="px-3 py-1.5 bg-white/10 rounded-lg border border-white/20">SOC 2</span>
+              <span className="px-3 py-1.5 bg-white/10 rounded-lg border border-white/20">GDPR</span>
+            </div>
+          </div>
         </div>
 
-        {/* Illustration */}
-        <div className="absolute bottom-12 right-12 opacity-20">
-          <div className="w-64 h-64 rounded-full bg-white/10"></div>
-        </div>
+        {/* Decorative Grid Pattern */}
+        <div className="absolute inset-0 opacity-5" style={{
+          backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
+          backgroundSize: '50px 50px'
+        }}></div>
       </div>
 
-      {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+      {/* Right Panel - White with Login Form */}
+      <div className="flex-1 flex items-center justify-center bg-white relative overflow-hidden">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: 'radial-gradient(circle, #ff004f 1px, transparent 1px)',
+          backgroundSize: '30px 30px'
+        }}></div>
+
+        <div className="w-full max-w-md px-8 relative z-10 mt-16">
           {/* Mobile Logo */}
-          <div className="lg:hidden mb-8 text-center">
+          <div className="lg:hidden mb-10 text-center">
             <Image
-              src={logoSrc}
-              alt={`${orgName} Logo`}
+              src="/logos/maihooMain.png"
+              alt="Maihoo"
               width={140}
-              height={40}
+              height={38}
               priority
-              className="mx-auto mb-4"
+              className="mx-auto mb-4 drop-shadow-lg"
             />
-            <h2 className="text-2xl font-bold text-gray-800">Welcome Back</h2>
-            <p className="text-gray-600 mt-2">Sign in to your account</p>
+            <p className="text-gray-600 text-sm font-semibold">Welcome to {orgName}</p>
           </div>
 
-          {/* Desktop Header */}
-          <div className="hidden lg:block mb-8">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">Sign In</h2>
-            <p className="text-gray-600">
+          {/* Header */}
+          <div className="mb-10">
+            <h2 className="text-3xl font-black text-gray-900 mb-2">
+              Sign In
+            </h2>
+            <p className="text-gray-600 font-medium">
               Enter your credentials to access your account
             </p>
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5">
             {/* Email Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-800 mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -234,7 +257,7 @@ export default function LoginPage() {
                     emailFocused ? "text-[#ff004f]" : "text-gray-400"
                   }`}
                 >
-                  <Mail size={20} />
+                  <Mail className="w-5 h-5" />
                 </div>
                 <input
                   type="email"
@@ -244,16 +267,16 @@ export default function LoginPage() {
                   onFocus={() => setEmailFocused(true)}
                   onBlur={() => setEmailFocused(false)}
                   required
-                  className="w-full pl-12 pr-4 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 
-                    focus:border-[#ff004f] focus:ring-4 focus:ring-[#ff004f]/10 outline-none transition-all duration-200
-                    hover:border-gray-300"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 
+                    focus:border-[#ff004f] focus:ring-2 focus:ring-[#ff004f]/20 outline-none transition-all
+                    hover:border-gray-300 bg-gray-50 focus:bg-white font-medium"
                 />
               </div>
             </div>
 
             {/* Password Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-bold text-gray-800 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -262,7 +285,7 @@ export default function LoginPage() {
                     passwordFocused ? "text-[#ff004f]" : "text-gray-400"
                   }`}
                 >
-                  <Lock size={20} />
+                  <Lock className="w-5 h-5" />
                 </div>
                 <input
                   type={passwordVisible ? "text" : "password"}
@@ -273,17 +296,17 @@ export default function LoginPage() {
                   onFocus={() => setPasswordFocused(true)}
                   onBlur={() => setPasswordFocused(false)}
                   required
-                  className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 
-                    focus:border-[#ff004f] focus:ring-4 focus:ring-[#ff004f]/10 outline-none transition-all duration-200
-                    hover:border-gray-300"
+                  className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 
+                    focus:border-[#ff004f] focus:ring-2 focus:ring-[#ff004f]/20 outline-none transition-all
+                    hover:border-gray-300 bg-gray-50 focus:bg-white font-medium"
                 />
                 {password.length > 0 && (
                   <button
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#ff004f] transition-colors"
                   >
-                    {passwordVisible ? <EyeOff size={20} /> : <Eye size={20} />}
+                    {passwordVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
                 )}
               </div>
@@ -291,12 +314,9 @@ export default function LoginPage() {
 
             {/* Error Message */}
             {errorMsg && (
-              <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl animate-fadeIn">
-                <AlertCircle
-                  size={20}
-                  className="text-red-600 flex-shrink-0 mt-0.5"
-                />
-                <p className="text-sm text-red-800">{errorMsg}</p>
+              <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-800 font-medium">{errorMsg}</p>
               </div>
             )}
 
@@ -304,34 +324,40 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#ff004f] to-[#e60047] text-white py-3.5 rounded-xl font-semibold text-base
+              className="w-full bg-gradient-to-r from-[#ff004f] to-[#e60047] text-white py-3 rounded-lg font-bold
                 hover:shadow-lg hover:shadow-[#ff004f]/30 active:scale-[0.98]
                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none
                 transition-all duration-200 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
-                  <Loader2 size={20} className="animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                   <span>Signing in...</span>
                 </>
               ) : (
-                <span>Sign In</span>
+                <span>Sign In to Dashboard</span>
               )}
             </button>
           </form>
 
           {/* Footer */}
-          <div className="mt-8 text-center text-sm text-gray-500">
-            <p>Secured by enterprise-grade encryption</p>
+          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
+            <div className="flex items-center justify-center gap-2 text-gray-500 mb-3">
+              <Lock className="w-4 h-4" />
+              <p className="text-sm font-semibold">Enterprise-grade encryption</p>
+            </div>
+            <p className="text-xs text-gray-400">
+              Protected by industry-leading security standards
+            </p>
           </div>
         </div>
       </div>
 
       {/* Redirecting Overlay */}
       {redirecting && (
-        <div className="fixed inset-0 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center z-50 animate-fadeIn">
+        <div className="fixed inset-0 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center z-50">
           <div className="text-center">
-            <div className="relative mb-8">
+            <div className="relative mb-6">
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#ff004f] border-t-transparent mx-auto"></div>
               <div className="absolute inset-0 rounded-full bg-[#ff004f]/20 animate-ping"></div>
             </div>
@@ -340,6 +366,29 @@ export default function LoginPage() {
           </div>
         </div>
       )}
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes blob {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(30px, -50px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}} />
     </div>
   );
 }

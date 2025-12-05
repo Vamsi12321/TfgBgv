@@ -98,8 +98,10 @@ export default function ManageProfilePage() {
       )}
 
       {/* PAGE HEADER */}
-      <div className="bg-[#ff004f] text-white px-6 py-5 rounded-xl shadow-md mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold tracking-wide">Manage Profile</h1>
+      <div className="px-6 py-5 mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <UserCircle2 size={24} /> Manage Profile
+        </h1>
         <p className="text-sm opacity-90 mt-2 sm:mt-0">
           Update your email, phone & password
         </p>

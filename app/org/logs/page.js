@@ -13,6 +13,7 @@ import {
   Download,
   ChevronLeft,
   ChevronRight,
+  FileBarChart
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useOrgState } from "../../context/OrgStateContext";
@@ -265,8 +266,8 @@ export default function OrgLogsPage() {
       {/* HEADER */}
       <div className="max-w-[1200px] mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-extrabold text-[#ff004f]">
-            Organization Logs
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <FileBarChart size={24} /> Organization Logs
           </h1>
 
           <button
@@ -278,8 +279,14 @@ export default function OrgLogsPage() {
           </button>
         </div>
 
-        {/* FILTER PANEL */}
-        <div className="bg-white rounded-xl shadow-sm p-3 mb-6">
+        {/* Enhanced Filter Panel */}
+        <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-gray-100">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+              <FileBarChart size={20} className="text-[#ff004f]" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-800">Filter Logs</h3>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
             {/* ROLE */}
             <div>
@@ -357,14 +364,14 @@ export default function OrgLogsPage() {
           {/* DESKTOP TABLE */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full table-fixed text-sm">
-              <thead className="bg-[#ffeef3] text-[#ff004f]">
+              <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                  <th className="px-3 py-2 text-left w-[50px]">#</th>
-                  <th className="px-3 py-2 text-left w-[150px]">Action</th>
-                  <th className="px-3 py-2 text-left w-[240px]">Email</th>
-                  <th className="px-3 py-2 text-left w-[140px]">Role</th>
-                  <th className="px-3 py-2 text-left w-[120px]">Status</th>
-                  <th className="px-3 py-2 text-left w-[160px]">Timestamp</th>
+                  <th className="px-4 py-4 text-left w-[50px] font-semibold text-gray-700">#</th>
+                  <th className="px-4 py-4 text-left w-[150px] font-semibold text-gray-700">⚡ Action</th>
+                  <th className="px-4 py-4 text-left w-[240px] font-semibold text-gray-700">✉️ Email</th>
+                  <th className="px-4 py-4 text-left w-[140px] font-semibold text-gray-700">🎭 Role</th>
+                  <th className="px-4 py-4 text-left w-[120px] font-semibold text-gray-700">✅ Status</th>
+                  <th className="px-4 py-4 text-left w-[160px] font-semibold text-gray-700">🕐 Timestamp</th>
                 </tr>
               </thead>
 

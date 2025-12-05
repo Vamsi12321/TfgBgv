@@ -68,7 +68,7 @@ export default function SuperAdminLayout({ children }) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  /* Navigation Links (Standardized names) */
+  /* Navigation Links */
   const links = [
     { name: "Dashboard", href: "/superadmin/dashboard", icon: LayoutDashboard },
     {
@@ -78,7 +78,7 @@ export default function SuperAdminLayout({ children }) {
     },
     { name: "Users & Roles", href: "/superadmin/users", icon: Users },
     {
-      name: "Manage Candidates",
+      name: "Candidates",
       href: "/superadmin/manage-candidates",
       icon: UserSearch,
     },
@@ -88,36 +88,36 @@ export default function SuperAdminLayout({ children }) {
       icon: CheckCheck,
     },
     {
-      name: "Bgv Services",
+      name: "BGV Services",
       href: "/superadmin/bgv-requests",
       icon: ClipboardListIcon,
     },
     {
-      name: "Candidate Self-verification",
+      name: "Self Verification",
       href: "/superadmin/self-verification",
       icon: UserCheck,
     },
 
-    // 🔥 STANDARDIZED TEXT
+    // AI Services
     { name: "AI Screening", href: "/superadmin/AI-screening", icon: Brain },
     {
-      name: "AI CV Validation",
+      name: "AI CV Check",
       href: "/superadmin/AI-CV-Verification",
       icon: ScanSearch,
     },
     {
-      name: "AI Edu Validation",
+      name: "AI Edu Check",
       href: "/superadmin/AI-Edu-Verification",
-      icon: GraduationCap, // Or choose a better icon like GraduationCap if you want
+      icon: GraduationCap,
     },
 
     { name: "Invoices", href: "/superadmin/invoices", icon: Receipt },
     {
-      name: "Support & Help Desk",
+      name: "Help Desk",
       href: "/superadmin/help-desk",
       icon: Headset,
     },
-    { name: "Logs", href: "/superadmin/logs", icon: FileBarChart },
+    { name: "Activity Logs", href: "/superadmin/logs", icon: FileBarChart },
     { name: "Reports", href: "/superadmin/reports", icon: FileText },
   ];
 
@@ -146,24 +146,24 @@ export default function SuperAdminLayout({ children }) {
     );
   }
 
-  /* ---------- BADGE STYLING (CONSISTENT) ---------- */
+  /* ---------- BADGE STYLING (CONSISTENT & COMPACT) ---------- */
   const AIBadgeInactive = () => (
     <span
-      className="ml-2 px-2 py-[3px] text-[10px] font-semibold rounded-full 
-      bg-pink-50 text-[#ff004f] border border-pink-200 inline-flex items-center gap-1 whitespace-nowrap"
+      className="ml-auto px-2 py-1 text-[10px] font-bold rounded-full 
+      bg-pink-50 text-[#ff004f] border border-pink-200 inline-flex items-center gap-1 whitespace-nowrap flex-shrink-0"
     >
-      <Sparkles size={10} className="text-[#ff004f]" />
-      AI Powered
+      <Sparkles size={11} className="text-[#ff004f]" />
+      AI
     </span>
   );
 
   const AIBadgeActive = () => (
     <span
-      className="ml-2 px-2 py-[3px] text-[10px] font-semibold rounded-full 
-      bg-white text-[#ff004f] inline-flex items-center gap-1 shadow-sm whitespace-nowrap"
+      className="ml-auto px-2 py-1 text-[10px] font-bold rounded-full 
+      bg-white text-[#ff004f] inline-flex items-center gap-1 shadow-sm whitespace-nowrap flex-shrink-0"
     >
-      <Sparkles size={10} className="text-[#ff004f]" />
-      AI Powered
+      <Sparkles size={11} className="text-[#ff004f]" />
+      AI
     </span>
   );
 
@@ -179,32 +179,32 @@ export default function SuperAdminLayout({ children }) {
   return (
     <SuperAdminStateProvider>
       <div className="flex min-h-screen bg-gray-50">
-        {/* ---------------- Sidebar ---------------- */}
+        {/* ---------------- Sidebar - Compact ---------------- */}
         <aside
-          className={`fixed top-0 left-0 z-40 h-full w-72 bg-white border-r border-gray-200 shadow-sm 
+          className={`fixed top-0 left-0 z-40 h-full w-64 bg-white border-r border-gray-200 shadow-sm 
           transform transition-transform duration-300 ease-in-out
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
           md:translate-x-0`}
         >
           <div className="p-2 h-full flex flex-col">
-            {/* Logo */}
-            <header className="w-full flex justify-center items-center bg-transparent py-2">
+            {/* Logo - Compact */}
+            <header className="w-full flex items-center px-3 ">
               <Image
                 src={logoSrc}
                 alt="Logo"
                 width={120}
-                height={30}
+                height={68}
                 priority
                 className="hover:scale-105 transition-transform duration-300"
               />
             </header>
 
-            {/* Navigation */}
+            {/* Navigation - Optimized Vertical Space */}
             <nav
-              className="flex-1 overflow-y-auto sidebar-scroll pr-2 mt-2"
+              className="flex-1 overflow-y-auto sidebar-scroll pr-1"
               style={{
-                maxHeight: "calc(100vh - 150px)",
-                paddingBottom: "20px",
+                maxHeight: "calc(100vh - 90px)",
+                paddingBottom: "4px",
               }}
             >
               {filteredLinks.map((link) => {
@@ -222,33 +222,32 @@ export default function SuperAdminLayout({ children }) {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-md transition whitespace-nowrap
+                    className={`flex items-center gap-3 px-3 py-2.5 mb-0.5 rounded-xl transition-all whitespace-nowrap text-sm group
                       ${
                         isActive
-                          ? "bg-[#ff004f] text-white font-semibold shadow"
-                          : "text-gray-700 hover:bg-gray-100 hover:text-[#ff004f]"
+                          ? "bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white font-bold shadow-lg scale-[1.02]"
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-50 hover:text-[#ff004f] font-semibold hover:scale-[1.01]"
                       }`}
                   >
-                    <Icon size={18} />
-
-                    <span className="flex items-center whitespace-nowrap">
+                    {Icon && <Icon size={20} className="flex-shrink-0" />}
+                    <span className="flex-1 whitespace-nowrap">
                       {link.name}
-                      {isAIPage &&
-                        (isActive ? <AIBadgeActive /> : <AIBadgeInactive />)}
                     </span>
+                    {isAIPage &&
+                      (isActive ? <AIBadgeActive /> : <AIBadgeInactive />)}
                   </Link>
                 );
               })}
             </nav>
 
             {/* Logout */}
-            <div className="border-t border-gray-200 pt-4 mt-4">
+            <div className="border-t-2 border-gray-200 pt-2 mt-1.5">
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-3 w-full px-3 py-2 text-gray-700 
-                hover:bg-gray-100 hover:text-[#ff004f] rounded-md transition"
+                className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 
+                hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-600 rounded-xl transition-all font-bold shadow-sm hover:shadow-md hover:scale-[1.01]"
               >
-                <LogOut size={18} />
+                <LogOut size={20} />
                 Logout
               </button>
             </div>
@@ -265,40 +264,60 @@ export default function SuperAdminLayout({ children }) {
 
         {/* ---------------- Main Section ---------------- */}
         <div className="flex-1 flex flex-col min-h-screen md:ml-64 transition-all duration-300 relative">
-          {/* Header */}
+          {/* SUPERB ENHANCED HEADER */}
           <header
-            className="fixed top-0 left-0 md:left-64 right-0 bg-white px-4 sm:px-6 py-2 
-            flex justify-between items-center shadow-md border-b border-gray-100 z-20 h-14"
+            className="fixed top-0 left-0 md:left-64 right-0 bg-gradient-to-r from-white via-gray-50 to-white px-4 sm:px-6 py-3.5
+            flex justify-between items-center shadow-lg border-b-2 border-gray-100 z-20 h-16"
           >
             <div className="flex items-center gap-4">
               <button
-                className="md:hidden text-gray-700 hover:text-[#ff004f]"
+                className="md:hidden text-gray-700 hover:text-[#ff004f] transition-colors p-2 hover:bg-gray-100 rounded-lg"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               >
                 {isSidebarOpen ? <X size={26} /> : <Menu size={26} />}
               </button>
 
-              <h1 className="text-lg sm:text-xl px-4 font-semibold text-gray-800">
-                Welcome,{" "}
-                <span className="text-[#ff004f]">
-                  {displayName.split(" ")[0]}
-                </span>
-              </h1>
+              <div className="flex items-center gap-3">
+                <UserCircle2 
+                  size={32} 
+                  className="hidden sm:block text-[#ff004f] flex-shrink-0" 
+                  strokeWidth={2}
+                />
+                <div>
+                  <h1 className="text-base sm:text-lg font-bold text-gray-800 leading-tight">
+                    Welcome back,{" "}
+                    <span className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] bg-clip-text text-transparent">
+                      {displayName.split(" ")[0]}
+                    </span>
+                    ! 👋
+                  </h1>
+                  <p className="text-xs text-gray-500 hidden sm:block font-medium">Have a productive day</p>
+                </div>
+              </div>
             </div>
 
             {/* Profile */}
             <div className="relative" ref={profileRef}>
-              <UserCircle2
-                size={36}
-                className="text-gray-600 hover:text-[#ff004f] cursor-pointer"
+              <button
                 onClick={() => setProfileMenuOpen((prev) => !prev)}
-              />
+                className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition-all"
+              >
+                <div className="w-9 h-9 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-full flex items-center justify-center shadow-md">
+                  <UserCircle2 size={20} className="text-white" />
+                </div>
+                <span className="hidden sm:block text-sm font-semibold text-gray-700">
+                  {displayName.split(" ")[0]}
+                </span>
+              </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-2 z-50">
-                  <div className="px-4 py-2 border-b text-sm text-gray-700">
-                    <p className="font-semibold">{displayName}</p>
-                    <p className="text-gray-500 text-xs">{user?.email}</p>
+                <div className="absolute right-0 mt-2 w-56 bg-white border-2 border-gray-100 rounded-xl shadow-2xl py-2 z-50 animate-in slide-in-from-top-2 duration-200">
+                  <div className="px-4 py-3 border-b-2 border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                    <p className="font-bold text-gray-800">{displayName}</p>
+                    <p className="text-gray-500 text-xs mt-0.5">{user?.email}</p>
+                    <span className="inline-block mt-2 px-2 py-1 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white text-xs font-bold rounded-full">
+                      {user?.role || "Admin"}
+                    </span>
                   </div>
 
                   <button
@@ -306,22 +325,60 @@ export default function SuperAdminLayout({ children }) {
                       window.location.href = "/superadmin/manage-profile";
                       setProfileMenuOpen(false);
                     }}
-                    className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-black"
+                    className="block w-full text-left px-4 py-2.5 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 text-gray-700 hover:text-[#ff004f] transition-all font-medium"
                   >
-                    Manage Profile
+                    ⚙️ Manage Profile
                   </button>
                 </div>
               )}
             </div>
           </header>
 
-          {/* ---- Main Content ---- */}
+          {/* ---- Main Content - Adjusted for New Header ---- */}
           <main
-            className="flex-1 overflow-y-auto p-4 sm:p-5 mt-14 custom-scroll"
-            style={{ maxHeight: "calc(100vh - 80px)" }}
+            className="flex-1 overflow-y-auto p-3 sm:p-4 mt-16 custom-scroll"
+            style={{ maxHeight: "calc(100vh - 64px)" }}
           >
             {children}
           </main>
+
+          {/* Logout Loading Screen */}
+          {loggingOut && (
+            <div className="fixed inset-0 bg-gradient-to-br from-pink-50 via-white to-gray-100 backdrop-blur-sm flex flex-col items-center justify-center z-[9999]">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-[#ff004f] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-lg font-semibold text-gray-800">Logging out...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Logout Confirmation Modal */}
+          {showLogoutModal && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[999]">
+              <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
+                <h2 className="text-lg font-semibold mb-3">Are you sure?</h2>
+                <p className="text-sm text-gray-600 mb-6">
+                  Do you really want to logout from your account?
+                </p>
+
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={() => setShowLogoutModal(false)}
+                    className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    onClick={handleConfirmLogout}
+                    className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700"
+                  >
+                    Yes, Logout
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </SuperAdminStateProvider>

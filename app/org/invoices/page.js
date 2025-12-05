@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Receipt } from "lucide-react";
 
 export default function InvoicesPage() {
   const [invoices, setInvoices] = useState([
@@ -94,21 +95,23 @@ export default function InvoicesPage() {
 
   return (
     <div className="p-4 md:p-8 space-y-10 text-black">
-      <h1 className="text-3xl md:text-4xl font-bold text-red-700">Invoices</h1>
+      <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <Receipt size={24} /> Invoices
+      </h1>
 
       {/* Desktop Table */}
       <div className="hidden md:block bg-white p-6 rounded-xl shadow-lg border border-red-200 overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-red-50 text-red-800 border-b border-red-200">
-              <th className="p-3">Invoice ID</th>
-              <th className="p-3">Organization</th>
-              <th className="p-3">Referral</th>
-              <th className="p-3">Discount (%)</th>
-              <th className="p-3">Final Amount</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Date</th>
-              <th className="p-3">Actions</th>
+            <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
+              <th className="p-4 font-semibold text-gray-700">📄 Invoice ID</th>
+              <th className="p-4 font-semibold text-gray-700">🏢 Organization</th>
+              <th className="p-4 font-semibold text-gray-700">👤 Referral</th>
+              <th className="p-4 font-semibold text-gray-700">💰 Discount (%)</th>
+              <th className="p-4 font-semibold text-gray-700">💵 Final Amount</th>
+              <th className="p-4 font-semibold text-gray-700">✅ Status</th>
+              <th className="p-4 font-semibold text-gray-700">📅 Date</th>
+              <th className="p-4 font-semibold text-gray-700">⚙️ Actions</th>
             </tr>
           </thead>
           <tbody>

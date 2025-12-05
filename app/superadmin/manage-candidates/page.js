@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { PlusCircle, X, Edit, Trash2, Loader2 } from "lucide-react";
+import { PlusCircle, X, Edit, Trash2, Loader2, Users } from "lucide-react";
 import { motion } from "framer-motion";
 
 
@@ -413,18 +413,18 @@ export default function ManageCandidatesPage() {
   /* UI START */
   /* -------------------------------------------- */
   return (
-    <div className="min-h-screen bg-gray-50 p-6 text-gray-900">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      <div className="max-w-7xl mx-auto">
         {/* HEADER */}
-        <div className="flex justify-between items-center flex-wrap gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-[#ff004f]">
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+              <svg className="w-6 h-6 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
               Manage Candidates
             </h1>
-
-            <p className="text-gray-700 mt-1">
-              Add, edit, and delete candidates for your organization.
-            </p>
+            <p className="text-gray-600 text-sm mt-1">Add and manage candidate records</p>
           </div>
 
           <button
@@ -441,12 +441,11 @@ export default function ManageCandidatesPage() {
               setNewCandidate(normalizeCandidate({}));
               setShowAddModal(true);
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg 
-    
-    ${
+            disabled={!selectedOrg}
+            className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg ${
       selectedOrg
-        ? "bg-[#ff004f] hover:bg-[#e60047] text-white"
-        : "bg-gray-300 cursor-not-allowed text-gray-600"
+        ? "bg-[#ff004f] hover:bg-[#e60047]"
+        : "bg-gray-400 cursor-not-allowed"
     }`}
           >
             <PlusCircle size={18} />
@@ -454,120 +453,139 @@ export default function ManageCandidatesPage() {
           </button>
         </div>
 
-        {/* ORGANIZATION SELECT */}
-        <div className="bg-white p-4 rounded-lg shadow border">
-          <label className="block text-sm font-medium mb-2 text-gray-800">
-            Select Organization
-          </label>
+        {/* SUPERB ORGANIZATION SELECT */}
+        <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+              <svg className="w-5 h-5 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              </svg>
+            </div>
+            <label className="text-base font-bold text-gray-800">
+              Select Organization
+            </label>
+          </div>
+          
           {/* SEARCHABLE ORG DROPDOWN */}
           <div className="relative">
             <div
               onClick={() => setShowOrgDropdown(!showOrgDropdown)}
-              className="w-full border rounded-lg p-3 bg-white cursor-pointer flex justify-between items-center shadow-sm"
+              className="w-full border-2 border-gray-200 rounded-xl p-4 bg-white cursor-pointer flex justify-between items-center shadow-sm hover:border-[#ff004f]/50 transition-all"
             >
-              <span className="text-gray-800">
+              <span className="text-gray-800 font-medium">
                 {selectedOrg
-                  ? organizations.find((o) => o._id === selectedOrg)
+                  ? "🏢 " + organizations.find((o) => o._id === selectedOrg)
                       ?.organizationName
-                  : "Select Organization"}
+                  : "🌐 Select Organization"}
               </span>
-              <span className="text-gray-500">▾</span>
+              <span className="text-gray-400 text-lg">▾</span>
             </div>
 
             {showOrgDropdown && (
-              <div className="absolute left-0 right-0 bg-white border rounded-lg shadow-xl mt-2 z-20 max-h-64 overflow-y-auto">
+              <div className="absolute left-0 right-0 bg-white border-2 border-[#ff004f]/20 rounded-xl shadow-2xl mt-2 z-30 max-h-80 overflow-hidden animate-in slide-in-from-top-2 duration-200">
                 {/* Search box */}
-                <div className="p-2 border-b bg-white sticky top-0">
+                <div className="p-3 border-b-2 border-gray-100 bg-gradient-to-r from-[#ff004f]/5 to-[#ff3366]/5 sticky top-0">
                   <input
                     type="text"
-                    placeholder="Search organization..."
-                    className="w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-red-500"
+                    placeholder="🔍 Search organization..."
+                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all"
                     value={orgSearch}
                     onChange={(e) => setOrgSearch(e.target.value)}
                   />
                 </div>
 
                 {/* List */}
-                {organizations
-                  .filter((o) =>
-                    o.organizationName
-                      .toLowerCase()
-                      .includes(orgSearch.toLowerCase())
-                  )
-                  .map((o) => (
-                    <div
-                      key={o._id}
-                      onClick={() => {
-                        setSelectedOrg(o._id);
-                        setShowOrgDropdown(false);
-                      }}
-                      className="px-4 py-2 cursor-pointer hover:bg-[#ffeef3]
- text-sm"
-                    >
-                      {o.organizationName}
-                    </div>
-                  ))}
+                <div className="max-h-64 overflow-y-auto">
+                  {organizations
+                    .filter((o) =>
+                      o.organizationName
+                        .toLowerCase()
+                        .includes(orgSearch.toLowerCase())
+                    )
+                    .map((o) => (
+                      <div
+                        key={o._id}
+                        onClick={() => {
+                          setSelectedOrg(o._id);
+                          setShowOrgDropdown(false);
+                          setOrgSearch("");
+                        }}
+                        className="px-4 py-3 cursor-pointer hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 text-sm font-medium transition-all border-b border-gray-50 last:border-0"
+                      >
+                        🏢 {o.organizationName}
+                      </div>
+                    ))}
+                </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* LIST */}
-        <div className="bg-white p-6 rounded-lg shadow border text-gray-900">
+        {/* SUPERB CANDIDATES LIST */}
+        <div className="bg-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 text-gray-900">
           {loading ? (
-            <div className="text-center py-10 text-gray-600">Loading...</div>
+            <div className="text-center py-16">
+              <Loader2 className="animate-spin mx-auto text-[#ff004f] mb-4" size={40} />
+              <p className="text-gray-600 font-medium">Loading candidates...</p>
+            </div>
           ) : candidates.length === 0 ? (
-            <div className="text-center py-10 text-gray-600">
-              No candidates found.
+            <div className="text-center py-16">
+              <svg className="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <p className="text-xl font-semibold text-gray-600 mb-2">No candidates found</p>
+              <p className="text-sm text-gray-400">Add your first candidate to get started</p>
             </div>
           ) : (
             <>
-              {/* DESKTOP TABLE */}
+              {/* SUPERB DESKTOP TABLE */}
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-[#ffeef3] text-[#ff004f] uppercase text-xs">
-                      <th className="p-3 text-left">Name</th>
-                      <th className="p-3 text-left">Phone</th>
-                      <th className="p-3 text-left">Email</th>
-                      <th className="p-3 text-left">Aadhaar</th>
-                      <th className="p-3 text-left">PAN</th>
-                      <th className="p-3 text-left">Actions</th>
+                    <tr className="bg-gradient-to-r from-gray-50 to-gray-100 uppercase text-xs tracking-wide">
+                      <th className="p-4 text-left font-semibold text-gray-700">👤 Name</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">📞 Phone</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">✉️ Email</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">🆔 Aadhaar</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">💳 PAN</th>
+                      <th className="p-4 text-left font-semibold text-gray-700">⚙️ Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {candidates.map((c) => (
+                  <tbody className="divide-y divide-gray-100">
+                    {candidates.map((c, idx) => (
                       <tr
                         key={c._id}
-                        className="border-b hover:bg-[#ffeef3]
- transition"
+                        className={`transition-all group hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] hover:shadow-md ${
+                          idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                        }`}
                       >
-                        <td className="p-3">
+                        <td className="p-4 font-semibold text-gray-800 group-hover:text-[#ff004f] transition-colors">
                           {c.firstName} {c.lastName}
                         </td>
-                        <td className="p-3">{c.phone}</td>
-                        <td className="p-3">{c.email}</td>
-                        <td className="p-3">{c.aadhaarNumber}</td>
-                        <td className="p-3">{c.panNumber}</td>
-                        <td className="p-3">
+                        <td className="p-4 text-gray-600">{c.phone}</td>
+                        <td className="p-4 text-gray-600">{c.email}</td>
+                        <td className="p-4 text-gray-600 font-mono text-sm">{c.aadhaarNumber}</td>
+                        <td className="p-4 text-gray-600 font-mono text-sm font-semibold">{c.panNumber}</td>
+                        <td className="p-4">
                           <div className="flex gap-2">
                             <button
-                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded transition"
+                              className="p-2.5 text-blue-600 hover:text-white hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 rounded-lg transition-all transform hover:scale-110 shadow-sm hover:shadow-lg"
                               onClick={() => {
                                 setEditCandidate(normalizeCandidate(c));
                                 setShowEditModal(true);
                               }}
+                              title="Edit Candidate"
                             >
                               <Edit size={18} />
                             </button>
 
                             <button
-                              className="p-2 text-red-600 hover:text-red-800 hover:bg-[#ffeef3]
- rounded transition"
+                              className="p-2.5 text-red-600 hover:text-white hover:bg-gradient-to-r hover:from-red-500 hover:to-red-600 rounded-lg transition-all transform hover:scale-110 shadow-sm hover:shadow-lg"
                               onClick={() => {
                                 setSelectedCandidate(normalizeCandidate(c));
                                 setShowDeleteModal(true);
                               }}
+                              title="Delete Candidate"
                             >
                               <Trash2 size={18} />
                             </button>
@@ -579,49 +597,64 @@ export default function ManageCandidatesPage() {
                 </table>
               </div>
 
-              {/* MOBILE CARDS */}
+              {/* SUPERB MOBILE CARDS */}
               <div className="md:hidden grid gap-4">
                 {candidates.map((c) => (
                   <div
                     key={c._id}
-                    className="border rounded-lg p-4 shadow bg-white"
+                    className="border-2 border-gray-100 rounded-2xl p-5 shadow-lg bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all transform hover:scale-[1.02]"
                   >
-                    <div className="font-semibold text-lg">
-                      {c.firstName} {c.lastName}
+                    <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-gray-100">
+                      <div className="p-3 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-xl shadow-md">
+                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-bold text-lg text-gray-800">
+                          {c.firstName} {c.lastName}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="text-sm mt-1 text-gray-700">
-                      📞 {c.phone}
+                    <div className="space-y-2.5 mb-4">
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-500 font-semibold min-w-[80px]">📞 Phone:</span>
+                        <span className="text-gray-800 font-medium">{c.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-500 font-semibold min-w-[80px]">✉️ Email:</span>
+                        <span className="text-gray-800 font-medium break-all">{c.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-500 font-semibold min-w-[80px]">🆔 Aadhaar:</span>
+                        <span className="text-gray-800 font-mono font-medium">{c.aadhaarNumber}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-500 font-semibold min-w-[80px]">💳 PAN:</span>
+                        <span className="text-gray-800 font-mono font-bold">{c.panNumber}</span>
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-700">✉️ {c.email}</div>
 
-                    <div className="text-sm text-gray-700 mt-2">
-                      Aadhaar: {c.aadhaarNumber}
-                    </div>
-                    <div className="text-sm text-gray-700">
-                      PAN: {c.panNumber}
-                    </div>
-
-                    <div className="flex gap-3 mt-4">
+                    <div className="flex gap-3 mt-4 pt-4 border-t-2 border-gray-100">
                       <button
-                        className="flex-1 py-2 rounded border border-blue-500 text-blue-600 hover:bg-blue-50 transition"
+                        className="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg transition-all transform hover:scale-105"
                         onClick={() => {
                           setEditCandidate(normalizeCandidate(c));
                           setShowEditModal(true);
                         }}
                       >
-                        Edit
+                        ✏️ Edit
                       </button>
 
                       <button
-                        className="flex-1 py-2 rounded border border-red-500 text-red-600 hover:bg-[#ffeef3]
- transition"
+                        className="flex-1 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-md hover:shadow-lg transition-all transform hover:scale-105"
                         onClick={() => {
                           setSelectedCandidate(normalizeCandidate(c));
                           setShowDeleteModal(true);
                         }}
                       >
-                        Delete
+                        🗑️ Delete
                       </button>
                     </div>
                   </div>
@@ -718,23 +751,38 @@ export default function ManageCandidatesPage() {
 /* -------------------------------------------- */
 function Modal({ title, children, onClose }) {
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <motion.div
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="
-          bg-white rounded-xl shadow-xl p-6 w-full max-w-lg text-gray-900
-          max-h-[90vh] overflow-y-auto   /* 🔥 FIX: ENABLE SCROLL */
-        "
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg text-gray-900 overflow-hidden"
       >
-        <div className="flex justify-between items-center mb-4 sticky top-0 bg-white pb-2">
-          <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-          <button onClick={onClose} className="text-gray-600 hover:text-black">
+        {/* Enhanced Header with Gradient */}
+        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] px-6 py-4 relative sticky top-0 z-10">
+          <button 
+            onClick={onClose} 
+            className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-lg p-1 transition-all"
+          >
             <X size={22} />
           </button>
+          
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-white">{title}</h2>
+              <p className="text-white/80 text-sm">Fill in candidate information</p>
+            </div>
+          </div>
         </div>
 
-        {children}
+        {/* Scrollable Content */}
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-100px)]">
+          {children}
+        </div>
       </motion.div>
     </div>
   );
@@ -955,13 +1003,28 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
       )}
 
       {/* SUBMIT BUTTON */}
-      <button
-        onClick={onSubmit}
-        disabled={saving}
-        className="mt-6 w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 flex items-center justify-center"
-      >
-        {saving ? <Loader2 className="animate-spin" /> : submitText}
-      </button>
+      <div className="mt-8 pt-6 border-t-2 border-gray-100">
+        <button
+          onClick={onSubmit}
+          disabled={saving}
+          className={`w-full py-3.5 rounded-xl text-white font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
+            saving
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:shadow-2xl hover:shadow-[#ff004f]/30"
+          }`}
+        >
+          {saving ? (
+            <>
+              <Loader2 className="animate-spin" size={20} />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <span>💾 {submitText}</span>
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }

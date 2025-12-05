@@ -30,12 +30,12 @@ export default function PageHeader({ title, subtitle, action, breadcrumbs }) {
       {/* Title & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          {/* 🔥 Title color updated here */}
-          <h1 className="text-3xl font-bold text-[#ff004f] mb-2">
+          {/* Enhanced Title - Consistent with SuperAdmin */}
+          <h1 className="text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
             {title}
           </h1>
 
-          {subtitle && <p className="text-gray-600">{subtitle}</p>}
+          {subtitle && <p className="text-gray-600 text-sm">{subtitle}</p>}
         </div>
 
         {action && <div className="flex-shrink-0">{action}</div>}

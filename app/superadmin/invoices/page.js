@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Receipt } from "lucide-react";
 
 export default function InvoicesPage() {
   const router = useRouter();
@@ -168,44 +169,53 @@ export default function InvoicesPage() {
   ----------------------------------------------------------- */
   return (
     <div className="p-4 md:p-8 space-y-10 text-black">
-      <h1 className="text-3xl font-bold text-[#ff004f]">Invoices</h1>
+      {/* HEADER */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Receipt size={24} className="text-[#ff004f]" />
+          Invoices
+        </h1>
+        <p className="text-gray-600 text-sm mt-1">Manage invoices and payments</p>
+      </div>
 
-      {/* ================= DESKTOP TABLE ================= */}
-      <div className="hidden md:block bg-white p-6 rounded-xl shadow-lg border border-red-200 overflow-x-auto">
+      {/* ================= SUPERB DESKTOP TABLE ================= */}
+      <div className="hidden md:block bg-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-red-50 text-red-800 border-b border-red-200">
-              <th className="p-3">Invoice ID</th>
-              <th className="p-3">Organization</th>
-              <th className="p-3">Referral</th>
-              <th className="p-3">Discount (%)</th>
-              <th className="p-3">Final Amount</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Date</th>
-              <th className="p-3">Actions</th>
+            <tr className="bg-gradient-to-r from-gray-50 to-gray-100">
+              <th className="p-4 font-semibold text-gray-700">📄 Invoice ID</th>
+              <th className="p-4 font-semibold text-gray-700">🏢 Organization</th>
+              <th className="p-4 font-semibold text-gray-700">👤 Referral</th>
+              <th className="p-4 font-semibold text-gray-700">💰 Discount (%)</th>
+              <th className="p-4 font-semibold text-gray-700">💵 Final Amount</th>
+              <th className="p-4 font-semibold text-gray-700">✅ Status</th>
+              <th className="p-4 font-semibold text-gray-700">📅 Date</th>
+              <th className="p-4 font-semibold text-gray-700">⚙️ Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            {invoices.map((inv) => (
-              <tr key={inv.id} className="border-b hover:bg-red-50 transition">
-                <td className="p-3">{inv.id}</td>
-                <td className="p-3 font-semibold">{inv.org}</td>
-                <td className="p-3 text-green-700">
+            {invoices.map((inv, idx) => (
+              <tr key={inv.id} className={`transition-all group hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] hover:shadow-md ${
+                idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+              }`}>
+                <td className="p-4 font-semibold text-gray-800 group-hover:text-[#ff004f] transition-colors">{inv.id}</td>
+                <td className="p-4 font-bold text-gray-800">{inv.org}</td>
+                <td className="p-4 text-green-700 font-medium">
                   {inv.referral || (
-                    <span className="text-black/60 italic">—</span>
+                    <span className="text-gray-400 italic">—</span>
                   )}
                 </td>
-                <td className="p-3">
+                <td className="p-4 text-gray-600">
                   {inv.discount ? `${inv.discount}%` : "—"}
                 </td>
-                <td className="p-3 font-semibold">
+                <td className="p-4 font-bold text-gray-800">
                   ₹{inv.amount.toLocaleString()}
                 </td>
 
-                <td className="p-3">
+                <td className="p-4">
                   <span
-                    className={`px-2 py-1 rounded text-white text-sm ${
+                    className={`px-3 py-1.5 rounded-full text-white text-xs font-bold ${
                       inv.status === "Paid"
                         ? "bg-green-600"
                         : inv.status === "Pending"
@@ -217,24 +227,26 @@ export default function InvoicesPage() {
                   </span>
                 </td>
 
-                <td className="p-3">{inv.date}</td>
+                <td className="p-4 text-gray-600">{inv.date}</td>
 
-                <td className="p-3 space-y-2 flex flex-col">
-                  {inv.status !== "Paid" && (
+                <td className="p-4">
+                  <div className="flex gap-2">
+                    {inv.status !== "Paid" && (
+                      <button
+                        onClick={() => handleMarkPaid(inv.id)}
+                        className="px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all transform hover:scale-105 font-semibold text-sm shadow-md"
+                      >
+                        Mark Paid
+                      </button>
+                    )}
+
                     <button
-                      onClick={() => handleMarkPaid(inv.id)}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded transition"
+                      onClick={() => setSelectedInvoice(inv.id)}
+                      className="px-4 py-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:from-[#e60047] hover:to-[#e6005f] text-white rounded-lg transition-all transform hover:scale-105 font-semibold text-sm shadow-md"
                     >
-                      Mark Paid
+                      Edit
                     </button>
-                  )}
-
-                  <button
-                    onClick={() => setSelectedInvoice(inv.id)}
-                    className="w-full border border-red-600 text-red-700 hover:bg-red-600 hover:text-white px-3 py-1 rounded transition"
-                  >
-                    Edit
-                  </button>
+                  </div>
                 </td>
               </tr>
             ))}
