@@ -19,6 +19,7 @@ export default function OrgVerificationsPage() {
 
   const [loading, setLoading] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [loadingCandidate, setLoadingCandidate] = useState(false);
 
   const router = useRouter();
 
@@ -142,21 +143,26 @@ export default function OrgVerificationsPage() {
 
   /* --------------------------------------------------------------- */
   const openCandidateDetails = (candidate) => {
-    const details = verifications.find(
-      (v) => v.candidateId === candidate.candidateId
-    );
+    setLoadingCandidate(true);
+    // Simulate loading for better UX
+    setTimeout(() => {
+      const details = verifications.find(
+        (v) => v.candidateId === candidate.candidateId
+      );
 
-    // merge summary info (completionPercentage, overallStatus, initiatedByName)
-    const summaryInfo = mergedSummary.find(
-      (s) => s.candidateId === candidate.candidateId
-    );
+      // merge summary info (completionPercentage, overallStatus, initiatedByName)
+      const summaryInfo = mergedSummary.find(
+        (s) => s.candidateId === candidate.candidateId
+      );
 
-    setSelectedCandidate({
-      ...(details || candidate),
-      completionPercentage: summaryInfo?.completionPercentage || 0,
-      overallStatus: summaryInfo?.overallStatus || details?.overallStatus,
-      initiatedByName: summaryInfo?.initiatedByName || details?.initiatedByName,
-    });
+      setSelectedCandidate({
+        ...(details || candidate),
+        completionPercentage: summaryInfo?.completionPercentage || 0,
+        overallStatus: summaryInfo?.overallStatus || details?.overallStatus,
+        initiatedByName: summaryInfo?.initiatedByName || details?.initiatedByName,
+      });
+      setLoadingCandidate(false);
+    }, 300);
   };
 
   /* ---------------------- UI ---------------------- */
@@ -255,9 +261,10 @@ export default function OrgVerificationsPage() {
           <div className="min-w-[140px]">
             <select
               value={filters.status}
-              onChange={(e) =>
-                setFilters({ ...filters, status: e.target.value })
-              }
+              onChange={(e) => {
+                setFilters({ ...filters, status: e.target.value });
+                setSelectedCandidate(null);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-red-500"
             >
               <option value="">All Statuses</option>
@@ -274,7 +281,10 @@ export default function OrgVerificationsPage() {
               type="text"
               placeholder="Search Candidate"
               value={filters.name}
-              onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+              onChange={(e) => {
+                setFilters({ ...filters, name: e.target.value });
+                setSelectedCandidate(null);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-red-500"
             />
           </div>
@@ -283,9 +293,10 @@ export default function OrgVerificationsPage() {
           <div className="min-w-[160px]">
             <select
               value={filters.initiatedByName}
-              onChange={(e) =>
-                setFilters({ ...filters, initiatedByName: e.target.value })
-              }
+              onChange={(e) => {
+                setFilters({ ...filters, initiatedByName: e.target.value });
+                setSelectedCandidate(null);
+              }}
               className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-red-500"
             >
               <option value="">Initiated By</option>
@@ -302,18 +313,20 @@ export default function OrgVerificationsPage() {
             <input
               type="date"
               value={filters.fromDate}
-              onChange={(e) =>
-                setFilters({ ...filters, fromDate: e.target.value })
-              }
+              onChange={(e) => {
+                setFilters({ ...filters, fromDate: e.target.value });
+                setSelectedCandidate(null);
+              }}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-red-500"
             />
             <span className="text-gray-600 text-sm">to</span>
             <input
               type="date"
               value={filters.toDate}
-              onChange={(e) =>
-                setFilters({ ...filters, toDate: e.target.value })
-              }
+              onChange={(e) => {
+                setFilters({ ...filters, toDate: e.target.value });
+                setSelectedCandidate(null);
+              }}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-red-500"
             />
           </div>
@@ -460,8 +473,18 @@ export default function OrgVerificationsPage() {
         )}
       </div>
 
+      {/* LOADING OVERLAY */}
+      {loadingCandidate && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+          </div>
+        </>
+      )}
+
       {/* Drawer */}
-      {selectedCandidate && (
+      {selectedCandidate && !loadingCandidate && (
         <>
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"

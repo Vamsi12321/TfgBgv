@@ -65,6 +65,7 @@ export default function OrgCandidateSelfVerification() {
   const [currentStep, setCurrentStep] = useState(0);
 
   const [loading, setLoading] = useState(false);
+  const [loadingCandidate, setLoadingCandidate] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -226,6 +227,7 @@ export default function OrgCandidateSelfVerification() {
       return;
     }
 
+    setLoadingCandidate(true);
     setLoading(true);
     try {
       const res = await fetch(
@@ -259,6 +261,7 @@ export default function OrgCandidateSelfVerification() {
       setStages(restored);
     } finally {
       setLoading(false);
+      setLoadingCandidate(false);
     }
   };
 
@@ -691,6 +694,16 @@ export default function OrgCandidateSelfVerification() {
   /* ---------------------------------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900 px-3 sm:px-4 md:px-6 py-4">
+      {/* Loading Overlay */}
+      {loadingCandidate && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+          </div>
+        </>
+      )}
+
       {/* Global Modals */}
       {modal.open && modal.type !== "confirmClose" && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center p-4">
@@ -754,18 +767,23 @@ export default function OrgCandidateSelfVerification() {
 
       {/* PAGE HEADER — ENHANCED WITH GRADIENT */}
       <div className="max-w-7xl mx-auto space-y-6">
-        <div className="bg-gradient-to-r from-[#ff004f] via-[#ff3366] to-[#ff6f6f] text-white p-6 md:p-8 rounded-xl shadow-2xl border-2 border-[#ff004f]/20">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                  <UserCheck size={28} className="text-white" />
+        <div className="relative overflow-hidden bg-white rounded-2xl shadow-xl border border-gray-200">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#ff004f]/5 via-transparent to-purple-500/5"></div>
+          <div className="relative p-6 md:p-8">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <UserCheck size={32} className="text-white" />
                 </div>
-                Self Verification Services
-              </h1>
-              <p className="text-white/95 mt-3 text-sm md:text-base font-medium">
-                Initiate candidate self-verification with automated API checks
-              </p>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+                    Self Verification Services
+                  </h1>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Initiate candidate self-verification with automated API checks
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -880,47 +898,60 @@ export default function OrgCandidateSelfVerification() {
         </div>
 
         {/* CANDIDATE SELECT - Enhanced */}
-        <div className="bg-white border-2 p-6 rounded-2xl shadow-lg">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Selection Panel</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-2 block">Organization</label>
-              <div className="border-2 border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
-                <div className="font-bold text-sm text-gray-900">
-                  {bgvUser?.organizationName || "Your Organization"}
-                </div>
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <Shield size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Selection Panel</h3>
+                <p className="text-xs text-gray-600">Choose candidate to begin self-verification</p>
               </div>
             </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Organization</label>
+                <div className="border-2 border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
+                  <div className="font-bold text-sm text-gray-900">
+                    {bgvUser?.organizationName || "Your Organization"}
+                  </div>
+                </div>
+              </div>
 
-            <div>
-              <SearchableDropdown
-                label="Select Candidate"
-                value={selectedCandidate}
-                disabled={!bgvUser?.organizationId}
-                onChange={(cid) => {
-                  setSelectedCandidate(cid);
+              <div>
+                <SearchableDropdown
+                  label="Select Candidate"
+                  value={selectedCandidate}
+                  disabled={!bgvUser?.organizationId}
+                  onChange={(cid) => {
+                    setSelectedCandidate(cid);
 
-                  if (cid) refreshVerification(cid);
-                  else {
-                    setCandidateVerification(null);
-                    setStages({ primary: [], secondary: [], final: [] });
-                    setCurrentStep(0);
-                  }
-                }}
-                options={candidates.map((c) => ({
-                  label: `${c.firstName} ${c.lastName}`,
-                  value: c._id,
-                }))}
-              />
-            </div>
+                    if (cid) refreshVerification(cid);
+                    else {
+                      setCandidateVerification(null);
+                      setStages({ primary: [], secondary: [], final: [] });
+                      setCurrentStep(0);
+                    }
+                  }}
+                  options={candidates.map((c) => ({
+                    label: `${c.firstName} ${c.lastName}`,
+                    value: c._id,
+                  }))}
+                />
+              </div>
 
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-2 block">Available API Checks</label>
-              <div className="border-2 border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
-                <div className="font-bold text-sm text-gray-900">
-                  {availableChecks.length > 0
-                    ? `${availableChecks.length} API Services`
-                    : "No services"}
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Available API Checks</label>
+                <div className="border-2 border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
+                  <div className="font-bold text-sm text-gray-900">
+                    {availableChecks.length > 0
+                      ? `${availableChecks.length} API Services`
+                      : "No services"}
+                  </div>
                 </div>
               </div>
             </div>

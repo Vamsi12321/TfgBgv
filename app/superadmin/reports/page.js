@@ -10,7 +10,7 @@ import {
   Building2,
   CheckCircle,
   XCircle,
-  
+  Brain,
 } from "lucide-react";
 
 import { jsPDF } from "jspdf";
@@ -43,6 +43,10 @@ const formatServiceName = (raw = "") =>
     .split(/[_\s]+/)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+
+const isAIValidationCheck = (checkName) => {
+  return checkName === "ai_cv_validation" || checkName === "ai_education_validation";
+};
 
 const getServiceCertId = (stage, checkName, candId) =>
   `cert-${stage}-${checkName
@@ -243,6 +247,29 @@ export default function SuperAdminReportsPage() {
         </div>
       </div>
 
+      {/* AI VALIDATION NOTICE */}
+      <div className="bg-gradient-to-r from-purple-50 to-purple-100 border-2 border-purple-300 rounded-xl p-4 mb-6 shadow-md">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-purple-200 rounded-lg flex-shrink-0">
+            <Brain size={20} className="text-purple-700" />
+          </div>
+          <div>
+            <h3 className="font-bold text-purple-900 mb-1">AI Validation Reports</h3>
+            <p className="text-sm text-purple-800">
+              Reports for <strong>AI CV Validation</strong> and <strong>AI Education Validation</strong> can be downloaded from their respective verification pages:
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className="text-xs bg-purple-200 text-purple-900 px-3 py-1 rounded-full font-semibold">
+                📄 AI-CV-Verification Page
+              </span>
+              <span className="text-xs bg-purple-200 text-purple-900 px-3 py-1 rounded-full font-semibold">
+                🎓 AI-Edu-Verification Page
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* SUPERB ORG SELECTOR */}
       <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-6 mb-8 shadow-xl border-2 border-gray-100">
         <div className="flex items-center gap-2 mb-3">
@@ -324,28 +351,66 @@ export default function SuperAdminReportsPage() {
           const primaryChecks = v?.stages?.primary || [];
           const secondaryChecks = v?.stages?.secondary || [];
           const finalChecks = v?.stages?.final || [];
+          
+          const totalChecks = primaryChecks.length + secondaryChecks.length + finalChecks.length;
+          const completedChecks = [...primaryChecks, ...secondaryChecks, ...finalChecks].filter(chk => chk.status === "COMPLETED").length;
 
           return (
             <div
               key={c._id}
-              className="bg-white shadow border rounded-xl p-5 mb-6 transition-all"
+              className="bg-gradient-to-br from-white to-gray-50 shadow-lg border-2 border-gray-200 rounded-2xl overflow-hidden mb-6 transition-all hover:shadow-xl hover:border-[#ff004f]/30"
             >
+              {/* Candidate Header */}
               <div
-                className="flex justify-between items-center cursor-pointer"
+                className="bg-gradient-to-r from-[#ff004f]/5 to-purple-500/5 p-6 cursor-pointer hover:from-[#ff004f]/10 hover:to-purple-500/10 transition-all"
                 onClick={() => toggle(c._id)}
               >
-                <div className="flex items-center gap-3">
-                  {expanded === c._id ? (
-                    <ChevronDown size={20} />
-                  ) : (
-                    <ChevronRight size={20} />
-                  )}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    {/* Avatar Circle */}
+                    <div className="w-14 h-14 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                      {c.firstName?.charAt(0)}{c.lastName?.charAt(0)}
+                    </div>
 
-                  <div>
-                    <p className="font-semibold text-lg">
-                      {c.firstName} {c.lastName}
-                    </p>
-                    <p className="text-xs text-gray-500">ID: {c._id}</p>
+                    {/* Candidate Info */}
+                    <div>
+                      <p className="font-bold text-xl text-gray-900 flex items-center gap-2">
+                        {c.firstName} {c.lastName}
+                        {v?.overallStatus === "COMPLETED" && (
+                          <CheckCircle size={20} className="text-green-600" />
+                        )}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1">
+                        <p className="text-sm text-gray-600">
+                          <span className="font-semibold">ID:</span> {c._id}
+                        </p>
+                        {totalChecks > 0 && (
+                          <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full font-semibold">
+                            {completedChecks}/{totalChecks} Completed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expand Icon */}
+                  <div className="flex items-center gap-3">
+                    {v?.overallStatus && (
+                      <span className={`px-4 py-2 rounded-lg font-bold text-sm ${
+                        v.overallStatus === "COMPLETED" ? "bg-green-100 text-green-800" :
+                        v.overallStatus === "IN_PROGRESS" ? "bg-yellow-100 text-yellow-800" :
+                        "bg-gray-100 text-gray-800"
+                      }`}>
+                        {v.overallStatus.replace("_", " ")}
+                      </span>
+                    )}
+                    <div className={`p-2 rounded-lg transition-all ${expanded === c._id ? "bg-[#ff004f] text-white" : "bg-gray-200 text-gray-600"}`}>
+                      {expanded === c._id ? (
+                        <ChevronDown size={24} />
+                      ) : (
+                        <ChevronRight size={24} />
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -353,9 +418,9 @@ export default function SuperAdminReportsPage() {
               {/* EXPANDED */}
               {expanded === c._id && (
                 <div className="mt-6 border-t pt-6 space-y-10">
-                  {/* HIDDEN CERTIFICATES - invisible DOM for PDF */}
+                  {/* HIDDEN CERTIFICATES - invisible DOM for PDF (excluding AI checks) */}
                   <div className="absolute -left-[9999px] -top-[9999px]">
-                    {primaryChecks.map((chk) => (
+                    {primaryChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) => (
                       <ServiceCertificate
                         key={getServiceCertId("primary", chk.check, c._id)}
                         id={getServiceCertId("primary", chk.check, c._id)}
@@ -365,7 +430,7 @@ export default function SuperAdminReportsPage() {
                         stage="primary"
                       />
                     ))}
-                    {secondaryChecks.map((chk) => (
+                    {secondaryChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) => (
                       <ServiceCertificate
                         key={getServiceCertId("secondary", chk.check, c._id)}
                         id={getServiceCertId("secondary", chk.check, c._id)}
@@ -375,7 +440,7 @@ export default function SuperAdminReportsPage() {
                         stage="secondary"
                       />
                     ))}
-                    {finalChecks.map((chk) => (
+                    {finalChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) => (
                       <ServiceCertificate
                         key={getServiceCertId("final", chk.check, c._id)}
                         id={getServiceCertId("final", chk.check, c._id)}
@@ -392,10 +457,17 @@ export default function SuperAdminReportsPage() {
                     <div>
                       <button
                         onClick={() => setPrimaryOpen((p) => !p)}
-                        className="w-full flex justify-between items-center bg-[#fde7ee] px-4 py-3 rounded-lg font-semibold text-[#ff004f]"
+                        className="w-full flex justify-between items-center bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200 px-6 py-4 rounded-xl font-bold text-[#ff004f] hover:from-red-100 hover:to-pink-100 transition-all shadow-sm hover:shadow-md"
                       >
-                        <span>Primary Services ({primaryChecks.length})</span>
-                        {primaryOpen ? <ChevronDown /> : <ChevronRight />}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-[#ff004f] rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                            1
+                          </div>
+                          <span className="text-lg">Primary Services ({primaryChecks.length})</span>
+                        </div>
+                        <div className={`transition-transform ${primaryOpen ? "rotate-180" : ""}`}>
+                          <ChevronDown size={24} />
+                        </div>
                       </button>
 
                       {primaryOpen && (
@@ -407,48 +479,58 @@ export default function SuperAdminReportsPage() {
                               chk.check,
                               c._id
                             );
+                            const isAI = isAIValidationCheck(chk.check);
 
                             return (
                               <div
                                 key={certId}
-                                className="bg-white border rounded-xl p-4 shadow flex flex-col"
+                                className={`bg-white border rounded-xl p-4 shadow flex flex-col ${isAI ? "border-purple-300 bg-purple-50" : ""}`}
                               >
                                 <p className="font-medium text-gray-900 flex items-center gap-2">
                                   <span className="text-lg">
-                                    {SERVICE_ICONS[chk.check] || "📝"}
+                                    {isAI ? "🤖" : (SERVICE_ICONS[chk.check] || "📝")}
                                   </span>
                                   {formatServiceName(chk.check)}
                                 </p>
 
-                                <button
-                                  disabled={!done || downloading}
-                                  onClick={() =>
-                                    downloadSingleCert(
-                                      certId,
-                                      `${c._id}-primary-${chk.check}.pdf`,
-                                      setDownloading
-                                    )
-                                  }
-                                  className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
-                                    done
-                                      ? "bg-[#ff004f] text-white hover:bg-[#e60047]"
-                                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                  } ${
-                                    downloading
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                >
-                                  {downloading ? (
-                                    <Loader2
-                                      className="animate-spin"
-                                      size={16}
-                                    />
-                                  ) : (
-                                    <Download size={16} />
-                                  )}
-                                  Download
-                                </button>
+                                {isAI ? (
+                                  <div className="mt-4 p-3 bg-purple-100 border border-purple-300 rounded-lg">
+                                    <p className="text-xs text-purple-900 font-semibold flex items-center gap-1">
+                                      <Brain size={14} />
+                                      Download from AI Verification Page
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <button
+                                    disabled={!done || downloading}
+                                    onClick={() =>
+                                      downloadSingleCert(
+                                        certId,
+                                        `${c._id}-primary-${chk.check}.pdf`,
+                                        setDownloading
+                                      )
+                                    }
+                                    className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
+                                      done
+                                        ? "bg-[#ff004f] text-white hover:bg-[#e60047]"
+                                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    } ${
+                                      downloading
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  >
+                                    {downloading ? (
+                                      <Loader2
+                                        className="animate-spin"
+                                        size={16}
+                                      />
+                                    ) : (
+                                      <Download size={16} />
+                                    )}
+                                    Download
+                                  </button>
+                                )}
                               </div>
                             );
                           })}
@@ -462,12 +544,17 @@ export default function SuperAdminReportsPage() {
                     <div>
                       <button
                         onClick={() => setSecondaryOpen((p) => !p)}
-                        className="w-full flex justify-between items-center bg-[#fde7ee] px-4 py-3 rounded-lg font-semibold text-[#ff004f]"
+                        className="w-full flex justify-between items-center bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 px-6 py-4 rounded-xl font-bold text-orange-600 hover:from-orange-100 hover:to-amber-100 transition-all shadow-sm hover:shadow-md"
                       >
-                        <span>
-                          Secondary Services ({secondaryChecks.length})
-                        </span>
-                        {secondaryOpen ? <ChevronDown /> : <ChevronRight />}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                            2
+                          </div>
+                          <span className="text-lg">Secondary Services ({secondaryChecks.length})</span>
+                        </div>
+                        <div className={`transition-transform ${secondaryOpen ? "rotate-180" : ""}`}>
+                          <ChevronDown size={24} />
+                        </div>
                       </button>
 
                       {secondaryOpen && (
@@ -479,48 +566,58 @@ export default function SuperAdminReportsPage() {
                               chk.check,
                               c._id
                             );
+                            const isAI = isAIValidationCheck(chk.check);
 
                             return (
                               <div
                                 key={certId}
-                                className="bg-white border rounded-xl p-4 shadow flex flex-col"
+                                className={`bg-white border rounded-xl p-4 shadow flex flex-col ${isAI ? "border-purple-300 bg-purple-50" : ""}`}
                               >
                                 <p className="font-medium text-gray-900 flex items-center gap-2">
                                   <span className="text-lg">
-                                    {SERVICE_ICONS[chk.check] || "📝"}
+                                    {isAI ? "🤖" : (SERVICE_ICONS[chk.check] || "📝")}
                                   </span>
                                   {formatServiceName(chk.check)}
                                 </p>
 
-                                <button
-                                  disabled={!done || downloading}
-                                  onClick={() =>
-                                    downloadSingleCert(
-                                      certId,
-                                      `${c._id}-secondary-${chk.check}.pdf`,
-                                      setDownloading
-                                    )
-                                  }
-                                  className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
-                                    done
-                                      ? "bg-[#ff004f] text-white hover:bg-[#e60047]"
-                                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                  } ${
-                                    downloading
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                >
-                                  {downloading ? (
-                                    <Loader2
-                                      className="animate-spin"
-                                      size={16}
-                                    />
-                                  ) : (
-                                    <Download size={16} />
-                                  )}
-                                  Download
-                                </button>
+                                {isAI ? (
+                                  <div className="mt-4 p-3 bg-purple-100 border border-purple-300 rounded-lg">
+                                    <p className="text-xs text-purple-900 font-semibold flex items-center gap-1">
+                                      <Brain size={14} />
+                                      Download from AI Verification Page
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <button
+                                    disabled={!done || downloading}
+                                    onClick={() =>
+                                      downloadSingleCert(
+                                        certId,
+                                        `${c._id}-secondary-${chk.check}.pdf`,
+                                        setDownloading
+                                      )
+                                    }
+                                    className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
+                                      done
+                                        ? "bg-[#ff004f] text-white hover:bg-[#e60047]"
+                                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    } ${
+                                      downloading
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  >
+                                    {downloading ? (
+                                      <Loader2
+                                        className="animate-spin"
+                                        size={16}
+                                      />
+                                    ) : (
+                                      <Download size={16} />
+                                    )}
+                                    Download
+                                  </button>
+                                )}
                               </div>
                             );
                           })}
@@ -534,10 +631,17 @@ export default function SuperAdminReportsPage() {
                     <div>
                       <button
                         onClick={() => setFinalOpen((p) => !p)}
-                        className="w-full flex justify-between items-center bg-[#fde7ee] px-4 py-3 rounded-lg font-semibold text-[#ff004f]"
+                        className="w-full flex justify-between items-center bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 px-6 py-4 rounded-xl font-bold text-green-600 hover:from-green-100 hover:to-emerald-100 transition-all shadow-sm hover:shadow-md"
                       >
-                        <span>Final Services ({finalChecks.length})</span>
-                        {finalOpen ? <ChevronDown /> : <ChevronRight />}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                            3
+                          </div>
+                          <span className="text-lg">Final Services ({finalChecks.length})</span>
+                        </div>
+                        <div className={`transition-transform ${finalOpen ? "rotate-180" : ""}`}>
+                          <ChevronDown size={24} />
+                        </div>
                       </button>
 
                       {finalOpen && (
@@ -549,48 +653,58 @@ export default function SuperAdminReportsPage() {
                               chk.check,
                               c._id
                             );
+                            const isAI = isAIValidationCheck(chk.check);
 
                             return (
                               <div
                                 key={certId}
-                                className="bg-white border rounded-xl p-4 shadow flex flex-col"
+                                className={`bg-white border rounded-xl p-4 shadow flex flex-col ${isAI ? "border-purple-300 bg-purple-50" : ""}`}
                               >
                                 <p className="font-medium text-gray-900 flex items-center gap-2">
                                   <span className="text-lg">
-                                    {SERVICE_ICONS[chk.check] || "📝"}
+                                    {isAI ? "🤖" : (SERVICE_ICONS[chk.check] || "📝")}
                                   </span>
                                   {formatServiceName(chk.check)}
                                 </p>
 
-                                <button
-                                  disabled={!done || downloading}
-                                  onClick={() =>
-                                    downloadSingleCert(
-                                      certId,
-                                      `${c._id}-final-${chk.check}.pdf`,
-                                      setDownloading
-                                    )
-                                  }
-                                  className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
-                                    done
-                                      ? "bg-[#ff004f] text-white hover:bg-[#e60047]"
-                                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                  } ${
-                                    downloading
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : ""
-                                  }`}
-                                >
-                                  {downloading ? (
-                                    <Loader2
-                                      className="animate-spin"
-                                      size={16}
-                                    />
-                                  ) : (
-                                    <Download size={16} />
-                                  )}
-                                  Download
-                                </button>
+                                {isAI ? (
+                                  <div className="mt-4 p-3 bg-purple-100 border border-purple-300 rounded-lg">
+                                    <p className="text-xs text-purple-900 font-semibold flex items-center gap-1">
+                                      <Brain size={14} />
+                                      Download from AI Verification Page
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <button
+                                    disabled={!done || downloading}
+                                    onClick={() =>
+                                      downloadSingleCert(
+                                        certId,
+                                        `${c._id}-final-${chk.check}.pdf`,
+                                        setDownloading
+                                      )
+                                    }
+                                    className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
+                                      done
+                                        ? "bg-[#ff004f] text-white hover:bg-[#e60047]"
+                                        : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                    } ${
+                                      downloading
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : ""
+                                    }`}
+                                  >
+                                    {downloading ? (
+                                      <Loader2
+                                        className="animate-spin"
+                                        size={16}
+                                      />
+                                    ) : (
+                                      <Download size={16} />
+                                    )}
+                                    Download
+                                  </button>
+                                )}
                               </div>
                             );
                           })}
@@ -606,14 +720,15 @@ export default function SuperAdminReportsPage() {
                       <button
                         disabled={downloading}
                         onClick={() => {
+                          // Filter out AI validation checks
                           const allIds = [
-                            ...primaryChecks.map((chk) =>
+                            ...primaryChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) =>
                               getServiceCertId("primary", chk.check, c._id)
                             ),
-                            ...secondaryChecks.map((chk) =>
+                            ...secondaryChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) =>
                               getServiceCertId("secondary", chk.check, c._id)
                             ),
-                            ...finalChecks.map((chk) =>
+                            ...finalChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) =>
                               getServiceCertId("final", chk.check, c._id)
                             ),
                           ];
@@ -645,15 +760,15 @@ export default function SuperAdminReportsPage() {
   );
 }
 
+
 /* -------------------------------------------------------------
    SERVICE CERTIFICATE TEMPLATE
 ------------------------------------------------------------- */
 function ServiceCertificate({ id, candidate, orgName, check, stage }) {
   const checks = [{ ...check, stage }];
-
-  const title = `${
-    stage.charAt(0).toUpperCase() + stage.slice(1)
-  } – ${formatServiceName(check.check)} Verification Report`;
+  const title = `${stage.toUpperCase()} - ${formatServiceName(
+    check.check
+  )} Verification Report`;
 
   return (
     <CertificateBase
@@ -667,23 +782,24 @@ function ServiceCertificate({ id, candidate, orgName, check, stage }) {
 }
 
 /* -------------------------------------------------------------
-   CERTIFICATE UI BASE (SINGLE PAGE)
+   FINAL SUPERADMIN CERTIFICATE TEMPLATE (FIXED & IMPROVED)
 ------------------------------------------------------------- */
 
 function CertificateBase({ id, title, candidate, orgName, checks }) {
   const verification = candidate.verification;
   const serviceName = formatServiceName(checks[0]?.check || "");
+
+  // Prepare remarks
   let bulletItems = [];
   const remarks = checks[0]?.remarks;
 
-  if (!remarks) {
-    bulletItems = ["No remarks available"];
-  } else if (typeof remarks === "string") {
-    bulletItems = [remarks];
-  } else if (Array.isArray(remarks)) {
-    bulletItems = remarks.map((r) => String(r));
-  } else if (typeof remarks === "object") {
-    bulletItems = Object.entries(remarks).map(([k, v]) => `${k}: ${String(v)}`);
+  if (!remarks) bulletItems = ["No remarks available"];
+  else if (typeof remarks === "string") bulletItems = [remarks];
+  else if (Array.isArray(remarks)) bulletItems = remarks.map((r) => String(r));
+  else if (typeof remarks === "object") {
+    bulletItems = Object.entries(remarks).map(
+      ([k, v]) => `${k}: ${String(v)}`
+    );
   } else {
     bulletItems = [String(remarks)];
   }
@@ -693,168 +809,227 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
       id={id}
       style={{
         width: "860px",
-        minHeight: "1120px", // A4 page height
-        padding: "40px",
+        minHeight: "1120px", // A4 height
+        padding: "10px 50px 60px 50px",
         background: "#ffffff",
         fontFamily: "Arial, sans-serif",
         color: "#000",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      {/* ------------------------------- */}
-      {/* HEADER: LOGO LEFT + TITLE CENTER */}
-      {/* ------------------------------- */}
-      <div
+      {/* ================= WATERMARK ================= */}
+      <img
+        src="/logos/maihooMain.png"
+        alt="watermark"
         style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          alignItems: "center",
-        }}
-      >
-        {/* Left - Logo */}
-        <div style={{ textAlign: "left" }}>
-          <img
-            src="/logos/maihooMain.png"
-            alt="logo"
-            style={{ height: "80px" }}
-          />
-        </div>
-
-        {/* Center - Title */}
-        <div
-          style={{
-            textAlign: "center",
-            fontSize: "22px",
-            fontWeight: "bold",
-            textDecoration: "underline",
-            width: "200px",
-          }}
-        >
-          {serviceName} Verification Report
-        </div>
-
-        {/* Right - Empty (for alignment) */}
-        <div></div>
-      </div>
-
-      {/* ------------------------------- */}
-      {/* CANDIDATE DETAILS BLOCK */}
-      {/* ------------------------------- */}
-      <div
-        style={{
-          marginTop: "40px",
-          fontSize: "16px",
-          lineHeight: "28px",
-        }}
-      >
-        <p>
-          <b>Candidate Name:</b> {candidate.firstName} {candidate.lastName}
-        </p>
-
-        <p>
-          <b>Candidate ID:</b> {candidate._id}
-        </p>
-
-        <p>
-          <b>Verification ID:</b> {verification?._id || "—"}
-        </p>
-
-        <p>
-          <b>Organization:</b> {orgName}
-        </p>
-
-        <p>
-          <b>Service:</b> {serviceName}
-        </p>
-
-        <p>
-          <b>Verification Date & Time stamp:</b> {new Date().toLocaleString()}
-        </p>
-      </div>
-
-      {/* LINE */}
-      <div
-        style={{
-          width: "100%",
-          height: "2px",
-          background: "#000",
-          marginTop: "10px",
-          marginBottom: "40px",
+          position: "absolute",
+          top: "300px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          opacity: 0.08,
+          width: "750px",
+          height: "750px",
+          objectFit: "contain",
+          pointerEvents: "none",
+          zIndex: 1,
         }}
       />
 
-      {/* ------------------------------- */}
-      {/* GREEN BOX + LINE */}
-      {/* ------------------------------- */}
+      {/* ================= CONTENT BLOCK ================= */}
+      <div style={{ position: "relative", zIndex: 2, marginTop: "10px" }}>
+        
+        {/* =============================================== */}
+        {/* HEADER AREA                                     */}
+        {/* =============================================== */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "35px",
+            marginBottom: "25px",
+          }}
+        >
+          {/* Left logo */}
+          <div style={{ flexShrink: 0, marginTop: "5px" }}>
+            <img
+              src="/logos/maihooMain.png"
+              alt="logo"
+              style={{
+                maxHeight: "180px",
+                maxWidth: "450px",
+                height: "auto",
+                width: "auto",
+                display: "block",
+                objectFit: "contain",
+              }}
+            />
+          </div>
+
+          {/* Title block */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              marginTop: "55px",
+            }}
+          >
+            <h1
+              style={{
+                fontSize: "26px",
+                fontWeight: "900",
+                margin: 0,
+                lineHeight: "1",
+                fontFamily: "Arial Black, Arial, sans-serif",
+              }}
+            >
+              {serviceName}
+            </h1>
+
+            <h2
+              style={{
+                fontSize: "26px",
+                fontWeight: "900",
+                margin: "0",
+                lineHeight: "1",
+                fontFamily: "Arial Black, Arial, sans-serif",
+              }}
+            >
+              Verification Report
+            </h2>
+          </div>
+        </div>
+
+        {/* =============================================== */}
+        {/* CANDIDATE DETAILS                               */}
+        {/* =============================================== */}
+        <div
+          style={{
+            fontSize: "15px",
+            lineHeight: "28px",
+            marginTop: "-20px",
+            marginBottom: "50px",
+          }}
+        >
+          <p><strong>Candidate Name:</strong> {candidate.firstName} {candidate.lastName}</p>
+          <p><strong>Candidate ID:</strong> {candidate._id}</p>
+          <p><strong>Verification ID:</strong> {verification?._id || "—"}</p>
+          <p><strong>Organization:</strong> {orgName}</p>
+          <p><strong>Service:</strong> {serviceName}</p>
+          <p>
+            <strong>Verification Timestamp:</strong>{" "}
+            {new Date().toLocaleString()}
+          </p>
+
+          <p style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <strong>Status:</strong>
+            <span style={{ color: "#5cb85c", fontWeight: "bold", fontSize: "16px" }}>
+              ✓ Completed
+            </span>
+          </p>
+        </div>
+
+        {/* =============================================== */}
+        {/* BLACK SEPARATOR LINE                             */}
+        {/* =============================================== */}
+        <div
+          style={{
+            width: "100%",
+            height: "3px",
+            background: "#000",
+            marginTop: "10px",
+            marginBottom: "60px",
+          }}
+        />
+
+        {/* =============================================== */}
+        {/* GREEN STATUS BAR                                 */}
+        {/* =============================================== */}
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "90px" }}>
+          <div
+            style={{
+              width: "70px",
+              height: "32px",
+              background: "#5cb85c",
+              borderRadius: "5px",
+            }}
+          />
+          <div
+            style={{
+              flexGrow: 1,
+              height: "2px",
+              background: "#5cb85c",
+              marginLeft: "10px",
+            }}
+          />
+        </div>
+
+        {/* =============================================== */}
+        {/* REMARKS LIST                                     */}
+        {/* =============================================== */}
+        <div style={{ marginBottom: "30px" }}>
+          {bulletItems.map((item, idx) => (
+            <div
+              key={idx}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                marginBottom: "12px",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "18px",
+                  marginRight: "10px",
+                  color: "#000",
+                }}
+              >
+                ✓
+              </span>
+              <span style={{ fontSize: "14px", color: "#000" }}>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* =============================================== */}
+      {/* FOOTER SECTION                                    */}
+      {/* =============================================== */}
       <div
-        style={{ display: "flex", alignItems: "center", marginBottom: "40px" }}
+        style={{
+          position: "absolute",
+          bottom: "10px",
+          left: "50px",
+          right: "50px",
+          textAlign: "center",
+        }}
       >
         <div
           style={{
-            width: "70px",
-            height: "40px",
-            background: "#6ac46a",
-            borderRadius: "6px",
-            boxShadow: "0 3px 6px rgba(0,0,0,0.2)",
-          }}
-        />
-        <div
-          style={{
-            flexGrow: 1,
             height: "2px",
-            background: "#6ac46a",
-            marginLeft: "15px",
-          }}
-        />
-      </div>
-
-      {/* ------------------------------- */}
-      {/* BULLET REMARKS LIST */}
-      {/* ------------------------------- */}
-      <div style={{ marginTop: "20px", marginLeft: "40px" }}>
-        {bulletItems.map((item, i) => (
-          <div
-            key={i}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "12px",
-            }}
-          >
-            <span style={{ fontSize: "20px", marginRight: "12px" }}>✓</span>
-            <span style={{ fontSize: "16px" }}>{item}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* ------------------------------- */}
-      {/* FIXED FOOTER */}
-      {/* ------------------------------- */}
-      <div style={{ marginTop: "60px", textAlign: "center" }}>
-        <div
-          style={{
-            height: "1px",
-            background: "red",
+            background: "#dc3545",
             width: "100%",
             marginBottom: "10px",
           }}
         />
+
         <p
           style={{
-            fontSize: "13px",
-            color: "red",
+            fontSize: "12px",
+            color: "#dc3545",
             fontWeight: "600",
+            margin: 0,
           }}
         >
-          Maihoo Technologies Private Limited, Vaishnavi’s Cynosure, 2-48/5/6,
+          Maihoo Technologies Private Limited, Vaishnavi's Cynosure, 2-48/5/6,
           8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032
         </p>
       </div>
     </div>
   );
 }
+
 
 const headerCell = {
   padding: "10px",

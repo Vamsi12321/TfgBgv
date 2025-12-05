@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   PlusCircle,
   Loader2,
@@ -25,7 +26,8 @@ import {
   User,
   Mail,
   MapPin,
-  Building
+  Building,
+  ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ConsentSection from "@/app/components/ConsentSection";
@@ -35,6 +37,8 @@ export default function OrgBGVRequestsPage() {
   /* ---------------------------------------------------------------------
       STATE
   --------------------------------------------------------------------- */
+  const router = useRouter();
+  
   // State management context
   const { bgvState = {}, setBgvState = () => {} } = useOrgState();
 
@@ -47,10 +51,12 @@ export default function OrgBGVRequestsPage() {
 
   const [loading, setLoading] = useState(false);
   const [candidateLoading, setCandidateLoading] = useState(false);
+  const [loadingCandidateStatus, setLoadingCandidateStatus] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
   const [runLoading, setRunLoading] = useState(false);
   const [startLoading, setStartLoading] = useState({});
   const [reinitLoading, setReinitLoading] = useState(false);
+  const [navigating, setNavigating] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
@@ -163,6 +169,17 @@ export default function OrgBGVRequestsPage() {
   }, []);
 
   /* ---------------------------------------------------------------------
+      RESTORE VERIFICATION STATUS ON MOUNT
+  --------------------------------------------------------------------- */
+  useEffect(() => {
+    // If there's a persisted candidate selection and candidates are loaded
+    if (selectedCandidate && candidates.length > 0 && !candidateVerification) {
+      setLoadingCandidateStatus(true);
+      fetchCandidateVerification(selectedCandidate);
+    }
+  }, [candidates]);
+
+  /* ---------------------------------------------------------------------
       FETCH CANDIDATES
   --------------------------------------------------------------------- */
   const fetchCandidates = async (orgId) => {
@@ -208,6 +225,7 @@ export default function OrgBGVRequestsPage() {
       showModal({ title: "Error", message: err.message, type: "error" });
     } finally {
       setLoading(false);
+      setLoadingCandidateStatus(false);
     }
   };
 
@@ -223,7 +241,10 @@ export default function OrgBGVRequestsPage() {
     setVisibleStage("primary");
     setLastRunStage(null);
 
-    if (id) fetchCandidateVerification(id);
+    if (id) {
+      setLoadingCandidateStatus(true);
+      fetchCandidateVerification(id);
+    }
   };
 
   /* ---------------------------------------------------------------------
@@ -777,14 +798,34 @@ export default function OrgBGVRequestsPage() {
           </button>
         )}
 
-        {/* INFO FOR AI CHECKS */}
-        {type === "ai" && !completed && (
-          <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg">
-            <p className="text-xs text-purple-800 flex items-center gap-1">
-              <Info size={12} />
-              Can be performed from AI-CV-Verification page
-            </p>
-          </div>
+        {/* AI CHECK REDIRECT BUTTON - Only show after finalization */}
+        {type === "ai" && !completed && isStageLocked(stageKey) && (
+          <button
+            onClick={() => {
+              setNavigating(true);
+              setTimeout(() => {
+                if (key === "ai_cv_validation") {
+                  router.push("/org/AI-CV-Verification");
+                } else if (key === "ai_education_validation") {
+                  router.push("/org/AI-Edu-Verification");
+                }
+              }, 100);
+            }}
+            disabled={navigating}
+            className="mt-2 w-full px-4 py-3 text-sm bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+          >
+            {navigating ? (
+              <>
+                <Loader2 className="animate-spin" size={16} />
+                Navigating...
+              </>
+            ) : (
+              <>
+                <ExternalLink size={16} />
+                {key === "ai_cv_validation" ? "Go to CV Verification" : "Go to Education Verification"}
+              </>
+            )}
+          </button>
         )}
       </motion.div>
     );
@@ -794,97 +835,141 @@ export default function OrgBGVRequestsPage() {
       RETURN UI
   --------------------------------------------------------------------- */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 text-gray-900 p-3 sm:p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* PAGE HEADER — ENHANCED WITH GRADIENT */}
-        <div className="bg-gradient-to-r from-[#ff004f] via-[#ff3366] to-[#ff6f6f] text-white p-6 md:p-8 rounded-xl shadow-2xl border-2 border-[#ff004f]/20">
-          <div className="flex justify-between items-center flex-wrap gap-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                  <Shield size={28} className="text-white" />
-                </div>
-                Background Verification Services
-              </h1>
-              <p className="text-white/95 mt-3 text-sm md:text-base font-medium">
-                Comprehensive verification workflows with AI-powered validation and manual checks
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900 p-4 md:p-8">
+      {/* Loading Overlay - Candidate Status */}
+      {loadingCandidateStatus && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Loading Candidate Status</h3>
+                <p className="text-sm text-gray-600">Please wait while we fetch verification details...</p>
+              </div>
             </div>
           </div>
-        </div>
+        </>
+      )}
 
-        {/* INFORMATIVE BANNER */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-5 shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
-          <div className="flex items-start gap-4">
-            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-md">
-              <AlertCircle className="text-white" size={22} />
+      {/* Navigation Loading Overlay */}
+      {navigating && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-purple-600" size={48} />
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Navigating</h3>
+                <p className="text-sm text-gray-600">Please wait...</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-black text-blue-900 mb-3 text-lg">Important Information</h3>
-              <div className="text-sm text-blue-800 space-y-2">
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">📋 Manual Verification:</span>
-                  <span>Education and employment checks require manual verification on this page itself. Click "Verify Manually" button on respective check cards.</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">🎓 Education Validation:</span>
-                  <span>Use AI-CV-Verification page for automated education analysis or verify manually here.</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">💼 Employment History:</span>
-                  <span>Both API-based and manual employment verification available. Manual checks provide detailed supervisory validation.</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">🤖 AI Checks:</span>
-                  <span>AI-powered CV and education validation can be performed from dedicated AI pages or initiated here.</span>
-                </p>
+          </div>
+        </>
+      )}
+
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* ENTERPRISE HEADER WITH ACTIONS */}
+        <div className="relative overflow-hidden bg-white rounded-2xl shadow-xl border border-gray-200">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#ff004f]/5 via-transparent to-purple-500/5"></div>
+          <div className="relative p-6 md:p-8">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Shield size={32} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+                    Background Verification Center
+                  </h1>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Enterprise verification management for your organization
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    selectedCandidate &&
+                    fetchCandidateVerification(selectedCandidate)
+                  }
+                  disabled={!selectedCandidate || loading}
+                  className="px-5 py-2.5 bg-white border border-gray-300 hover:border-[#ff004f] hover:bg-gray-50 rounded-xl flex items-center gap-2 text-gray-700 font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm"
+                >
+                  <RefreshCcw size={18} /> Refresh
+                </button>
+                <button
+                  onClick={() => setShowAddModal(true)}
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#ff004f] to-purple-600 hover:from-purple-600 hover:to-[#ff004f] text-white rounded-xl flex items-center gap-2 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-md"
+                >
+                  <PlusCircle size={20} />
+                  Add Candidate
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ACTION BUTTONS ROW */}
-        <div className="flex justify-end gap-3 flex-wrap">
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={() =>
-                selectedCandidate &&
-                fetchCandidateVerification(selectedCandidate)
-              }
-              disabled={!selectedCandidate || loading}
-              className="px-5 py-2.5 bg-white border-2 border-gray-200 hover:border-[#ff004f] hover:bg-gray-50 rounded-xl flex items-center gap-2 text-gray-700 font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md"
-            >
-              <RefreshCcw size={18} /> Refresh
-            </button>
-
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="px-6 py-2.5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:from-[#ff3366] hover:to-[#ff004f] text-white rounded-xl flex items-center gap-2 font-bold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-md"
-            >
-              <PlusCircle size={18} />
-              Add Candidate
-            </button>
+        {/* VERIFICATION GUIDELINES - ENTERPRISE CARDS */}
+        <div className="grid md:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <FileText size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-blue-900 mb-2 text-sm">Manual Verification</h4>
+            <p className="text-xs text-blue-700">Click "Verify Manually" on check cards for validation</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <Brain size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-purple-900 mb-2 text-sm">AI Validation</h4>
+            <p className="text-xs text-purple-700">Automated CV and education analysis available</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <Building size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-green-900 mb-2 text-sm">Employment Check</h4>
+            <p className="text-xs text-green-700">API-based and manual verification with supervisory validation</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <Cpu size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-orange-900 mb-2 text-sm">API Services</h4>
+            <p className="text-xs text-orange-700">Automated checks for PAN, Aadhaar, and more</p>
           </div>
         </div>
 
-        {/* STEPPER - ENHANCED */}
-        <div className="bg-white border-2 border-gray-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
-          <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-gray-100">
-            <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-              <FileCheck className="text-[#ff004f]" size={24} />
-              Verification Progress
-            </h3>
-            <span className="text-sm font-bold text-gray-600 px-3 py-1.5 bg-gray-100 rounded-full">
-              {isStageCompleted("primary") && isStageCompleted("secondary") && isStageCompleted("final") 
-                ? "All Stages Complete ✓" 
-                : `Stage ${currentStep + 1} of 3`}
-            </span>
+        {/* ENTERPRISE WORKFLOW STEPPER */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+          <div className="flex justify-between items-center mb-6 pb-5 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                <CheckCircle size={24} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Verification Workflow</h3>
+                <p className="text-sm text-gray-500">Track progress through all verification stages</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-700 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                {isStageCompleted("primary") && isStageCompleted("secondary") && isStageCompleted("final") 
+                  ? "✓ All Stages Complete" 
+                  : `Stage ${currentStep + 1} / 3`}
+              </span>
+            </div>
           </div>
           <div className="flex justify-between relative">
             {/* Progress Line */}
-            <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 -z-10">
+            <div className="absolute top-6 left-0 right-0 h-1 bg-gray-200 -z-10">
               <div 
-                className="h-full bg-gradient-to-r from-green-500 to-red-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[#ff004f] to-purple-600 transition-all duration-500"
                 style={{ width: `${(currentStep / 2) * 100}%` }}
               />
             </div>
@@ -927,10 +1012,22 @@ export default function OrgBGVRequestsPage() {
           <ConsentSection candidateId={selectedCandidate} />
         </div>
 
-        {/* CANDIDATE & STATUS - Enhanced */}
-        <div className="bg-white border-2 p-6 rounded-2xl shadow-lg">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Selection Panel</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* ENTERPRISE SELECTION PANEL */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <User size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Candidate Selection</h3>
+                <p className="text-xs text-gray-600">Choose candidate to begin verification</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
             {/* CANDIDATE */}
             <div>
               <SearchableDropdown
@@ -959,22 +1056,7 @@ export default function OrgBGVRequestsPage() {
                 </div>
               </div>
             </div>
-
-            {/* Service Pricing */}
-            <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl border-2 border-gray-200 shadow-sm">
-              <h3 className="font-bold text-gray-900 text-sm mb-2">Service Pricing</h3>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
-                {userServices.map((s, i) => (
-                  <div
-                    key={i}
-                    className="flex justify-between text-xs text-gray-700 border-b border-gray-300 py-1"
-                  >
-                    <span className="truncate flex-1">{s.serviceName}</span>
-                    <span className="font-semibold ml-2">₹{s.price}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+          </div>
           </div>
         </div>
 
@@ -1512,47 +1594,58 @@ export default function OrgBGVRequestsPage() {
         )}
       </div>
 
-      {/* -----------------------------------------------------------------
-          ADD CANDIDATE MODAL (FULL FORM)
-      ----------------------------------------------------------------- */}
+      {/* ENHANCED ADD CANDIDATE MODAL */}
       {showAddModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center p-4 overflow-y-auto">
-          <div className="bg-white p-4 rounded-xl w-full max-w-lg shadow-xl border relative mt-10 mb-10 max-h-[90vh] overflow-y-auto">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">Add Candidate</h2>
-              <button
-                onClick={() => setShowConfirmClose(true)}
-                className="text-gray-500 hover:text-black"
-              >
-                <X />
-              </button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl border-2 border-gray-200 my-8 max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white p-6 flex-shrink-0">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <UserPlus size={28} />
+                  <div>
+                    <h2 className="text-2xl font-bold">Add New Candidate</h2>
+                    <p className="text-white/90 text-sm">Fill in candidate information</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowConfirmClose(true)}
+                  className="text-white hover:bg-white/20 p-2 rounded-lg transition"
+                >
+                  <X size={24} />
+                </button>
+              </div>
             </div>
 
-            {/* FORM */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* FIRST NAME */}
-              <div>
-                <input
-                  name="firstName"
-                  value={newCandidate.firstName}
-                  onChange={(e) =>
-                    setNewCandidate((p) => ({
-                      ...p,
-                      firstName: e.target.value,
-                    }))
-                  }
-                  placeholder="First Name *"
-                  className={`border p-2 rounded w-full ${
-                    fieldErrors.firstName ? "border-red-500" : ""
-                  }`}
-                />
-                {fieldErrors.firstName && (
-                  <p className="text-red-500 text-xs">
-                    {fieldErrors.firstName}
-                  </p>
-                )}
-              </div>
+            {/* Form Content - Scrollable */}
+            <div className="p-6 overflow-y-auto flex-1">
+              {/* Personal Information Section */}
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-4 pb-2 border-b-2 border-blue-200">
+                  <User className="text-blue-600" size={20} />
+                  <h3 className="text-lg font-bold text-gray-900">Personal Information</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* FIRST NAME */}
+                  <div>
+                    <input
+                      name="firstName"
+                      value={newCandidate.firstName}
+                      onChange={(e) =>
+                        setNewCandidate((p) => ({
+                          ...p,
+                          firstName: e.target.value,
+                        }))
+                      }
+                      placeholder="First Name *"
+                      className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                        fieldErrors.firstName ? "border-red-500" : "border-gray-300"
+                      }`}
+                    />
+                    {fieldErrors.firstName && (
+                      <p className="text-red-500 text-xs mt-1">{fieldErrors.firstName}</p>
+                    )}
+                  </div>
 
               {/* MIDDLE NAME */}
               <input
@@ -1832,45 +1925,51 @@ export default function OrgBGVRequestsPage() {
                   <p className="text-red-500 text-xs">{fieldErrors.pincode}</p>
                 )}
               </div>
+
+              {/* ADDRESS */}
+              <div className="sm:col-span-2">
+                <textarea
+                  name="address"
+                  value={newCandidate.address}
+                  onChange={(e) =>
+                    setNewCandidate((p) => ({ ...p, address: e.target.value }))
+                  }
+                  placeholder="Full Address *"
+                  className={`border p-2 rounded w-full ${
+                    fieldErrors.address ? "border-red-500" : ""
+                  }`}
+                  rows={3}
+                />
+                {fieldErrors.address && (
+                  <p className="text-red-500 text-xs">{fieldErrors.address}</p>
+                )}
+              </div>
+
+              {/* RESUME UPLOAD (Optional) */}
+              <div className="sm:col-span-2">
+                <label className="text-sm font-medium">
+                  Resume (PDF/DOC/DOCX)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) =>
+                    setNewCandidate((p) => ({ ...p, resume: e.target.files[0] }))
+                  }
+                  className="border p-2 rounded w-full mt-1"
+                />
+
+                {newCandidate.resume && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Selected: <strong>{newCandidate.resume.name}</strong>
+                  </p>
+                )}
+              </div>
             </div>
-
-            {/* ADDRESS */}
-            <textarea
-              name="address"
-              value={newCandidate.address}
-              onChange={(e) =>
-                setNewCandidate((p) => ({ ...p, address: e.target.value }))
-              }
-              placeholder="Full Address *"
-              className="border p-2 rounded w-full mt-4"
-              rows={3}
-            />
-            {fieldErrors.address && (
-              <p className="text-red-500 text-xs">{fieldErrors.address}</p>
-            )}
-            {/* RESUME UPLOAD (Optional) */}
-            <div className="sm:col-span-2 mt-4">
-              <label className="text-sm font-medium">
-                Resume (PDF/DOC/DOCX)
-              </label>
-              <input
-                type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) =>
-                  setNewCandidate((p) => ({ ...p, resume: e.target.files[0] }))
-                }
-                className="border p-2 rounded w-full mt-1"
-              />
-
-              {newCandidate.resume && (
-                <p className="text-xs text-gray-600 mt-1">
-                  Selected: <strong>{newCandidate.resume.name}</strong>
-                </p>
-              )}
             </div>
 
             {/* ACTION BUTTONS */}
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowConfirmClose(true)}
                 className="px-4 py-2 border rounded-md"
@@ -1987,6 +2086,7 @@ export default function OrgBGVRequestsPage() {
                 <PlusCircle size={16} />
                 Add Candidate
               </button>
+            </div>
             </div>
           </div>
         </div>

@@ -29,6 +29,7 @@ import {
   Sparkles,
   ClipboardListIcon,
   GraduationCap,
+ 
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -186,14 +187,14 @@ export default function SuperAdminLayout({ children }) {
           ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} 
           md:translate-x-0`}
         >
-          <div className="p-2 h-full flex flex-col">
-            {/* Logo - Compact */}
-            <header className="w-full flex items-center px-3 ">
+          <div className="h-full flex flex-col">
+            {/* Logo - Aligned with nav */}
+            <header className="w-full px-3 ">
               <Image
                 src={logoSrc}
                 alt="Logo"
-                width={120}
-                height={68}
+                width={110}
+                height={60}
                 priority
                 className="hover:scale-105 transition-transform duration-300"
               />

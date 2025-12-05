@@ -21,6 +21,7 @@ export default function SuperAdminVerificationsPage() {
   ------------------------------------------------------------*/
   const [loading, setLoading] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
+  const [loadingCandidate, setLoadingCandidate] = useState(false);
 
   const [openOrgFilter, setOpenOrgFilter] = useState(false);
   const [orgSearch, setOrgSearch] = useState("");
@@ -159,8 +160,13 @@ export default function SuperAdminVerificationsPage() {
   };
 
   const openCandidateDetails = (c) => {
-    const full = verifications.find((v) => v.candidateId === c.candidateId);
-    setSelectedCandidate(full || c);
+    setLoadingCandidate(true);
+    // Simulate loading for better UX
+    setTimeout(() => {
+      const full = verifications.find((v) => v.candidateId === c.candidateId);
+      setSelectedCandidate(full || c);
+      setLoadingCandidate(false);
+    }, 300);
   };
 
   /* ===================================================================
@@ -284,6 +290,7 @@ export default function SuperAdminVerificationsPage() {
                   className="px-4 py-2 cursor-pointer text-sm hover:bg-gray-50 text-gray-700"
                   onClick={() => {
                     setFilters({ ...filters, org: "" });
+                    setSelectedCandidate(null);
                     setOpenOrgFilter(false);
                   }}
                 >
@@ -300,6 +307,7 @@ export default function SuperAdminVerificationsPage() {
                       className="px-4 py-2 cursor-pointer text-sm hover:bg-gray-50 text-gray-700"
                       onClick={() => {
                         setFilters({ ...filters, org });
+                        setSelectedCandidate(null);
                         setOpenOrgFilter(false);
                       }}
                     >
@@ -313,7 +321,10 @@ export default function SuperAdminVerificationsPage() {
           {/* STATUS FILTER */}
           <select
             value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+            onChange={(e) => {
+              setFilters({ ...filters, status: e.target.value });
+              setSelectedCandidate(null);
+            }}
             className="px-4 py-2 bg-white rounded-xl text-sm shadow min-w-[160px] hover:shadow-md transition text-gray-700"
           >
             <option value="">All Status</option>
@@ -325,7 +336,10 @@ export default function SuperAdminVerificationsPage() {
           {/* SEARCH FIELD */}
           <input
             value={filters.name}
-            onChange={(e) => setFilters({ ...filters, name: e.target.value })}
+            onChange={(e) => {
+              setFilters({ ...filters, name: e.target.value });
+              setSelectedCandidate(null);
+            }}
             placeholder="Search Candidate..."
             className="px-4 py-2 bg-white rounded-xl text-sm shadow min-w-[200px] hover:shadow-md transition text-gray-700"
           />
@@ -333,9 +347,10 @@ export default function SuperAdminVerificationsPage() {
           {/* INITIATED BY */}
           <select
             value={filters.initiatedBy}
-            onChange={(e) =>
-              setFilters({ ...filters, initiatedBy: e.target.value })
-            }
+            onChange={(e) => {
+              setFilters({ ...filters, initiatedBy: e.target.value });
+              setSelectedCandidate(null);
+            }}
             className="px-4 py-2 bg-white rounded-xl text-sm shadow min-w-[180px] hover:shadow-md transition text-gray-700"
           >
             <option value="">Initiated By (All)</option>
@@ -493,8 +508,18 @@ export default function SuperAdminVerificationsPage() {
         </div>
       )}
 
+      {/* LOADING OVERLAY */}
+      {loadingCandidate && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+          </div>
+        </>
+      )}
+
       {/* DRAWER */}
-      {selectedCandidate && (
+      {selectedCandidate && !loadingCandidate && (
         <>
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"

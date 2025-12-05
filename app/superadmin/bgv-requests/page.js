@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   PlusCircle,
   Loader2,
@@ -25,11 +26,16 @@ import {
   User,
   Mail,
   MapPin,
+  Building,
+  UserCircle2,
+  ExternalLink
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSuperAdminState } from "../../context/SuperAdminStateContext";
 
 export default function BGVInitiationPage() {
+  const router = useRouter();
+  
   // State management context
   const { bgvState = {}, setBgvState = () => {} } = useSuperAdminState();
 
@@ -42,12 +48,14 @@ export default function BGVInitiationPage() {
   const [loading, setLoading] = useState(false);
   const [orgLoading, setOrgLoading] = useState(false);
   const [candidateLoading, setCandidateLoading] = useState(false);
+  const [loadingCandidateStatus, setLoadingCandidateStatus] = useState(false);
   const [initLoading, setInitLoading] = useState(false);
   const [runLoading, setRunLoading] = useState(false);
   const [reinitLoading, setReinitLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [startLoading, setStartLoading] = useState({});
   const [orgDetails, setOrgDetails] = useState(null);
+  const [navigating, setNavigating] = useState(false);
 
   const [visibleStage, setVisibleStage] = useState(bgvState.visibleStage || "primary");
   const [currentStep, setCurrentStep] = useState(bgvState.currentStep || 0);
@@ -270,6 +278,17 @@ export default function BGVInitiationPage() {
     })();
   }, []);
 
+  /* ---------------------------------------------------------------------
+      RESTORE VERIFICATION STATUS ON MOUNT
+  --------------------------------------------------------------------- */
+  useEffect(() => {
+    // If there's a persisted candidate selection and candidates are loaded
+    if (selectedCandidate && candidates.length > 0 && !candidateVerification) {
+      setLoadingCandidateStatus(true);
+      fetchCandidateVerification(selectedCandidate);
+    }
+  }, [candidates]);
+
   const fetchCandidates = async (orgId) => {
     try {
       setCandidateLoading(true);
@@ -397,6 +416,7 @@ export default function BGVInitiationPage() {
       });
     } finally {
       setLoading(false);
+      setLoadingCandidateStatus(false);
     }
   };
 
@@ -409,6 +429,7 @@ export default function BGVInitiationPage() {
     setLastRunStage(null);
 
     if (id) {
+      setLoadingCandidateStatus(true);
       fetchCandidateVerification(id);
       fetchConsentStatus(id);
     }
@@ -903,7 +924,7 @@ export default function BGVInitiationPage() {
 
         {/* DROPDOWN - Enhanced */}
         {open && !disabled && !loading && (
-          <div className="absolute z-50 mt-2 w-full bg-white border-2 border-gray-200 rounded-xl shadow-2xl p-3">
+          <div className="absolute z-[100] mt-2 w-full bg-white border-2 border-gray-200 rounded-xl shadow-2xl p-3">
             {/* Search input */}
             <input
               type="text"
@@ -1070,15 +1091,38 @@ export default function BGVInitiationPage() {
           </button>
         )}
 
-        {/* INFO FOR AI CHECKS */}
-        {type === "AI" && !completed && (
-          <div className="mt-2 p-2 bg-purple-50 border border-purple-200 rounded-lg">
-            <p className="text-xs text-purple-800 flex items-center gap-1">
-              <Info size={12} />
-              Can be performed from AI-CV-Verification page
-            </p>
-          </div>
-        )}
+        {/* AI CHECK REDIRECT BUTTON - Only show after finalization */}
+       {type === "AI" && !completed && isStageLocked(stageKey) && (
+  <button
+    onClick={() => {
+      setNavigating(true);
+      setTimeout(() => {
+        if (v === "ai_cv_validation") {
+          router.push("/superadmin/AI-CV-Verification");
+        } else if (v === "ai_education_validation") {
+          router.push("/superadmin/AI-Edu-Verification");
+        }
+      }, 100);
+    }}
+    disabled={navigating}
+    className="mt-2 w-full px-4 py-3 text-sm bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+  >
+    {navigating ? (
+      <>
+        <Loader2 className="animate-spin" size={16} />
+        Navigating...
+      </>
+    ) : (
+      <>
+        <ExternalLink size={16} />
+        {v === "ai_cv_validation"
+          ? "Go to CV Verification"
+          : "Go to Education Verification"}
+      </>
+    )}
+  </button>
+)}
+
       </motion.div>
     );
   }
@@ -1135,95 +1179,151 @@ export default function BGVInitiationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 p-6 md:p-10">
-      <div className="max-w-6xl mx-auto space-y-8">
-        {/* HEADER */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Shield size={24} className="text-[#ff004f]" />
-            BGV Services
-          </h1>
-          <p className="text-gray-600 text-sm mt-1">Comprehensive verification workflows</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900 p-4 md:p-8">
+      {/* Loading Overlay - Candidate Status */}
+      {loadingCandidateStatus && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Loading Candidate Status</h3>
+                <p className="text-sm text-gray-600">Please wait while we fetch verification details...</p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
-        {/* INFORMATIVE BANNER - SCROLLING TEXT */}
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 shadow-md overflow-hidden">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="text-blue-600 flex-shrink-0 mt-1" size={24} />
-            <div className="flex-1">
-              <h3 className="font-bold text-blue-900 mb-2">Important Information</h3>
-              <div className="text-sm text-blue-800 space-y-2">
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">📋 Manual Verification:</span>
-                  <span>Education and employment checks require manual verification on this page itself. Click "Verify Manually" button on respective check cards.</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">🎓 Education Validation:</span>
-                  <span>Use AI-CV-Verification page for automated education analysis or verify manually here.</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">💼 Employment History:</span>
-                  <span>Both API-based and manual employment verification available. Manual checks provide detailed supervisory validation.</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="font-semibold">🤖 AI Checks:</span>
-                  <span>AI-powered CV and education validation can be performed from dedicated AI pages or initiated here.</span>
-                </p>
+      {/* Navigation Loading Overlay */}
+      {navigating && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-purple-600" size={48} />
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Navigating</h3>
+                <p className="text-sm text-gray-600">Please wait...</p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* ENTERPRISE HEADER WITH ACTIONS */}
+        <div className="relative overflow-hidden bg-white rounded-2xl shadow-xl border border-gray-200">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#ff004f]/5 via-transparent to-purple-500/5"></div>
+          <div className="relative p-6 md:p-8">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <Shield size={32} className="text-white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
+                    Background Verification Center
+                  </h1>
+                  <p className="text-gray-600 text-sm md:text-base">
+                    Enterprise verification management across all organizations
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() =>
+                    selectedCandidate &&
+                    fetchCandidateVerification(selectedCandidate)
+                  }
+                  disabled={!selectedCandidate || loading}
+                  className="px-5 py-2.5 bg-white border border-gray-300 hover:border-[#ff004f] hover:bg-gray-50 rounded-xl flex items-center gap-2 text-gray-700 font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-sm"
+                >
+                  <RefreshCcw size={18} /> Refresh
+                </button>
+                <button
+                  onClick={() => {
+                    if (!selectedOrg) {
+                      return showModal({
+                        title: "Select Organization",
+                        message:
+                          "Please select an organization before adding a candidate.",
+                        type: "error",
+                      });
+                    }
+                    setShowAddModal(true);
+                  }}
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#ff004f] to-purple-600 hover:from-purple-600 hover:to-[#ff004f] text-white rounded-xl flex items-center gap-2 font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg shadow-md"
+                >
+                  <PlusCircle size={20} />
+                  Add Candidate
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ACTION BUTTONS ROW */}
-        <div className="flex justify-end gap-3 flex-wrap">
-
-          <div className="flex gap-3 flex-wrap">
-            <button
-              onClick={() =>
-                selectedCandidate &&
-                fetchCandidateVerification(selectedCandidate)
-              }
-              disabled={!selectedCandidate || loading}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md flex items-center gap-2 text-gray-700"
-            >
-              <RefreshCcw size={16} /> Refresh
-            </button>
-
-            <button
-              onClick={() => {
-                if (!selectedOrg) {
-                  return showModal({
-                    title: "Select Organization",
-                    message:
-                      "Please select an organization before adding a candidate.",
-                    type: "error",
-                  });
-                }
-                setShowAddModal(true);
-              }}
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md flex items-center gap-2"
-            >
-              <PlusCircle size={16} />
-              Add Candidate
-            </button>
+        {/* VERIFICATION GUIDELINES - ENTERPRISE CARDS */}
+        <div className="grid md:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <FileText size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-blue-900 mb-2 text-sm">Manual Verification</h4>
+            <p className="text-xs text-blue-700">Click "Verify Manually" on check cards for validation</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 border border-purple-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <Brain size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-purple-900 mb-2 text-sm">AI Validation</h4>
+            <p className="text-xs text-purple-700">Automated CV and education analysis available</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <Building size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-green-900 mb-2 text-sm">Employment Check</h4>
+            <p className="text-xs text-green-700">API-based and manual verification with supervisory validation</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 border border-orange-200 rounded-xl p-4 hover:shadow-lg transition-all duration-300">
+            <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center mb-3 shadow-md">
+              <Cpu size={20} className="text-white" />
+            </div>
+            <h4 className="font-bold text-orange-900 mb-2 text-sm">API Services</h4>
+            <p className="text-xs text-orange-700">Automated checks for PAN, Aadhaar, and more</p>
           </div>
         </div>
 
-        {/* STEPPER - ENHANCED */}
-        <div className="bg-white border-2 p-6 rounded-2xl shadow-lg">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-gray-900">Verification Progress</h3>
-            <span className="text-sm text-gray-600">
-              {isStageCompleted("primary") && isStageCompleted("secondary") && isStageCompleted("final") 
-                ? "All Stages Complete ✓" 
-                : `Stage ${currentStep + 1} of 3`}
-            </span>
+        {/* ENTERPRISE WORKFLOW STEPPER */}
+        <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg">
+          <div className="flex justify-between items-center mb-6 pb-5 border-b border-gray-200">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+                <CheckCircle size={24} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Verification Workflow</h3>
+                <p className="text-sm text-gray-500">Track progress through all verification stages</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-700 px-4 py-2 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
+                {isStageCompleted("primary") && isStageCompleted("secondary") && isStageCompleted("final") 
+                  ? "✓ All Stages Complete" 
+                  : `Stage ${currentStep + 1} / 3`}
+              </span>
+            </div>
           </div>
           <div className="flex justify-between relative">
             {/* Progress Line */}
-            <div className="absolute top-5 left-0 right-0 h-1 bg-gray-200 -z-10">
+            <div className="absolute top-6 left-0 right-0 h-1 bg-gray-200 -z-10">
               <div 
-                className="h-full bg-gradient-to-r from-green-500 to-red-500 transition-all duration-500"
+                className="h-full bg-gradient-to-r from-[#ff004f] to-purple-600 transition-all duration-500"
                 style={{ width: `${(currentStep / 2) * 100}%` }}
               />
             </div>
@@ -1262,55 +1362,68 @@ export default function BGVInitiationPage() {
           </div>
         </div>
 
-        {/* ORG + CANDIDATE SELECT - Enhanced */}
-        <div className="bg-white border-2 p-6 rounded-2xl shadow-lg">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">Selection Panel</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* ORG */}
-            <div>
-              <SearchableDropdown
-                label="Organization"
-                options={organizations.map((o) => ({
-                  label: o.organizationName,
-                  value: o._id,
-                }))}
-                value={selectedOrg}
-                loading={orgLoading}
-                onChange={(v) => {
-                  setSelectedOrg(v);
-                  setCandidates([]);
-                  setSelectedCandidate("");
-                  if (v) fetchCandidates(v);
-                }}
-              />
+        {/* ENTERPRISE SELECTION PANEL */}
+        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg">
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200 rounded-t-2xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <User size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Candidate Selection</h3>
+                <p className="text-xs text-gray-600">Choose organization and candidate to begin verification</p>
+              </div>
             </div>
+          </div>
+          
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+              {/* ORG */}
+              <div>
+                <SearchableDropdown
+                  label="Organization"
+                  options={organizations.map((o) => ({
+                    label: o.organizationName,
+                    value: o._id,
+                  }))}
+                  value={selectedOrg}
+                  loading={orgLoading}
+                  onChange={(v) => {
+                    setSelectedOrg(v);
+                    setCandidates([]);
+                    setSelectedCandidate("");
+                    if (v) fetchCandidates(v);
+                  }}
+                />
+              </div>
 
-            {/* CANDIDATE */}
-            <div>
-              <SearchableDropdown
-                label="Candidate"
-                disabled={!selectedOrg}
-                loading={candidateLoading}
-                options={candidates.map((c) => ({
-                  label: c.firstName + " " + c.lastName,
-                  value: c._id,
-                }))}
-                value={selectedCandidate}
-                onChange={(v) => handleCandidateSelect(v)}
-              />
-            </div>
+              {/* CANDIDATE */}
+              <div>
+                <SearchableDropdown
+                  label="Candidate"
+                  disabled={!selectedOrg}
+                  loading={candidateLoading}
+                  options={candidates.map((c) => ({
+                    label: c.firstName + " " + c.lastName,
+                    value: c._id,
+                  }))}
+                  value={selectedCandidate}
+                  onChange={(v) => handleCandidateSelect(v)}
+                />
+              </div>
 
-            {/* STATUS */}
-            <div>
-              <label className="text-sm font-bold text-gray-700 mb-2 block">Verification Status</label>
-              <div className="border-2 border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
-                <div className={`font-bold text-sm ${
-                  candidateVerification?.overallStatus === "COMPLETED" ? "text-green-600" :
-                  candidateVerification?.overallStatus === "IN_PROGRESS" ? "text-yellow-600" :
-                  candidateVerification?.overallStatus === "FAILED" ? "text-red-600" :
-                  "text-gray-600"
-                }`}>
-                  {candidateVerification?.overallStatus || "Not Initiated"}
+              {/* STATUS */}
+              <div>
+                <label className="text-sm font-bold text-gray-700 mb-2 block">Verification Status</label>
+                <div className="border-2 border-gray-300 rounded-xl px-4 py-3 bg-gray-50">
+                  <div className={`font-bold text-sm ${
+                    candidateVerification?.overallStatus === "COMPLETED" ? "text-green-600" :
+                    candidateVerification?.overallStatus === "IN_PROGRESS" ? "text-yellow-600" :
+                    candidateVerification?.overallStatus === "FAILED" ? "text-red-600" :
+                    "text-gray-600"
+                  }`}>
+                    {candidateVerification?.overallStatus || "Not Initiated"}
+                  </div>
                 </div>
               </div>
             </div>
