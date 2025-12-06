@@ -74,6 +74,7 @@ export default function SelfVerificationPage() {
   const [availableChecks, setAvailableChecks] = useState([]);
   const [candidateVerification, setCandidateVerification] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const [orgDetails, setOrgDetails] = useState(null);
 
   const [loading, setLoading] = useState(false);
   const [loadingCandidate, setLoadingCandidate] = useState(false);
@@ -363,10 +364,12 @@ export default function SelfVerificationPage() {
 
     if (!orgId) {
       setAvailableChecks([]);
+      setOrgDetails(null);
       return;
     }
 
     const org = organizations.find((o) => o._id === orgId);
+    setOrgDetails(org || null);
 
     if (org?.services?.length) {
       // Extract service names
@@ -1288,6 +1291,43 @@ export default function SelfVerificationPage() {
             </div>
           </div>
         </div>
+
+        {/* SERVICE CARDS - SHOW WHEN ORGANIZATION IS SELECTED */}
+        {selectedOrg && orgDetails && orgDetails.services && orgDetails.services.length > 0 && (
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                <Shield size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Available Services</h3>
+                <p className="text-xs text-gray-600">Services offered by {orgDetails.organizationName}</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {orgDetails.services.map((service, idx) => (
+                <div
+                  key={idx}
+                  className="bg-gradient-to-br from-gray-50 to-white border-2 border-gray-200 rounded-xl p-4 hover:border-[#ff004f] hover:shadow-lg transition-all"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="w-8 h-8 bg-gradient-to-br from-[#ff004f]/10 to-purple-600/10 rounded-lg flex items-center justify-center">
+                      <CheckCircle size={16} className="text-[#ff004f]" />
+                    </div>
+                    <div className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                      ₹{service.price}
+                    </div>
+                  </div>
+                  <h4 className="font-bold text-gray-900 text-sm mb-1 capitalize">
+                    {service.serviceName.replace(/_/g, ' ')}
+                  </h4>
+                  <p className="text-xs text-gray-600">Per verification</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* CHECK PANEL */}
         <div className="bg-white p-6 rounded-xl shadow border">

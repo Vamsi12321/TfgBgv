@@ -219,6 +219,7 @@ export default function OrgAICVVerificationPage() {
   const [resumeFile, setResumeFile] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [finalRemarks, setFinalRemarks] = useState("");
+  const [checkStatus, setCheckStatus] = useState("PENDING"); // Track verification status
   
   // Loading states
   const [loadingCandidates, setLoadingCandidates] = useState(false);
@@ -318,6 +319,8 @@ export default function OrgAICVVerificationPage() {
         });
         return;
       }
+
+      setCheckStatus(aiCheck.status); // Store the check status
 
       if (aiCheck.status !== "PENDING") {
         loadResults(ver._id);
@@ -455,6 +458,7 @@ export default function OrgAICVVerificationPage() {
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
+      setCheckStatus(status); // Update status after approval
       setSuccessModal({
         isOpen: true,
         message: `Decision Submitted: ${status}`,
@@ -692,6 +696,7 @@ export default function OrgAICVVerificationPage() {
                   submitDecision={submitDecision}
                   exportPDF={exportPDF}
                   submittingFinal={submittingFinal}
+                  checkStatus={checkStatus}
                 />
               ) : (
                 <div className="bg-white p-12 rounded-2xl shadow-lg border flex flex-col items-center justify-center space-y-4 text-center">
@@ -723,6 +728,7 @@ function ResultsSection({
   submitDecision,
   exportPDF,
   submittingFinal,
+  checkStatus,
 }) {
   const toggle = (key) =>
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -736,13 +742,16 @@ function ResultsSection({
       {/* HEADER */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold text-gray-900">AI Analysis</h2>
-        <button
-          onClick={exportPDF}
-          className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-        >
-          <FileDown size={18} />
-          Export PDF
-        </button>
+        {/* Show Download Report button only after approval */}
+        {checkStatus === "COMPLETED" && (
+          <button
+            onClick={exportPDF}
+            className="flex items-center gap-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-5 py-2.5 rounded-lg hover:shadow-lg transition-all font-semibold"
+          >
+            <FileDown size={18} />
+            Download Report
+          </button>
+        )}
       </div>
 
       {/* BADGES */}

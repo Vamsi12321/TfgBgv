@@ -413,8 +413,24 @@ export default function SuperAdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="p-4 sm:p-8">
+    <div className="min-h-screen bg-gray-50 relative">
+      {/* Loading Overlay when switching organizations */}
+      {loading && stats && (
+        <>
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
+              <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Loading Dashboard</h3>
+                <p className="text-sm text-gray-600">Fetching organization data...</p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+      
+      <div className="p-4 sm:p-6 lg:p-8">
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
@@ -469,105 +485,151 @@ export default function SuperAdminDashboard() {
           ))}
         </div>
 
-        {/* SUPERB CHARTS */}
+        {/* ENHANCED CHARTS WITH BETTER STYLING */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* BAR CHART */}
-          <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-gray-100">
+          {/* BAR CHART - ENHANCED */}
+          <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-6 shadow-2xl border-2 border-gray-100 hover:shadow-3xl transition-shadow">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 flex items-center justify-center shadow-sm">
-                <TrendingUp size={24} className="text-[#ff004f]" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f] to-[#ff3366] flex items-center justify-center shadow-lg">
+                <TrendingUp size={24} className="text-white" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900">
-                Stage-wise Verification Breakdown
-              </h2>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Stage-wise Breakdown
+                </h2>
+                <p className="text-xs text-gray-600">Verification stages distribution</p>
+              </div>
             </div>
 
-            <ResponsiveContainer width="100%" height={320}>
-              <BarChart data={barData}>
-                <defs>
-                  {barData.map((e, i) => (
-                    <linearGradient
-                      key={i}
-                      id={`barGrad${i}`}
-                      x1="0"
-                      x2="0"
-                      y1="0"
-                      y2="1"
-                    >
-                      <stop offset="0%" stopColor={e.color} stopOpacity={0.9} />
-                      <stop
-                        offset="100%"
-                        stopColor={e.color}
-                        stopOpacity={0.4}
-                      />
-                    </linearGradient>
-                  ))}
-                </defs>
+            <div className="bg-white rounded-xl p-4 shadow-inner">
+              <ResponsiveContainer width="100%" height={320}>
+                <BarChart data={barData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                  <defs>
+                    {barData.map((e, i) => (
+                      <linearGradient
+                        key={i}
+                        id={`barGrad${i}`}
+                        x1="0"
+                        x2="0"
+                        y1="0"
+                        y2="1"
+                      >
+                        <stop offset="0%" stopColor={e.color} stopOpacity={1} />
+                        <stop offset="100%" stopColor={e.color} stopOpacity={0.6} />
+                      </linearGradient>
+                    ))}
+                  </defs>
 
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="stage" tick={{ fill: "#444" }} />
-                <YAxis tick={{ fill: "#444" }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                  <XAxis 
+                    dataKey="stage" 
+                    tick={{ fill: "#374151", fontWeight: 600, fontSize: 13 }}
+                    axisLine={{ stroke: "#d1d5db" }}
+                  />
+                  <YAxis 
+                    tick={{ fill: "#6b7280", fontSize: 12 }}
+                    axisLine={{ stroke: "#d1d5db" }}
+                  />
 
-                <Tooltip
-                  contentStyle={{
-                    background: "#fff",
-                    borderRadius: 10,
-                    border: "1px solid #eee",
-                  }}
-                />
+                  <Tooltip
+                    contentStyle={{
+                      background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
+                      borderRadius: 12,
+                      border: "2px solid #e5e7eb",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      fontWeight: 600,
+                    }}
+                    cursor={{ fill: "rgba(255, 0, 79, 0.05)" }}
+                  />
 
-                <Bar dataKey="value" radius={[12, 12, 0, 0]}>
-                  {barData.map((e, i) => (
-                    <Cell key={i} fill={`url(#barGrad${i})`} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                  <Bar dataKey="value" radius={[16, 16, 0, 0]} maxBarSize={80}>
+                    {barData.map((e, i) => (
+                      <Cell key={i} fill={`url(#barGrad${i})`} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
 
-          {/* PIE CHART */}
-          <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-gray-100">
+          {/* PIE CHART - ENHANCED */}
+          <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-6 shadow-2xl border-2 border-gray-100 hover:shadow-3xl transition-shadow">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 flex items-center justify-center shadow-sm">
-                <Activity size={24} className="text-[#ff004f]" />
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f] to-[#ff3366] flex items-center justify-center shadow-lg">
+                <Activity size={24} className="text-white" />
               </div>
-              <h2 className="text-lg font-bold text-gray-900">
-                Verification Status Overview
-              </h2>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Status Overview
+                </h2>
+                <p className="text-xs text-gray-600">Current verification status</p>
+              </div>
             </div>
 
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={110}
-                  paddingAngle={3}
-                  dataKey="value"
-                  label={({ value }) => value}
-                >
-                  {pieData.map((e, i) => (
-                    <Cell
-                      key={i}
-                      fill={e.color}
-                      stroke="#fff"
-                      strokeWidth={2}
-                    />
-                  ))}
-                </Pie>
+            <div className="bg-white rounded-xl p-4 shadow-inner">
+              <ResponsiveContainer width="100%" height={320}>
+                <PieChart>
+                  <defs>
+                    {pieData.map((e, i) => (
+                      <linearGradient
+                        key={i}
+                        id={`pieGrad${i}`}
+                        x1="0"
+                        x2="1"
+                        y1="0"
+                        y2="1"
+                      >
+                        <stop offset="0%" stopColor={e.color} stopOpacity={1} />
+                        <stop offset="100%" stopColor={e.color} stopOpacity={0.7} />
+                      </linearGradient>
+                    ))}
+                  </defs>
+                  
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={75}
+                    outerRadius={115}
+                    paddingAngle={4}
+                    dataKey="value"
+                    label={({ name, value, percent }) => 
+                      value > 0 ? `${value} (${(percent * 100).toFixed(0)}%)` : ""
+                    }
+                    labelLine={{ stroke: "#9ca3af", strokeWidth: 2 }}
+                  >
+                    {pieData.map((e, i) => (
+                      <Cell
+                        key={i}
+                        fill={`url(#pieGrad${i})`}
+                        stroke="#fff"
+                        strokeWidth={3}
+                      />
+                    ))}
+                  </Pie>
 
-                <Tooltip
-                  contentStyle={{
-                    background: "#fff",
-                    borderRadius: 10,
-                    border: "1px solid #eee",
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+                  <Tooltip
+                    contentStyle={{
+                      background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
+                      borderRadius: 12,
+                      border: "2px solid #e5e7eb",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      fontWeight: 600,
+                    }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom" 
+                    height={36}
+                    iconType="circle"
+                    wrapperStyle={{ 
+                      paddingTop: "20px",
+                      fontWeight: 600,
+                      fontSize: "13px"
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 

@@ -230,7 +230,7 @@ export default function SuperAdminReportsPage() {
   /* RENDER UI */
   /* ----------------------------------------------- */
   return (
-    <div className="p-6 bg-gray-50 min-h-screen text-gray-900">
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen text-gray-900">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>

@@ -189,12 +189,12 @@ export default function SuperAdminLayout({ children }) {
         >
           <div className="h-full flex flex-col">
             {/* Logo - Aligned with nav */}
-            <header className="w-full px-3 ">
+            <header className="w-full px-4 ">
               <Image
                 src={logoSrc}
                 alt="Logo"
                 width={110}
-                height={60}
+                height={50}
                 priority
                 className="hover:scale-105 transition-transform duration-300"
               />
@@ -202,7 +202,7 @@ export default function SuperAdminLayout({ children }) {
 
             {/* Navigation - Optimized Vertical Space */}
             <nav
-              className="flex-1 overflow-y-auto sidebar-scroll pr-1"
+              className="flex-1 overflow-y-auto sidebar-scroll px-2"
               style={{
                 maxHeight: "calc(100vh - 90px)",
                 paddingBottom: "4px",
@@ -223,7 +223,7 @@ export default function SuperAdminLayout({ children }) {
                     key={link.href}
                     href={link.href}
                     onClick={() => setIsSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2.5 mb-0.5 rounded-xl transition-all whitespace-nowrap text-sm group
+                    className={`flex items-center gap-3 px-4 py-2.5 mb-0.5 rounded-xl transition-all whitespace-nowrap text-sm group
                       ${
                         isActive
                           ? "bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white font-bold shadow-lg scale-[1.02]"
@@ -242,10 +242,10 @@ export default function SuperAdminLayout({ children }) {
             </nav>
 
             {/* Logout */}
-            <div className="border-t-2 border-gray-200 pt-2 mt-1.5">
+            <div className="border-t-2 border-gray-200 pt-2 mt-1.5 px-2">
               <button
                 onClick={() => setShowLogoutModal(true)}
-                className="flex items-center gap-3 w-full px-3 py-2.5 text-sm text-gray-700 
+                className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 
                 hover:bg-gradient-to-r hover:from-red-50 hover:to-red-100 hover:text-red-600 rounded-xl transition-all font-bold shadow-sm hover:shadow-md hover:scale-[1.01]"
               >
                 <LogOut size={20} />

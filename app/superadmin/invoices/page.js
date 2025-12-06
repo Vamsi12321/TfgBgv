@@ -168,7 +168,7 @@ export default function InvoicesPage() {
    UI START
   ----------------------------------------------------------- */
   return (
-    <div className="p-4 md:p-8 space-y-10 text-black">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-10 text-black">
       {/* HEADER */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">

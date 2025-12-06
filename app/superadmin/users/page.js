@@ -42,8 +42,8 @@ const rolePermissionPresets = {
     "candidate:create",
   ],
   SUPER_ADMIN_HELPER: allPermissions.map((p) => p.key),
-  SUPER_ADMIN: [], // CANNOT BE EDITED
-  SUPER_SPOC: [], // CANNOT BE EDITED
+  SUPER_ADMIN: allPermissions.map((p) => p.key), // Full permissions
+  SUPER_SPOC: allPermissions.map((p) => p.key), // Full permissions
 };
 
 /* ============================================================
@@ -194,10 +194,15 @@ export default function UsersPage() {
       if (cachedOrgs) setOrganizations(JSON.parse(cachedOrgs));
     } catch {}
   }, []);
-  /* Get logged-in user's role */
+  /* Get logged-in user's role and ID */
   const currentUserRole =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("bgvUser"))?.role
+      : null;
+  
+  const currentUserId =
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("bgvUser"))?._id
       : null;
 
   /* Build allowed role list based on rules */
@@ -370,7 +375,7 @@ export default function UsersPage() {
   }, [showModal]);
 
   return (
-    <div className="bg-gray-50 min-h-screen text-black">
+    <div className="bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8 text-black">
       {/* SUCCESS & ERROR MODALS */}
       <MessageModal modal={modal} onClose={closeModal} />
 
@@ -536,7 +541,9 @@ export default function UsersPage() {
                       key={u._id}
                       className={`transition-all text-black group
     ${
-      u.role === "SUPER_ADMIN" || u.role === "SUPER_SPOC" || u.role === "SPOC"
+      (u.role === "SUPER_ADMIN" || u.role === "SUPER_SPOC" || u.role === "SPOC") &&
+      currentUserRole !== "SUPER_ADMIN" &&
+      currentUserRole !== "SUPER_SPOC"
         ? "bg-gray-50/50 cursor-not-allowed hover:bg-gray-100/50"
         : "hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] cursor-pointer hover:shadow-md"
     }
@@ -583,17 +590,17 @@ export default function UsersPage() {
 
                       <td className="p-4">
                         <div className="flex justify-center">
-                          {(u.role === "SUPER_ADMIN" ||
-                            u.role === "SUPER_SPOC" ||
-                            u.role === "SPOC") && (
-                            <span className="text-gray-400 text-xs font-medium px-3 py-1 bg-gray-100 rounded-full">
-                              🔒 Locked
+                          {/* Show locked if user is editing themselves */}
+                          {u._id === currentUserId && (
+                            <span className="text-blue-400 text-xs font-medium px-3 py-1 bg-blue-50 rounded-full">
+                              👤 You
                             </span>
                           )}
-
-                          {u.role !== "SUPER_ADMIN" &&
-                            u.role !== "SUPER_SPOC" &&
-                            u.role !== "SPOC" && (
+                          
+                          {/* Show edit button if not editing self and has permission */}
+                          {u._id !== currentUserId &&
+                            ((currentUserRole === "SUPER_SPOC") ||
+                             (currentUserRole === "SUPER_ADMIN" && u.role !== "SUPER_SPOC")) && (
                               <button
                                 onClick={() => {
                                   setEditUser(u);
@@ -605,6 +612,15 @@ export default function UsersPage() {
                                 <Edit size={18} />
                               </button>
                             )}
+                          
+                          {/* Show locked for users who cannot edit */}
+                          {u._id !== currentUserId &&
+                            ((currentUserRole !== "SUPER_ADMIN" && currentUserRole !== "SUPER_SPOC") ||
+                             (currentUserRole === "SUPER_ADMIN" && u.role === "SUPER_SPOC")) && (
+                            <span className="text-gray-400 text-xs font-medium px-3 py-1 bg-gray-100 rounded-full">
+                              🔒 Locked
+                            </span>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -647,7 +663,10 @@ export default function UsersPage() {
                       </div>
                     </div>
 
-                    {u.role !== "SUPER_ADMIN" && u.role !== "SUPER_SPOC" && u.role !== "SPOC" && (
+                    {/* SUPER_SPOC can edit all, SUPER_ADMIN can edit all except SUPER_SPOC */}
+                    {u._id !== currentUserId && 
+                     ((currentUserRole === "SUPER_SPOC") ||
+                      (currentUserRole === "SUPER_ADMIN" && u.role !== "SUPER_SPOC")) && (
                       <button
                         onClick={() => {
                           setEditUser(u);
@@ -659,9 +678,10 @@ export default function UsersPage() {
                       </button>
                     )}
 
-                    {(u.role === "SUPER_ADMIN" ||
-                      u.role === "SUPER_SPOC" ||
-                      u.role === "SPOC") && (
+                    {/* Show locked for users who cannot edit */}
+                    {u._id !== currentUserId && 
+                     ((currentUserRole !== "SUPER_ADMIN" && currentUserRole !== "SUPER_SPOC") ||
+                      (currentUserRole === "SUPER_ADMIN" && u.role === "SUPER_SPOC")) && (
                       <span className="text-gray-400 text-xs font-medium px-3 py-1.5 bg-gray-100 rounded-full">
                         🔒 Locked
                       </span>
@@ -750,10 +770,9 @@ function AddEditUserModal({
   currentUserRole,
 }) {
   const isEdit = !!editData;
-  const isLockedRole =
-    editData?.role === "SUPER_ADMIN" ||
-    editData?.role === "SUPER_SPOC" ||
-    editData?.role === "SPOC";
+  
+  // Only lock if current user doesn't have permission to edit this role
+  const isLockedRole = false; // SUPER_ADMIN and SUPER_SPOC can edit all roles now
 
   const initialRole = editData?.role || "HELPER";
 
@@ -815,6 +834,21 @@ function AddEditUserModal({
   const isOrgHR = form.role === "ORG_HR";
   const isSuperHelper = form.role === "SUPER_ADMIN_HELPER";
 
+  /* -------------------- AUTO-SELECT ALL FOR SUPER_ADMIN AND SUPER_SPOC -------------------- */
+  useEffect(() => {
+    if (form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") {
+      // Pre-check all organizations
+      const allOrgIds = organizations.map(o => o.organizationId);
+      // Pre-check all permissions
+      const allPerms = allPermissions.map(p => p.key);
+      
+      setField({
+        accessibleOrganizations: allOrgIds,
+        permissions: allPerms,
+      });
+    }
+  }, [form.role, organizations]);
+
   /* -------------------- PERMISSION TOGGLE -------------------- */
   const togglePermission = (perm) => {
     if (isHelper) return;
@@ -849,7 +883,7 @@ function AddEditUserModal({
       password: "Welcome1",
     };
 
-    if (isSuperHelper) {
+    if (isSuperHelper || form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") {
       payload.accessibleOrganizations = form.accessibleOrganizations;
       payload.permissions = form.permissions;
     } else {
@@ -1157,11 +1191,14 @@ function AddEditUserModal({
             </div>
           )}
 
-          {/* SUPER HELPER — MULTIPLE ORGANIZATIONS */}
-          {isSuperHelper && (
+          {/* SUPER HELPER, SUPER_ADMIN, SUPER_SPOC — MULTIPLE ORGANIZATIONS */}
+          {(isSuperHelper || form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") && (
             <div>
               <label className="text-sm font-semibold block mb-1">
                 Accessible Organizations
+                {(form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") && (
+                  <span className="ml-2 text-xs text-gray-600">(All organizations by default)</span>
+                )}
               </label>
               <div className="border rounded-lg bg-gray-50 p-3 max-h-40 overflow-y-auto space-y-2">
                 {organizations.map((org) => (

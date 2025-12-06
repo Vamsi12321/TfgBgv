@@ -202,7 +202,7 @@ export default function OrganizationsPage() {
       : `/logos/${url}`;
 
   return (
-    <div className="text-gray-900 bg-gray-50 min-h-screen">
+    <div className="text-gray-900 bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8 overflow-x-hidden">
         {/* ----------------------------------------------------
            ENHANCED MODAL WITH ANIMATIONS
         ---------------------------------------------------- */}
@@ -276,15 +276,15 @@ export default function OrganizationsPage() {
       {/* ----------------------------------------------------
          SUPERB ENHANCED SEARCH + SORT UI WITH GRADIENT
       ---------------------------------------------------- */}
-      <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-8">
+      <div className="bg-gradient-to-br from-white via-gray-50 to-white p-4 sm:p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-8">
         <div className="flex items-center gap-2 mb-4">
           <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
             <Search size={20} className="text-[#ff004f]" />
           </div>
-          <h3 className="text-lg font-bold text-gray-800">Search & Filter</h3>
+          <h3 className="text-base sm:text-lg font-bold text-gray-800">Search & Filter</h3>
         </div>
         
-        <div className="flex flex-col sm:flex-row gap-4 items-end">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch sm:items-end">
           <div className="relative w-full flex-1">
             <input
               placeholder="🔍 Search by organization name..."
@@ -298,13 +298,13 @@ export default function OrganizationsPage() {
                  bg-white shadow-sm 
                  focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f]
                  text-gray-800 placeholder-gray-500 font-medium
-                 transition-all"
+                 transition-all text-sm sm:text-base"
             />
           </div>
 
           <button
             onClick={() => setSortAsc(!sortAsc)}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-gray-200 bg-white shadow-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 hover:border-[#ff004f] transition-all font-medium whitespace-nowrap"
+            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-xl border-2 border-gray-200 bg-white shadow-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 hover:border-[#ff004f] transition-all font-medium whitespace-nowrap"
           >
             {sortAsc ? (
               <SortAsc size={18} className="text-[#ff004f]" />
@@ -326,8 +326,9 @@ export default function OrganizationsPage() {
         </div>
       ) : (
         <>
-          <div className="hidden md:block bg-white px-4 py-4 rounded-2xl shadow-xl border-2 border-gray-100 overflow-x-auto">
-            <table className="w-full border-collapse min-w-[900px]">
+          <div className="hidden md:block bg-white rounded-2xl shadow-xl border-2 border-gray-100 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse min-w-[900px]">
               <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr className="text-sm text-gray-700">
                   {[
@@ -442,31 +443,32 @@ export default function OrganizationsPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* ----------------------------------------------------
              ENHANCED MOBILE CARDS WITH GRADIENT
           ---------------------------------------------------- */}
-          <div className="grid md:hidden gap-5 mt-6">
+          <div className="grid md:hidden gap-4 sm:gap-5 mt-6">
             {filteredOrgs.length > 0 ? (
               filteredOrgs.map((org) => (
                 <div
                   key={org._id}
-                  className="bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-2xl p-5 border-2 border-gray-200 hover:border-[#ff004f] hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                  className="bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-2xl p-4 sm:p-5 border-2 border-gray-200 hover:border-[#ff004f] hover:shadow-xl transition-all"
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3 flex-1">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                       <img
                         src={getLogoSrc(org.logoUrl)}
                         alt="logo"
-                        className="w-14 h-14 rounded-xl border-2 border-gray-200 object-cover shadow-md"
+                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl border-2 border-gray-200 object-cover shadow-md flex-shrink-0"
                       />
 
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-lg text-gray-900 truncate">
+                        <p className="font-bold text-base sm:text-lg text-gray-900 truncate">
                           {org.organizationName}
                         </p>
-                        <p className="text-sm text-gray-600 truncate">{org.email}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">{org.email}</p>
                       </div>
                     </div>
 
@@ -475,11 +477,11 @@ export default function OrganizationsPage() {
                       className="flex-shrink-0"
                     >
                       {org.isActive ? (
-                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                        <span className="px-2 sm:px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold whitespace-nowrap">
                           Active
                         </span>
                       ) : (
-                        <span className="px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold">
+                        <span className="px-2 sm:px-3 py-1 bg-red-100 text-red-600 rounded-full text-xs font-bold whitespace-nowrap">
                           Inactive
                         </span>
                       )}
@@ -750,12 +752,12 @@ function OrganizationDrawer({
       ></div>
 
       <div
-        className={`w-full sm:w-[420px] md:w-[480px] bg-white h-full shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300
+        className={`w-full sm:w-[420px] md:w-[480px] bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right duration-300
           ${shake ? "animate-[shake_0.4s_ease-in-out]" : ""}
         `}
       >
         {/* Enhanced Header */}
-        <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] sticky top-0 z-50">
+        <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
               <Building2 size={20} className="text-white" />
@@ -780,7 +782,7 @@ function OrganizationDrawer({
         </div>
         
         {/* Scrollable Content */}
-        <div className="overflow-y-auto h-full pb-6 p-6">
+        <div className="flex-1 overflow-y-auto p-6" style={{ maxHeight: "calc(100vh - 180px)" }}>
 
         {/* Logo */}
         <div className="flex justify-center mb-4">
@@ -941,29 +943,40 @@ function OrganizationDrawer({
           </div>
         </div>
 
-        {/* ACTIONS */}
-        <div className="flex justify-between mt-6">
-          {!isView && (
-            <button
-              onClick={handleSave}
-              disabled={actionLoading}
-              className="bg-[#ff004f] text-white px-4 py-2 rounded-lg hover:bg-[#e60047] transition"
-            >
-              {actionLoading
-                ? "Saving..."
-                : isEdit
-                ? "Save Changes"
-                : "Add Organization"}
-            </button>
-          )}
-
-          <button
-            onClick={() => setDrawer({ show: false, org: null, mode: "" })}
-            className="px-4 py-2 border rounded-lg hover:bg-gray-100"
-          >
-            Close
-          </button>
+        {/* ACTIONS - FIXED STICKY FOOTER */}
         </div>
+        
+        {/* Sticky Action Footer */}
+        <div className="flex-shrink-0 bg-white border-t-2 border-gray-200 p-4 shadow-lg">
+          <div className="flex gap-3">
+            {!isView && (
+              <button
+                onClick={handleSave}
+                disabled={actionLoading}
+                className="flex-1 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {actionLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="animate-spin" size={18} />
+                    Saving...
+                  </span>
+                ) : isEdit ? (
+                  "💾 Save Changes"
+                ) : (
+                  "➕ Add Organization"
+                )}
+              </button>
+            )}
+
+            <button
+              onClick={() => setDrawer({ show: false, org: null, mode: "" })}
+              className={`px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-100 transition-all font-semibold ${
+                isView ? "flex-1" : ""
+              }`}
+            >
+              {isView ? "Close" : "Cancel"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

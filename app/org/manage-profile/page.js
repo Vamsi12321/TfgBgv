@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-
+import { UserCircle2 } from "lucide-react";
 
 export default function ManageProfilePage() {
   const [user, setUser] = useState(null);

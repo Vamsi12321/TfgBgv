@@ -297,7 +297,7 @@ export default function LogsOptimizedPage() {
 
   /* UI */
   return (
-    <div className="p-4 md:p-8 bg-gray-50 min-h-screen text-gray-900">
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen text-gray-900">
       {/* OUTER WRAPPER LIKE USERS & ROLES */}
       <div className="max-w-[1200px] mx-auto">
         {/* HEADER */}

@@ -102,6 +102,7 @@ export default function SuperAdminAIEducationValidationPage() {
 
   const [analysis, setAnalysis] = useState(null);
   const [finalRemarks, setFinalRemarks] = useState("");
+  const [checkStatus, setCheckStatus] = useState("PENDING"); // Track verification status
 
   const [loadingOrgs, setLoadingOrgs] = useState(false);
   const [loadingCandidates, setLoadingCandidates] = useState(false);
@@ -202,8 +203,11 @@ export default function SuperAdminAIEducationValidationPage() {
         (c) => c.check === "ai_education_validation"
       );
 
-      if (eduCheck && eduCheck.status !== "PENDING") {
-        loadResults(ver._id);
+      if (eduCheck) {
+        setCheckStatus(eduCheck.status); // Store the check status
+        if (eduCheck.status !== "PENDING") {
+          loadResults(ver._id);
+        }
       }
     } catch (err) {
       setErrorModal({
@@ -339,6 +343,7 @@ export default function SuperAdminAIEducationValidationPage() {
 
       if (!res.ok) throw new Error(await res.text());
 
+      setCheckStatus(status); // Update status after approval
       setSuccessModal({
         isOpen: true,
         message: `Education Validation Marked as ${status}`,
@@ -407,7 +412,7 @@ export default function SuperAdminAIEducationValidationPage() {
       />
 
       {/* MAIN PAGE */}
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 md:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* HEADER */}
           <div className="mb-6">
@@ -631,7 +636,31 @@ export default function SuperAdminAIEducationValidationPage() {
                   </div>
                 </motion.div>
               )}
-
+{analysis && selectedCandidate && (
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "794px",
+    minHeight: "1123px",
+    opacity: 0,
+    pointerEvents: "none",
+    zIndex: -9999,
+  }}>
+    <div ref={pdfRef}>
+      <EducationCertificateBase
+        id="edu-cert"
+        candidate={selectedCandidate}
+        orgName={organizations.find(o => o._id === selectedOrg)?.organizationName}
+        ai={
+          analysis?.analysis ||
+          analysis?.aiAnalysis ||
+          analysis
+        }
+      />
+    </div>
+  </div>
+)}
               {/* RESULTS */}
               {analysis && (
                 <ResultsSection
@@ -643,6 +672,7 @@ export default function SuperAdminAIEducationValidationPage() {
                   submitDecision={submitDecision}
                   exportPDF={exportPDF}
                   submittingFinal={submittingFinal}
+                  checkStatus={checkStatus}
                 />
               )}
             </div>
@@ -652,6 +682,218 @@ export default function SuperAdminAIEducationValidationPage() {
     </>
   );
 }
+function EducationCertificateBase({ id, candidate, orgName, ai }) {
+  const degree = ai.degree_type || "Not Specified";
+  const field = ai.field_of_study || "Not Specified";
+  const institution = ai.institution_name || "Not Specified";
+  const board = ai.board_university || "Not Specified";
+  const startDate = ai.start_date || "-";
+  const endDate = ai.end_date || "-";
+  const durationYears = ai.duration_years || "N/A";
+
+  const positives = ai.positive_findings || [];
+  const redflags = ai.red_flags || [];
+
+  return (
+    <div
+      id={id}
+      style={{
+        width: "794px",         // A4 EXACT WIDTH
+        minHeight: "1123px",    // A4 HEIGHT
+        padding: "10px 50px 60px 50px",
+        background: "#fff",
+        fontFamily: "Arial, sans-serif",
+        color: "#000",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* WATERMARK */}
+      <img
+        src="/logos/maihooMain.png"
+        alt="watermark"
+        style={{
+          position: "absolute",
+          top: "320px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          opacity: 0.08,
+          width: "750px",
+          height: "750px",
+          objectFit: "contain",
+          pointerEvents: "none",
+          zIndex: 1,
+        }}
+      />
+
+      {/* CONTENT */}
+      <div style={{ position: "relative", zIndex: 2 }}>
+        {/* HEADER */}
+        <div
+          style={{
+            display: "flex",
+            gap: "35px",
+            alignItems: "flex-start",
+            marginBottom: "25px",
+          }}
+        >
+          <img
+            src="/logos/maihooMain.png"
+            alt="logo"
+            style={{
+              maxHeight: "180px",
+              maxWidth: "450px",
+              objectFit: "contain",
+              marginTop: "10px",
+            }}
+          />
+
+          <div style={{ marginTop: "55px" }}>
+            <h1
+              style={{
+                fontSize: "26px",
+                fontWeight: 900,
+                margin: 0,
+                fontFamily: "Arial Black",
+              }}
+            >
+              Education
+            </h1>
+            <h2
+              style={{
+                fontSize: "26px",
+                fontWeight: 900,
+                margin: 0,
+                fontFamily: "Arial Black",
+              }}
+            >
+              Verification Report
+            </h2>
+          </div>
+        </div>
+
+        {/* CANDIDATE DETAILS */}
+        <div style={{ fontSize: "15px", lineHeight: "28px", marginBottom: "60px" }}>
+          <p><b>Candidate Name:</b> {candidate.firstName} {candidate.lastName}</p>
+          <p><b>Candidate ID:</b> {candidate._id}</p>
+          <p><b>Organization:</b> {orgName}</p>
+
+          <p><b>Degree:</b> {degree}</p>
+          <p><b>Field of Study:</b> {field}</p>
+          <p><b>Institution:</b> {institution}</p>
+          <p><b>Board/University:</b> {board}</p>
+
+          <p><b>Start Date:</b> {startDate}</p>
+          <p><b>End Date:</b> {endDate}</p>
+          <p><b>Duration:</b> {durationYears} years</p>
+
+          <p style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <b>Status:</b>
+            <span style={{ color: "#5cb85c", fontWeight: "bold" }}>✓ Completed</span>
+          </p>
+        </div>
+
+        {/* BLACK LINE */}
+        <div
+          style={{
+            width: "100%",
+            height: "3px",
+            background: "#000",
+            marginBottom: "50px",
+          }}
+        />
+
+        {/* GREEN STATUS BAR */}
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "80px" }}>
+          <div
+            style={{
+              width: "60px",
+              height: "28px",
+              background: "#5cb85c",
+              borderRadius: "5px",
+            }}
+          />
+          <div
+            style={{
+              height: "2px",
+              background: "#5cb85c",
+              flexGrow: 1,
+              marginLeft: "10px",
+            }}
+          />
+        </div>
+
+        {/* POSITIVE FINDINGS */}
+        {positives.length > 0 && (
+          <>
+            <h3 style={{ fontSize: "20px", color: "#2c7a2c", fontWeight: 700 }}>
+              Positive Findings
+            </h3>
+            <div style={{ marginTop: "10px", marginBottom: "40px" }}>
+              {positives.map((item, i) => (
+                <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                  <span style={{ fontSize: "18px" }}>✓</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {/* RED FLAGS */}
+        {redflags.length > 0 && (
+          <>
+            <div style={{ display: "flex", gap: "10px", marginBottom: "30px" }}>
+              <div style={{ width: "60px", height: "28px", background: "#d9534f", borderRadius: "5px" }} />
+              <div style={{ height: "2px", background: "#d9534f", flexGrow: 1 }} />
+            </div>
+
+            <h3 style={{ fontSize: "20px", color: "#d9534f", fontWeight: 700 }}>
+              Red Flags
+            </h3>
+
+            {redflags.map((rf, i) => (
+              <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+                <span style={{ color: "#d9534f", fontSize: "18px" }}>✓</span>
+                <span>{rf.issue || rf.description}</span>
+              </div>
+            ))}
+          </>
+        )}
+      </div>
+
+      {/* FOOTER */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: "10px",
+          left: "50px",
+          right: "50px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            height: "2px",
+            background: "#dc3545",
+            marginBottom: "10px",
+          }}
+        />
+
+        <p
+          style={{
+            fontSize: "12px",
+            color: "#dc3545",
+            fontWeight: 600,
+          }}
+        >
+          Maihoo Technologies Pvt Ltd, Vaishnavi’s Cynosure, Gachibowli - 500032
+        </p>
+      </div>
+    </div>
+  );
+}
+
 
 // -------------------------------------------------
 // RESULTS SECTION
@@ -665,6 +907,7 @@ function ResultsSection({
   submitDecision,
   exportPDF,
   submittingFinal,
+  checkStatus,
 }) {
   // FIX: use ONLY the nested analysis object
   let ai;
@@ -749,12 +992,15 @@ function ResultsSection({
           </p>
         </div>
 
-        <button
-          onClick={exportPDF}
-          className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-lg hover:bg-gray-800 transition shadow-md"
-        >
-          <FileDown size={18} /> Export PDF
-        </button>
+        {/* Show Download Report button only after approval */}
+        {checkStatus === "COMPLETED" && (
+          <button
+            onClick={exportPDF}
+            className="flex items-center gap-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-5 py-2.5 rounded-lg hover:shadow-lg transition-all font-semibold"
+          >
+            <FileDown size={18} /> Download Report
+          </button>
+        )}
       </div>
 
       {/* STATUS & SCORE BADGES */}

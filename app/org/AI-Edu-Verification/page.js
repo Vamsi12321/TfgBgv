@@ -102,6 +102,7 @@ export default function OrgAIEducationValidationPage() {
 
   const [analysis, setAnalysis] = useState(aiEduVerificationState.analysis || null);
   const [finalRemarks, setFinalRemarks] = useState(aiEduVerificationState.finalRemarks || "");
+  const [checkStatus, setCheckStatus] = useState("PENDING"); // Track verification status
 
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [loadingValidation, setLoadingValidation] = useState(false);
@@ -187,8 +188,11 @@ export default function OrgAIEducationValidationPage() {
         (c) => c.check === "ai_education_validation"
       );
 
-      if (eduCheck && eduCheck.status !== "PENDING") {
-        loadResults(ver._id);
+      if (eduCheck) {
+        setCheckStatus(eduCheck.status); // Store the check status
+        if (eduCheck.status !== "PENDING") {
+          loadResults(ver._id);
+        }
       }
     } catch (err) {
       setErrorModal({
@@ -315,6 +319,7 @@ export default function OrgAIEducationValidationPage() {
 
       if (!res.ok) throw new Error(await res.text());
 
+      setCheckStatus(status); // Update status after approval
       setSuccessModal({
         isOpen: true,
         message: `Education Validation Marked as ${status}`,
@@ -574,6 +579,7 @@ export default function OrgAIEducationValidationPage() {
                   exportPDF={exportPDF}
                   submittingFinal={submittingFinal}
                   pdfRef={pdfRef}
+                  checkStatus={checkStatus}
                 />
               )}
             </div>
@@ -595,6 +601,7 @@ function ResultsSection({
   exportPDF,
   submittingFinal,
   pdfRef,
+  checkStatus,
 }) {
   let ai;
 
@@ -665,12 +672,15 @@ function ResultsSection({
           </p>
         </div>
 
-        <button
-          onClick={exportPDF}
-          className="flex items-center gap-2 bg-black text-white px-4 py-2.5 rounded-lg hover:bg-gray-800 transition shadow-md"
-        >
-          <FileDown size={18} /> Export PDF
-        </button>
+        {/* Show Download Report button only after approval */}
+        {checkStatus === "COMPLETED" && (
+          <button
+            onClick={exportPDF}
+            className="flex items-center gap-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-5 py-2.5 rounded-lg hover:shadow-lg transition-all font-semibold"
+          >
+            <FileDown size={18} /> Download Report
+          </button>
+        )}
       </div>
 
       <div className="flex flex-wrap gap-3">
