@@ -277,7 +277,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
           />
           <div
             style={{
-              flexGrow: 1,
+              width :"25%",
               height: "2px",
               background: "#5cb85c",
               marginLeft: "10px",
@@ -288,16 +288,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
         {/* ================================================== */}
         {/* POSITIVE FINDINGS                                  */}
         {/* ================================================== */}
-        <h3
-          style={{
-            fontSize: "20px",
-            fontWeight: "700",
-            color: "#2c7a2c",
-            marginBottom: "10px",
-          }}
-        >
-          Positive Findings
-        </h3>
+       
 
         <div style={{ marginBottom: "30px" }}>
           {positives.map((item, i) => (
@@ -344,7 +335,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
               />
               <div
                 style={{
-                  flexGrow: 1,
+                    width :"25%",
                   height: "2px",
                   background: "#d9534f",
                   marginLeft: "10px",
@@ -352,16 +343,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
               />
             </div>
 
-            <h3
-              style={{
-                fontSize: "20px",
-                fontWeight: "700",
-                color: "#d9534f",
-                marginBottom: "10px",
-              }}
-            >
-              Red Flags
-            </h3>
+           
 
             {redflags.map((rf, i) => (
               <div
@@ -540,64 +522,48 @@ export default function SuperAdminAICVVerificationPage() {
   }, [selectedOrg]);
 
   /* ---------------- Fetch Verification ---------------- */
-  const fetchVerification = async (candId) => {
-    setAnalysis(null);
-    setLoadingResults(true);
+ const fetchVerification = async (candId) => {
+  setAnalysis(null);
+  setLoadingResults(true);
 
-    try {
-      const res = await fetch(
-        `/api/proxy/secure/getVerifications?candidateId=${candId}`,
-        { credentials: "include" }
-      );
+  try {
+    const res = await fetch(
+      `/api/proxy/secure/getVerifications?candidateId=${candId}`,
+      { credentials: "include" }
+    );
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      const data = await res.json();
-      const ver = data.verifications?.[0];
+    const data = await res.json();
+    const ver = data.verifications?.[0];
 
-      if (!ver) {
-        setErrorModal({
-          isOpen: true,
-          message: "No Verification Found",
-          details: "This candidate doesn't have any verification records.",
-        });
-        return;
-      }
-
-      setVerificationId(ver._id);
-
-      const allChecks = [
-        ...(ver.stages?.primary || []),
-        ...(ver.stages?.secondary || []),
-        ...(ver.stages?.final || []),
-      ];
-
-      const aiCheck = allChecks.find((c) => c.check === "ai_cv_validation");
-
-      if (!aiCheck) {
-        setErrorModal({
-          isOpen: true,
-          message: "AI CV Validation Not Configured",
-          details: "This verification doesn't include AI CV validation check.",
-        });
-        return;
-      }
-
-      setCheckStatus(aiCheck.status); // Store the check status
-
-      if (aiCheck.status !== "PENDING") {
-        loadResults(ver._id);
-      }
-    } catch (err) {
+    if (!ver) {
       setErrorModal({
         isOpen: true,
-        message: "Error Fetching Verification",
-        details: err.message,
+        message: "No Verification Found",
+        details: "This candidate doesn't have any verification records.",
       });
-    } finally {
-      setLoadingResults(false);
+      return;
     }
-  };
+
+    setVerificationId(ver._id);
+
+    // 🔥 REMOVE ALL STAGE CHECKING — AI can run anytime
+    // But if results already exist, load them
+    if (ver.ai_cv_results_available) {
+      loadResults(ver._id);
+    }
+
+  } catch (err) {
+    setErrorModal({
+      isOpen: true,
+      message: "Error Fetching Verification",
+      details: err.message,
+    });
+  } finally {
+    setLoadingResults(false);
+  }
+};
 
   /* ---------------- Run Validation ---------------- */
   const runValidation = async () => {
@@ -635,6 +601,7 @@ export default function SuperAdminAICVVerificationPage() {
     try {
       const fd = new FormData();
       fd.append("verificationId", verificationId);
+      fd.append("candidateId", selectedCandidate._id);
       fd.append("panNumber", selectedCandidate.panNumber || "");
       if (resumeFile) fd.append("resume", resumeFile);
 
@@ -652,7 +619,9 @@ export default function SuperAdminAICVVerificationPage() {
       const data = await res.json();
 
       if (data.verificationId) {
-        loadResults(data.verificationId);
+        // Directly use the results from the response instead of fetching again
+        // The response should contain the full analysis data
+        setAnalysis(data);
         setSuccessModal({
           isOpen: true,
           message: "Validation Complete!",
@@ -698,56 +667,58 @@ export default function SuperAdminAICVVerificationPage() {
   };
 
   /* ---------------- Submit Final Decision ---------------- */
-  const submitDecision = async (status) => {
-    if (!verificationId) {
-      setErrorModal({
-        isOpen: true,
-        message: "Missing Verification ID",
-        details: "Cannot submit decision without verification ID.",
-      });
-      return;
-    }
+ const submitDecision = async (status) => {
+  if (!verificationId) {
+    setErrorModal({
+      isOpen: true,
+      message: "Missing Verification ID",
+      details: "Cannot submit decision without verification ID.",
+    });
+    return;
+  }
 
-    setSubmittingFinal(true);
+  setSubmittingFinal(true);
 
-    try {
-      const body = new URLSearchParams();
-      body.append("verificationId", verificationId);
-      body.append("final_status", status);
-      body.append("staff_remarks", finalRemarks);
+  try {
+    const body = new URLSearchParams();
+    body.append("verificationId", verificationId);
+    body.append("candidateId", selectedCandidate._id);
+    body.append("final_status", status);
+    body.append("staff_remarks", finalRemarks);
 
-      const res = await fetch(`/api/proxy/secure/submit_ai_cv_validation`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body,
-      });
+    const res = await fetch(`/api/proxy/secure/submit_ai_cv_validation`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body,
+    });
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-      setCheckStatus(status); // Update status after approval
+    // Update UI only
+    setCheckStatus(status);
 
-      // Show success message and redirect to BGV requests page
-      setSuccessModal({
-        isOpen: true,
-        message: `Decision Submitted: ${status}`,
-      });
+    // Show success modal
+    setSuccessModal({
+      isOpen: true,
+      message: `Decision Submitted: ${status}`,
+    });
 
-      // Redirect after a short delay
-      setTimeout(() => {
-        setNavigating(true);
-        router.push("/superadmin/bgv-requests");
-      }, 1500);
-    } catch (error) {
-      setErrorModal({
-        isOpen: true,
-        message: "Submission Failed",
-        details: error.message,
-      });
-    } finally {
-      setSubmittingFinal(false);
-    }
-  };
+    // ❌ DO NOT REDIRECT
+    // ❌ DO NOT SET navigating
+    // After closing modal, download button will show
+
+  } catch (error) {
+    setErrorModal({
+      isOpen: true,
+      message: "Submission Failed",
+      details: error.message,
+    });
+  } finally {
+    setSubmittingFinal(false);
+  }
+};
+
 
   /* ---------------- Export PDF ---------------- */
   const exportPDF = async () => {
@@ -991,11 +962,11 @@ export default function SuperAdminAICVVerificationPage() {
                           ? "✓ Uploaded"
                           : "✗ Not Uploaded"}
                       </p>
-                      {verificationId && (
+                      {/* {verificationId && (
                         <p className="text-[#ff004f] font-semibold pt-2 border-t">
                           Verification ID: {verificationId.slice(0, 8)}...
                         </p>
-                      )}
+                      )} */}
                     </div>
                   </motion.div>
                 )}

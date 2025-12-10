@@ -81,6 +81,7 @@ export default function BGVInitiationPage() {
     status: "COMPLETED",
     loading: false,
   });
+  const [showNextStageConfirm, setShowNextStageConfirm] = useState(false);
 
   const API_CHECKS = [
     "pan_aadhaar_seeding",
@@ -94,11 +95,13 @@ export default function BGVInitiationPage() {
   const MANUAL_CHECKS = [
     "address_verification",
     "education_check_manual",
-    "supervisory_check",
     "employment_history_manual",
+    "employment_history_manual_2",
+    "supervisory_check_1",
+    "supervisory_check_2",
   ];
 
-  const AI_CHECKS = ["ai_cv_validation", "ai_education_validation"];
+  const AI_CHECKS = ["ai_education_validation"];
 
   // FULL candidate schema
   const emptyCandidate = {
@@ -750,10 +753,32 @@ export default function BGVInitiationPage() {
   };
 
   const goNext = () => {
-    if (currentStep === 0 && !isStageCompleted("primary")) return;
-    if (currentStep === 1 && !isStageCompleted("secondary")) return;
+    // Check if current stage has any pending or failed verifications
+    const currentStageName = stepNames[currentStep].toLowerCase();
+    const currentStageChecks = candidateVerification?.stages?.[currentStageName] || [];
+    
+    // Filter out AI checks
+    const nonAIChecks = currentStageChecks.filter(chk => !AI_CHECKS.includes(chk.check));
+    
+    // Check if stage has been initiated (has checks)
+    const stageNotInitiated = nonAIChecks.length === 0;
+    
+    // Check if there are any non-completed checks
+    const hasPendingOrFailed = nonAIChecks.some(chk => chk.status !== "COMPLETED");
+    
+    // Show confirmation if stage not initiated OR has pending/failed checks
+    if (stageNotInitiated || hasPendingOrFailed) {
+      setShowNextStageConfirm(true);
+    } else {
+      // Directly move to next stage if all completed
+      confirmNextStage();
+    }
+  };
+
+  const confirmNextStage = () => {
     setCurrentStep((s) => Math.min(s + 1, 2));
     setVisibleStage(stepNames[Math.min(currentStep + 1, 2)].toLowerCase());
+    setShowNextStageConfirm(false);
   };
 
   const goBack = () => {
@@ -1801,21 +1826,21 @@ export default function BGVInitiationPage() {
               <button
                 disabled={currentStep === 0}
                 onClick={goBack}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md flex items-center gap-2"
+                className="group relative flex-1 bg-gradient-to-r from-gray-600 to-gray-700 hover:shadow-xl text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
               >
-                <ChevronLeft size={16} /> Back
+                <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <ChevronLeft size={18} className="relative z-10" />
+                <span className="relative z-10">Previous Stage</span>
               </button>
 
               <button
-                disabled={
-                  currentStep === 2 ||
-                  (currentStep === 0 && !isStageCompleted("primary")) ||
-                  (currentStep === 1 && !isStageCompleted("secondary"))
-                }
+                disabled={currentStep === 2}
                 onClick={goNext}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                className="group relative flex-1 bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:shadow-xl text-white px-6 py-3 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
               >
-                Next <ChevronRight size={16} />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#e60047] to-[#ff004f] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <span className="relative z-10">Next Stage</span>
+                <ChevronRight size={18} className="relative z-10" />
               </button>
             </div>
 
@@ -1837,17 +1862,20 @@ export default function BGVInitiationPage() {
                         handleInitiateStage("primary");
                       }
                     }}
-                    className="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 disabled:bg-gray-400"
+                    className="group relative w-full py-4 bg-gradient-to-r from-green-500 to-green-600 hover:shadow-xl text-white rounded-xl flex items-center justify-center gap-2 font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
                   >
+                    {!initLoading && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    )}
                     {initLoading ? (
                       <>
-                        <Loader2 className="animate-spin" size={16} />
-                        Initiating Primary...
+                        <Loader2 className="animate-spin relative z-10" size={20} />
+                        <span className="relative z-10">Initiating Primary...</span>
                       </>
                     ) : (
                       <>
-                        <CheckCircle size={16} />
-                        Finalize Checks
+                        <CheckCircle size={20} className="relative z-10" />
+                        <span className="relative z-10">Finalize Checks</span>
                       </>
                     )}
                   </button>
@@ -1859,15 +1887,21 @@ export default function BGVInitiationPage() {
                       runLoading
                     }
                     onClick={() => handleRunStage("primary")}
-                    className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center gap-2 disabled:bg-blue-300"
+                    className="group relative w-full py-4 bg-gradient-to-r from-blue-500 to-blue-600 hover:shadow-xl text-white rounded-xl flex items-center justify-center gap-2 font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
                   >
+                    {!runLoading && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    )}
                     {runLoading ? (
                       <>
-                        <Loader2 className="animate-spin" size={16} />
-                        Running...
+                        <Loader2 className="animate-spin relative z-10" size={20} />
+                        <span className="relative z-10">Running...</span>
                       </>
                     ) : (
-                      "Execute Verification"
+                      <>
+                        <Cpu size={20} className="relative z-10" />
+                        <span className="relative z-10">Execute Verifications</span>
+                      </>
                     )}
                   </button>
                 </>
@@ -2846,6 +2880,64 @@ export default function BGVInitiationPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      {/* Next Stage Confirmation Modal */}
+      <AnimatePresence>
+        {showNextStageConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden"
+            >
+              {/* Header */}
+              <div className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] p-6 text-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                    <AlertCircle size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">Proceed to Next Stage?</h3>
+                    <p className="text-sm text-white/90">Confirmation Required</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6">
+                <p className="text-gray-700 text-base leading-relaxed">
+                  The current <span className="font-bold text-[#ff004f]">{stepNames[currentStep]}</span> stage is <span className="font-bold text-orange-600">not fully completed</span>. Are you sure you want to move to the <span className="font-bold text-[#ff004f]">{stepNames[currentStep + 1]}</span> stage?
+                </p>
+                <p className="text-sm text-gray-500 mt-3">
+                  It's recommended to initiate and complete all verifications in the current stage before proceeding.
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 p-6 bg-gray-50 border-t">
+                <button
+                  onClick={() => setShowNextStageConfirm(false)}
+                  className="flex-1 px-4 py-3 border-2 border-gray-300 rounded-xl text-gray-700 font-semibold hover:bg-gray-100 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmNextStage}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white rounded-xl font-semibold hover:shadow-lg transition-all"
+                >
+                  Yes, Proceed
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {showConsentWarning.open && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white p-6 rounded-xl max-w-sm w-full shadow-xl">

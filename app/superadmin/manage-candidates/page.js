@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { PlusCircle, X, Edit, Trash2, Loader2, Users } from "lucide-react";
+import { PlusCircle, X, Edit, Trash2, Loader2, Users, ChevronDown } from "lucide-react";
 import { motion } from "framer-motion";
 
 
@@ -31,6 +31,74 @@ const normalizeCandidate = (c = {}) => ({
   district: c.district ?? "",
   state: c.state ?? "",
   pincode: c.pincode ?? "",
+
+  // Supervisory Check 1 - FLAT STRUCTURE
+  supervisory1_name: c.supervisoryCheck1?.name ?? c.supervisory1_name ?? "",
+  supervisory1_phone: c.supervisoryCheck1?.phone ?? c.supervisory1_phone ?? "",
+  supervisory1_email: c.supervisoryCheck1?.email ?? c.supervisory1_email ?? "",
+  supervisory1_relationship: c.supervisoryCheck1?.relationship ?? c.supervisory1_relationship ?? "",
+  supervisory1_company: c.supervisoryCheck1?.company ?? c.supervisory1_company ?? "",
+  supervisory1_designation: c.supervisoryCheck1?.designation ?? c.supervisory1_designation ?? "",
+  supervisory1_workingPeriod: c.supervisoryCheck1?.workingPeriod ?? c.supervisory1_workingPeriod ?? "",
+
+  // Supervisory Check 2 - FLAT STRUCTURE
+  supervisory2_name: c.supervisoryCheck2?.name ?? c.supervisory2_name ?? "",
+  supervisory2_phone: c.supervisoryCheck2?.phone ?? c.supervisory2_phone ?? "",
+  supervisory2_email: c.supervisoryCheck2?.email ?? c.supervisory2_email ?? "",
+  supervisory2_relationship: c.supervisoryCheck2?.relationship ?? c.supervisory2_relationship ?? "",
+  supervisory2_company: c.supervisoryCheck2?.company ?? c.supervisory2_company ?? "",
+  supervisory2_designation: c.supervisoryCheck2?.designation ?? c.supervisory2_designation ?? "",
+  supervisory2_workingPeriod: c.supervisoryCheck2?.workingPeriod ?? c.supervisory2_workingPeriod ?? "",
+
+  // Employment History 1 - FLAT STRUCTURE
+  employment1_company: c.employmentHistory1?.company ?? c.employment1_company ?? "",
+  employment1_designation: c.employmentHistory1?.designation ?? c.employment1_designation ?? "",
+  employment1_joiningDate: c.employmentHistory1?.joiningDate ?? c.employment1_joiningDate ?? "",
+  employment1_relievingDate: c.employmentHistory1?.relievingDate ?? c.employment1_relievingDate ?? "",
+  employment1_hrContact: c.employmentHistory1?.hrContact ?? c.employment1_hrContact ?? "",
+  employment1_hrEmail: c.employmentHistory1?.hrEmail ?? c.employment1_hrEmail ?? "",
+  employment1_hrName: c.employmentHistory1?.hrName ?? c.employment1_hrName ?? "",
+  employment1_address: c.employmentHistory1?.address ?? c.employment1_address ?? "",
+  relievingLetter1: c.employmentHistory1?.relievingLetter ?? c.relievingLetter1 ?? null,
+  experienceLetter1: c.employmentHistory1?.experienceLetter ?? c.experienceLetter1 ?? null,
+  salarySlips1: c.employmentHistory1?.salarySlips ?? c.salarySlips1 ?? null,
+  relievingLetterUrl1: c.employmentHistory1?.relievingLetterUrl ?? c.relievingLetterUrl1 ?? "",
+  experienceLetterUrl1: c.employmentHistory1?.experienceLetterUrl ?? c.experienceLetterUrl1 ?? "",
+  salarySlipsUrl1: c.employmentHistory1?.salarySlipsUrl ?? c.salarySlipsUrl1 ?? "",
+
+  // Employment History 2 - FLAT STRUCTURE
+  employment2_company: c.employmentHistory2?.company ?? c.employment2_company ?? "",
+  employment2_designation: c.employmentHistory2?.designation ?? c.employment2_designation ?? "",
+  employment2_joiningDate: c.employmentHistory2?.joiningDate ?? c.employment2_joiningDate ?? "",
+  employment2_relievingDate: c.employmentHistory2?.relievingDate ?? c.employment2_relievingDate ?? "",
+  employment2_hrContact: c.employmentHistory2?.hrContact ?? c.employment2_hrContact ?? "",
+  employment2_hrEmail: c.employmentHistory2?.hrEmail ?? c.employment2_hrEmail ?? "",
+  employment2_hrName: c.employmentHistory2?.hrName ?? c.employment2_hrName ?? "",
+  employment2_address: c.employmentHistory2?.address ?? c.employment2_address ?? "",
+  relievingLetter2: c.employmentHistory2?.relievingLetter ?? c.relievingLetter2 ?? null,
+  experienceLetter2: c.employmentHistory2?.experienceLetter ?? c.experienceLetter2 ?? null,
+  salarySlips2: c.employmentHistory2?.salarySlips ?? c.salarySlips2 ?? null,
+  relievingLetterUrl2: c.employmentHistory2?.relievingLetterUrl ?? c.relievingLetterUrl2 ?? "",
+  experienceLetterUrl2: c.employmentHistory2?.experienceLetterUrl ?? c.experienceLetterUrl2 ?? "",
+  salarySlipsUrl2: c.employmentHistory2?.salarySlipsUrl ?? c.salarySlipsUrl2 ?? "",
+
+  // Education Check - FLAT STRUCTURE
+  education_degree: c.educationCheck?.degree ?? c.education_degree ?? "",
+  education_specialization: c.educationCheck?.specialization ?? c.education_specialization ?? "",
+  education_universityName: c.educationCheck?.universityName ?? c.education_universityName ?? "",
+  education_collegeName: c.educationCheck?.collegeName ?? c.education_collegeName ?? "",
+  education_yearOfPassing: c.educationCheck?.yearOfPassing ?? c.education_yearOfPassing ?? "",
+  education_cgpa: c.educationCheck?.cgpa ?? c.education_cgpa ?? "",
+  education_universityContact: c.educationCheck?.universityContact ?? c.education_universityContact ?? "",
+  education_universityEmail: c.educationCheck?.universityEmail ?? c.education_universityEmail ?? "",
+  education_universityAddress: c.educationCheck?.universityAddress ?? c.education_universityAddress ?? "",
+  education_collegeContact: c.educationCheck?.collegeContact ?? c.education_collegeContact ?? "",
+  education_collegeEmail: c.educationCheck?.collegeEmail ?? c.education_collegeEmail ?? "",
+  education_collegeAddress: c.educationCheck?.collegeAddress ?? c.education_collegeAddress ?? "",
+  educationCertificate: c.educationCheck?.certificate ?? c.educationCertificate ?? null,
+  marksheet: c.educationCheck?.marksheet ?? c.marksheet ?? null,
+  certificateUrl: c.educationCheck?.certificateUrl ?? c.certificateUrl ?? "",
+  marksheetUrl: c.educationCheck?.marksheetUrl ?? c.marksheetUrl ?? "",
 });
 
 export default function ManageCandidatesPage() {
@@ -146,14 +214,29 @@ export default function ManageCandidatesPage() {
   /* -------------------------------------------- */
   /* ADD CANDIDATE */
   /* -------------------------------------------- */
-  const handleAddChange = (e, isFile = false) => {
+  const handleAddChange = (e, isFile = false, fileField = null) => {
     if (isFile) {
-      setNewCandidate((p) => ({ ...p, resume: e.target.files[0] }));
+      const file = e.target.files[0];
+      
+      // Handle file uploads with flat field names
+      if (fileField) {
+        setNewCandidate((p) => ({ ...p, [fileField]: file }));
+        return;
+      }
+      
+      // Handle top-level file (resume)
+      setNewCandidate((p) => ({ ...p, resume: file }));
       return;
     }
 
     let { name, value } = e.target;
 
+    // Auto-format specific fields based on field name
+    if (name.includes('phone') || name.includes('hrContact') || name.includes('Contact')) {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+    
+    // Auto-format top-level fields
     if (name === "panNumber")
       value = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (name === "aadhaarNumber") value = value.replace(/\D/g, "").slice(0, 12);
@@ -171,26 +254,107 @@ export default function ManageCandidatesPage() {
       const formData = new FormData();
 
       // Append all fields EXACTLY as backend expects
-      formData.append("firstName", newCandidate.firstName);
-      formData.append("middleName", newCandidate.middleName);
-      formData.append("lastName", newCandidate.lastName);
-      formData.append("phone", newCandidate.phone);
-      formData.append("aadhaarNumber", newCandidate.aadhaarNumber);
-      formData.append("panNumber", newCandidate.panNumber);
-      formData.append("address", newCandidate.address);
-      formData.append("email", newCandidate.email);
-      formData.append("fatherName", newCandidate.fatherName);
-      formData.append("dob", newCandidate.dob);
-      formData.append("gender", newCandidate.gender);
-      formData.append("uanNumber", newCandidate.uanNumber);
-      formData.append("district", newCandidate.district);
-      formData.append("state", newCandidate.state);
-      formData.append("pincode", newCandidate.pincode);
+      formData.append("firstName", newCandidate.firstName || "");
+      formData.append("middleName", newCandidate.middleName || "");
+      formData.append("lastName", newCandidate.lastName || "");
+      formData.append("phone", newCandidate.phone || "");
+      formData.append("aadhaarNumber", newCandidate.aadhaarNumber || "");
+      formData.append("panNumber", newCandidate.panNumber || "");
+      formData.append("address", newCandidate.address || "");
+      formData.append("email", newCandidate.email || "");
+      formData.append("fatherName", newCandidate.fatherName || "");
+      formData.append("dob", newCandidate.dob || "");
+      formData.append("gender", newCandidate.gender || "");
+      formData.append("uanNumber", newCandidate.uanNumber || "");
+      formData.append("passportNumber", newCandidate.passportNumber || "");
+      formData.append("bankAccountNumber", newCandidate.bankAccountNumber || "");
+      formData.append("district", newCandidate.district || "");
+      formData.append("state", newCandidate.state || "");
+      formData.append("pincode", newCandidate.pincode || "");
       formData.append("organizationId", selectedOrg);
 
-      // Resume file (optional)
+      // Supervisory Check 1 Fields (flat structure as backend expects)
+      formData.append("supervisory1_name", newCandidate.supervisory1_name || "");
+      formData.append("supervisory1_phone", newCandidate.supervisory1_phone || "");
+      formData.append("supervisory1_email", newCandidate.supervisory1_email || "");
+      formData.append("supervisory1_relationship", newCandidate.supervisory1_relationship || "");
+      formData.append("supervisory1_company", newCandidate.supervisory1_company || "");
+      formData.append("supervisory1_designation", newCandidate.supervisory1_designation || "");
+      formData.append("supervisory1_workingPeriod", newCandidate.supervisory1_workingPeriod || "");
+
+      // Supervisory Check 2 Fields
+      formData.append("supervisory2_name", newCandidate.supervisory2_name || "");
+      formData.append("supervisory2_phone", newCandidate.supervisory2_phone || "");
+      formData.append("supervisory2_email", newCandidate.supervisory2_email || "");
+      formData.append("supervisory2_relationship", newCandidate.supervisory2_relationship || "");
+      formData.append("supervisory2_company", newCandidate.supervisory2_company || "");
+      formData.append("supervisory2_designation", newCandidate.supervisory2_designation || "");
+      formData.append("supervisory2_workingPeriod", newCandidate.supervisory2_workingPeriod || "");
+
+      // Employment History 1 Fields
+      formData.append("employment1_company", newCandidate.employment1_company || "");
+      formData.append("employment1_designation", newCandidate.employment1_designation || "");
+      formData.append("employment1_joiningDate", newCandidate.employment1_joiningDate || "");
+      formData.append("employment1_relievingDate", newCandidate.employment1_relievingDate || "");
+      formData.append("employment1_hrContact", newCandidate.employment1_hrContact || "");
+      formData.append("employment1_hrEmail", newCandidate.employment1_hrEmail || "");
+      formData.append("employment1_hrName", newCandidate.employment1_hrName || "");
+      formData.append("employment1_address", newCandidate.employment1_address || "");
+
+      // Employment History 2 Fields
+      formData.append("employment2_company", newCandidate.employment2_company || "");
+      formData.append("employment2_designation", newCandidate.employment2_designation || "");
+      formData.append("employment2_joiningDate", newCandidate.employment2_joiningDate || "");
+      formData.append("employment2_relievingDate", newCandidate.employment2_relievingDate || "");
+      formData.append("employment2_hrContact", newCandidate.employment2_hrContact || "");
+      formData.append("employment2_hrEmail", newCandidate.employment2_hrEmail || "");
+      formData.append("employment2_hrName", newCandidate.employment2_hrName || "");
+      formData.append("employment2_address", newCandidate.employment2_address || "");
+
+      // Education Check Fields
+      formData.append("education_degree", newCandidate.education_degree || "");
+      formData.append("education_specialization", newCandidate.education_specialization || "");
+      formData.append("education_universityName", newCandidate.education_universityName || "");
+      formData.append("education_collegeName", newCandidate.education_collegeName || "");
+      formData.append("education_yearOfPassing", newCandidate.education_yearOfPassing || "");
+      formData.append("education_cgpa", newCandidate.education_cgpa || "");
+      formData.append("education_universityContact", newCandidate.education_universityContact || "");
+      formData.append("education_universityEmail", newCandidate.education_universityEmail || "");
+      formData.append("education_universityAddress", newCandidate.education_universityAddress || "");
+      formData.append("education_collegeContact", newCandidate.education_collegeContact || "");
+      formData.append("education_collegeEmail", newCandidate.education_collegeEmail || "");
+      formData.append("education_collegeAddress", newCandidate.education_collegeAddress || "");
+
+      // Document Uploads
       if (newCandidate.resume) {
         formData.append("resume", newCandidate.resume);
+      }
+      
+      if (newCandidate.relievingLetter1) {
+        formData.append("relievingLetter1", newCandidate.relievingLetter1);
+      }
+      if (newCandidate.experienceLetter1) {
+        formData.append("experienceLetter1", newCandidate.experienceLetter1);
+      }
+      if (newCandidate.salarySlips1) {
+        formData.append("salarySlips1", newCandidate.salarySlips1);
+      }
+      
+      if (newCandidate.relievingLetter2) {
+        formData.append("relievingLetter2", newCandidate.relievingLetter2);
+      }
+      if (newCandidate.experienceLetter2) {
+        formData.append("experienceLetter2", newCandidate.experienceLetter2);
+      }
+      if (newCandidate.salarySlips2) {
+        formData.append("salarySlips2", newCandidate.salarySlips2);
+      }
+      
+      if (newCandidate.educationCertificate) {
+        formData.append("educationCertificate", newCandidate.educationCertificate);
+      }
+      if (newCandidate.marksheet) {
+        formData.append("marksheet", newCandidate.marksheet);
       }
 
       const res = await fetch(`/api/proxy/secure/addCandidate`, {
@@ -221,14 +385,29 @@ export default function ManageCandidatesPage() {
   /* -------------------------------------------- */
   /* EDIT CANDIDATE */
   /* -------------------------------------------- */
-  const handleEditChange = (e, isFile = false) => {
+  const handleEditChange = (e, isFile = false, fileField = null) => {
     if (isFile) {
-      setEditCandidate((p) => ({ ...p, resume: e.target.files[0] }));
+      const file = e.target.files[0];
+      
+      // Handle file uploads with flat field names
+      if (fileField) {
+        setEditCandidate((p) => ({ ...p, [fileField]: file }));
+        return;
+      }
+      
+      // Handle top-level file (resume)
+      setEditCandidate((p) => ({ ...p, resume: file }));
       return;
     }
 
     let { name, value } = e.target;
 
+    // Auto-format specific fields based on field name
+    if (name.includes('phone') || name.includes('hrContact') || name.includes('Contact')) {
+      value = value.replace(/\D/g, "").slice(0, 10);
+    }
+    
+    // Auto-format top-level fields
     if (name === "panNumber")
       value = value.toUpperCase().replace(/[^A-Z0-9]/g, "");
     if (name === "aadhaarNumber") value = value.replace(/\D/g, "").slice(0, 12);
@@ -268,8 +447,88 @@ export default function ManageCandidatesPage() {
       formData.append("state", editCandidate.state);
       formData.append("pincode", editCandidate.pincode);
 
+      // Supervisory Check 1 Fields (flat structure as backend expects)
+      formData.append("supervisory1_name", editCandidate.supervisory1_name || "");
+      formData.append("supervisory1_phone", editCandidate.supervisory1_phone || "");
+      formData.append("supervisory1_email", editCandidate.supervisory1_email || "");
+      formData.append("supervisory1_relationship", editCandidate.supervisory1_relationship || "");
+      formData.append("supervisory1_company", editCandidate.supervisory1_company || "");
+      formData.append("supervisory1_designation", editCandidate.supervisory1_designation || "");
+      formData.append("supervisory1_workingPeriod", editCandidate.supervisory1_workingPeriod || "");
+
+      // Supervisory Check 2 Fields
+      formData.append("supervisory2_name", editCandidate.supervisory2_name || "");
+      formData.append("supervisory2_phone", editCandidate.supervisory2_phone || "");
+      formData.append("supervisory2_email", editCandidate.supervisory2_email || "");
+      formData.append("supervisory2_relationship", editCandidate.supervisory2_relationship || "");
+      formData.append("supervisory2_company", editCandidate.supervisory2_company || "");
+      formData.append("supervisory2_designation", editCandidate.supervisory2_designation || "");
+      formData.append("supervisory2_workingPeriod", editCandidate.supervisory2_workingPeriod || "");
+
+      // Employment History 1 Fields
+      formData.append("employment1_company", editCandidate.employment1_company || "");
+      formData.append("employment1_designation", editCandidate.employment1_designation || "");
+      formData.append("employment1_joiningDate", editCandidate.employment1_joiningDate || "");
+      formData.append("employment1_relievingDate", editCandidate.employment1_relievingDate || "");
+      formData.append("employment1_hrContact", editCandidate.employment1_hrContact || "");
+      formData.append("employment1_hrEmail", editCandidate.employment1_hrEmail || "");
+      formData.append("employment1_hrName", editCandidate.employment1_hrName || "");
+      formData.append("employment1_address", editCandidate.employment1_address || "");
+
+      // Employment History 2 Fields
+      formData.append("employment2_company", editCandidate.employment2_company || "");
+      formData.append("employment2_designation", editCandidate.employment2_designation || "");
+      formData.append("employment2_joiningDate", editCandidate.employment2_joiningDate || "");
+      formData.append("employment2_relievingDate", editCandidate.employment2_relievingDate || "");
+      formData.append("employment2_hrContact", editCandidate.employment2_hrContact || "");
+      formData.append("employment2_hrEmail", editCandidate.employment2_hrEmail || "");
+      formData.append("employment2_hrName", editCandidate.employment2_hrName || "");
+      formData.append("employment2_address", editCandidate.employment2_address || "");
+
+      // Education Check Fields
+      formData.append("education_degree", editCandidate.education_degree || "");
+      formData.append("education_specialization", editCandidate.education_specialization || "");
+      formData.append("education_universityName", editCandidate.education_universityName || "");
+      formData.append("education_collegeName", editCandidate.education_collegeName || "");
+      formData.append("education_yearOfPassing", editCandidate.education_yearOfPassing || "");
+      formData.append("education_cgpa", editCandidate.education_cgpa || "");
+      formData.append("education_universityContact", editCandidate.education_universityContact || "");
+      formData.append("education_universityEmail", editCandidate.education_universityEmail || "");
+      formData.append("education_universityAddress", editCandidate.education_universityAddress || "");
+      formData.append("education_collegeContact", editCandidate.education_collegeContact || "");
+      formData.append("education_collegeEmail", editCandidate.education_collegeEmail || "");
+      formData.append("education_collegeAddress", editCandidate.education_collegeAddress || "");
+
+      // Document Uploads
       if (editCandidate.resume) {
         formData.append("resume", editCandidate.resume);
+      }
+      
+      if (editCandidate.relievingLetter1) {
+        formData.append("relievingLetter1", editCandidate.relievingLetter1);
+      }
+      if (editCandidate.experienceLetter1) {
+        formData.append("experienceLetter1", editCandidate.experienceLetter1);
+      }
+      if (editCandidate.salarySlips1) {
+        formData.append("salarySlips1", editCandidate.salarySlips1);
+      }
+      
+      if (editCandidate.relievingLetter2) {
+        formData.append("relievingLetter2", editCandidate.relievingLetter2);
+      }
+      if (editCandidate.experienceLetter2) {
+        formData.append("experienceLetter2", editCandidate.experienceLetter2);
+      }
+      if (editCandidate.salarySlips2) {
+        formData.append("salarySlips2", editCandidate.salarySlips2);
+      }
+      
+      if (editCandidate.educationCertificate) {
+        formData.append("educationCertificate", editCandidate.educationCertificate);
+      }
+      if (editCandidate.marksheet) {
+        formData.append("marksheet", editCandidate.marksheet);
       }
 
       const res = await fetch(`/api/proxy/secure/modifyCandidate`, {
@@ -892,11 +1151,24 @@ function Modal({ title, children, onClose }) {
 }
 
 /* -------------------------------------------- */
+/* -------------------------------------------- */
 /* FORM COMPONENT — WITH FULL NEW FIELDS */
 /* -------------------------------------------- */
 function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
+  const [expandedSections, setExpandedSections] = useState({
+    supervisory1: false,
+    supervisory2: false,
+    employment1: false,
+    employment2: false,
+    education: false,
+  });
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
   return (
-    <div className="text-gray-900">
+    <div className="text-gray-900 max-h-[70vh] overflow-y-auto pr-2">
       {/* FULL NAME */}
       <h3 className="font-semibold text-lg mb-3 text-[#ff004f]">
         Personal Details
@@ -1088,6 +1360,650 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
           className="border p-2 rounded"
         />
       </div>
+
+      {/* ============================================ */}
+      {/* SUPERVISORY CHECK 1 - COLLAPSIBLE */}
+      {/* ============================================ */}
+      <div className="mt-6 border-2 border-blue-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('supervisory1')}
+          className="w-full bg-gradient-to-r from-blue-50 to-blue-100 p-4 flex justify-between items-center hover:from-blue-100 hover:to-blue-200 transition-all"
+        >
+          <h3 className="font-semibold text-lg text-blue-700">
+            👤 Supervisory Check 1 (Optional)
+          </h3>
+          <ChevronDown
+            className={`transform transition-transform ${expandedSections.supervisory1 ? 'rotate-180' : ''}`}
+            size={20}
+          />
+        </button>
+        
+        {expandedSections.supervisory1 && (
+          <div className="p-4 bg-white space-y-3">
+            <input
+              name="supervisory1_name"
+              value={data.supervisory1_name || ''}
+              onChange={onChange}
+              placeholder="Supervisor Name"
+              className="border p-2 rounded w-full"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="supervisory1_phone"
+                value={data.supervisory1_phone || ''}
+                onChange={onChange}
+                placeholder="Phone Number"
+                className="border p-2 rounded"
+              />
+              <input
+                name="supervisory1_email"
+                value={data.supervisory1_email || ''}
+                onChange={onChange}
+                placeholder="Email"
+                type="email"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="supervisory1_relationship"
+                value={data.supervisory1_relationship || ''}
+                onChange={onChange}
+                placeholder="Relationship (e.g., Former Manager)"
+                className="border p-2 rounded"
+              />
+              <input
+                name="supervisory1_company"
+                value={data.supervisory1_company || ''}
+                onChange={onChange}
+                placeholder="Company Name"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="supervisory1_designation"
+                value={data.supervisory1_designation || ''}
+                onChange={onChange}
+                placeholder="Designation"
+                className="border p-2 rounded"
+              />
+              <input
+                name="supervisory1_workingPeriod"
+                value={data.supervisory1_workingPeriod || ''}
+                onChange={onChange}
+                placeholder="Working Period (e.g., 2020-2023)"
+                className="border p-2 rounded"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ============================================ */}
+      {/* SUPERVISORY CHECK 2 - COLLAPSIBLE */}
+      {/* ============================================ */}
+      <div className="mt-4 border-2 border-blue-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('supervisory2')}
+          className="w-full bg-gradient-to-r from-blue-50 to-blue-100 p-4 flex justify-between items-center hover:from-blue-100 hover:to-blue-200 transition-all"
+        >
+          <h3 className="font-semibold text-lg text-blue-700">
+            👤 Supervisory Check 2 (Optional)
+          </h3>
+          <ChevronDown 
+            className={`transform transition-transform ${expandedSections.supervisory2 ? 'rotate-180' : ''}`}
+            size={20}
+          />
+        </button>
+        
+        {expandedSections.supervisory2 && (
+          <div className="p-4 bg-white space-y-3">
+            <input
+              name="supervisory2_name"
+              value={data.supervisory2_name || ''}
+              onChange={onChange}
+              placeholder="Supervisor Name"
+              className="border p-2 rounded w-full"
+            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="supervisory2_phone"
+                value={data.supervisory2_phone || ''}
+                onChange={onChange}
+                placeholder="Phone Number"
+                className="border p-2 rounded"
+              />
+              <input
+                name="supervisory2_email"
+                value={data.supervisory2_email || ''}
+                onChange={onChange}
+                placeholder="Email"
+                type="email"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="supervisory2_relationship"
+                value={data.supervisory2_relationship || ''}
+                onChange={onChange}
+                placeholder="Relationship (e.g., Former Team Lead)"
+                className="border p-2 rounded"
+              />
+              <input
+                name="supervisory2_company"
+                value={data.supervisory2_company || ''}
+                onChange={onChange}
+                placeholder="Company Name"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="supervisory2_designation"
+                value={data.supervisory2_designation || ''}
+                onChange={onChange}
+                placeholder="Designation"
+                className="border p-2 rounded"
+              />
+              <input
+                name="supervisory2_workingPeriod"
+                value={data.supervisory2_workingPeriod || ''}
+                onChange={onChange}
+                placeholder="Working Period (e.g., 2018-2020)"
+                className="border p-2 rounded"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ============================================ */}
+      {/* EMPLOYMENT HISTORY 1 - COLLAPSIBLE */}
+      {/* ============================================ */}
+      <div className="mt-4 border-2 border-green-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('employment1')}
+          className="w-full bg-gradient-to-r from-green-50 to-green-100 p-4 flex justify-between items-center hover:from-green-100 hover:to-green-200 transition-all"
+        >
+          <h3 className="font-semibold text-lg text-green-700">
+            🏢 Employment History 1 (Optional)
+          </h3>
+          <ChevronDown 
+            className={`transform transition-transform ${expandedSections.employment1 ? 'rotate-180' : ''}`}
+            size={20}
+          />
+        </button>
+        
+        {expandedSections.employment1 && (
+          <div className="p-4 bg-white space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="employment1_company"
+                value={data.employment1_company || ''}
+                onChange={onChange}
+                placeholder="Company Name"
+                className="border p-2 rounded"
+              />
+              <input
+                name="employment1_designation"
+                value={data.employment1_designation || ''}
+                onChange={onChange}
+                placeholder="Designation"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Joining Date</label>
+                <input
+                  type="date"
+                  name="employment1_joiningDate"
+                  value={data.employment1_joiningDate || ''}
+                  onChange={onChange}
+                  className="border p-2 rounded w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Relieving Date</label>
+                <input
+                  type="date"
+                  name="employment1_relievingDate"
+                  value={data.employment1_relievingDate || ''}
+                  onChange={onChange}
+                  className="border p-2 rounded w-full"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input
+                name="employment1_hrName"
+                value={data.employment1_hrName || ''}
+                onChange={onChange}
+                placeholder="HR Name"
+                className="border p-2 rounded"
+              />
+              <input
+                name="employment1_hrContact"
+                value={data.employment1_hrContact || ''}
+                onChange={onChange}
+                placeholder="HR Contact"
+                className="border p-2 rounded"
+              />
+              <input
+                name="employment1_hrEmail"
+                value={data.employment1_hrEmail || ''}
+                onChange={onChange}
+                placeholder="HR Email"
+                type="email"
+                className="border p-2 rounded"
+              />
+            </div>
+            <textarea
+              name="employment1_address"
+              value={data.employment1_address || ''}
+              onChange={onChange}
+              placeholder="Company Address"
+              rows={2}
+              className="border p-2 rounded w-full"
+            />
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Relieving Letter* (PDF)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'relievingLetter1')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.relievingLetter1 && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.relievingLetter1.name}
+                  </p>
+                )}
+                {!data.relievingLetter1 && data.relievingLetterUrl1 && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Experience Letter (PDF, Optional)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'experienceLetter1')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.experienceLetter1 && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.experienceLetter1.name}
+                  </p>
+                )}
+                {!data.experienceLetter1 && data.experienceLetterUrl1 && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Salary Slips (PDF, Optional)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'salarySlips1')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.salarySlips1 && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.salarySlips1.name}
+                  </p>
+                )}
+                {!data.salarySlips1 && data.salarySlipsUrl1 && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ============================================ */}
+      {/* EMPLOYMENT HISTORY 2 - COLLAPSIBLE */}
+      {/* ============================================ */}
+      <div className="mt-4 border-2 border-green-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('employment2')}
+          className="w-full bg-gradient-to-r from-green-50 to-green-100 p-4 flex justify-between items-center hover:from-green-100 hover:to-green-200 transition-all"
+        >
+          <h3 className="font-semibold text-lg text-green-700">
+            🏢 Employment History 2 (Optional)
+          </h3>
+          <ChevronDown 
+            className={`transform transition-transform ${expandedSections.employment2 ? 'rotate-180' : ''}`}
+            size={20}
+          />
+        </button>
+        
+        {expandedSections.employment2 && (
+          <div className="p-4 bg-white space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="employment2_company"
+                value={data.employment2_company || ''}
+                onChange={onChange}
+                placeholder="Company Name"
+                className="border p-2 rounded"
+              />
+              <input
+                name="employment2_designation"
+                value={data.employment2_designation || ''}
+                onChange={onChange}
+                placeholder="Designation"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Joining Date</label>
+                <input
+                  type="date"
+                  name="employment2_joiningDate"
+                  value={data.employment2_joiningDate || ''}
+                  onChange={onChange}
+                  className="border p-2 rounded w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Relieving Date</label>
+                <input
+                  type="date"
+                  name="employment2_relievingDate"
+                  value={data.employment2_relievingDate || ''}
+                  onChange={onChange}
+                  className="border p-2 rounded w-full"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input
+                name="employment2_hrName"
+                value={data.employment2_hrName || ''}
+                onChange={onChange}
+                placeholder="HR Name"
+                className="border p-2 rounded"
+              />
+              <input
+                name="employment2_hrContact"
+                value={data.employment2_hrContact || ''}
+                onChange={onChange}
+                placeholder="HR Contact"
+                className="border p-2 rounded"
+              />
+              <input
+                name="employment2_hrEmail"
+                value={data.employment2_hrEmail || ''}
+                onChange={onChange}
+                placeholder="HR Email"
+                type="email"
+                className="border p-2 rounded"
+              />
+            </div>
+            <textarea
+              name="employment2_address"
+              value={data.employment2_address || ''}
+              onChange={onChange}
+              placeholder="Company Address"
+              rows={2}
+              className="border p-2 rounded w-full"
+            />
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Relieving Letter* (PDF)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'relievingLetter2')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.relievingLetter2 && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.relievingLetter2.name}
+                  </p>
+                )}
+                {!data.relievingLetter2 && data.relievingLetterUrl2 && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Experience Letter (PDF, Optional)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'experienceLetter2')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.experienceLetter2 && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.experienceLetter2.name}
+                  </p>
+                )}
+                {!data.experienceLetter2 && data.experienceLetterUrl2 && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Salary Slips (PDF, Optional)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'salarySlips2')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.salarySlips2 && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.salarySlips2.name}
+                  </p>
+                )}
+                {!data.salarySlips2 && data.salarySlipsUrl2 && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ============================================ */}
+      {/* EDUCATION CHECK - COLLAPSIBLE */}
+      {/* ============================================ */}
+      <div className="mt-4 border-2 border-purple-200 rounded-lg overflow-hidden">
+        <button
+          type="button"
+          onClick={() => toggleSection('education')}
+          className="w-full bg-gradient-to-r from-purple-50 to-purple-100 p-4 flex justify-between items-center hover:from-purple-100 hover:to-purple-200 transition-all"
+        >
+          <h3 className="font-semibold text-lg text-purple-700">
+            🎓 Education Check (Optional)
+          </h3>
+          <ChevronDown 
+            className={`transform transition-transform ${expandedSections.education ? 'rotate-180' : ''}`}
+            size={20}
+          />
+        </button>
+        
+        {expandedSections.education && (
+          <div className="p-4 bg-white space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Degree Certificate (PDF, Optional)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'educationCertificate')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.educationCertificate && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.educationCertificate.name}
+                  </p>
+                )}
+                {!data.educationCertificate && data.educationCertificateUrl && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Marksheet (PDF, Optional)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => onChange(e, true, 'marksheet')}
+                  className="border p-2 rounded w-full"
+                />
+                {data.marksheet && (
+                  <p className="text-xs mt-1 text-green-600">
+                    ✓ New file: {data.marksheet.name}
+                  </p>
+                )}
+                {!data.marksheet && data.marksheetUrl && (
+                  <p className="text-xs mt-1 text-blue-600">
+                    📄 Existing file uploaded
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="education_degree"
+                value={data.education_degree || ''}
+                onChange={onChange}
+                placeholder="Degree (e.g., Bachelor of Technology)"
+                className="border p-2 rounded"
+              />
+              <input
+                name="education_specialization"
+                value={data.education_specialization || ''}
+                onChange={onChange}
+                placeholder="Specialization"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="education_universityName"
+                value={data.education_universityName || ''}
+                onChange={onChange}
+                placeholder="University Name"
+                className="border p-2 rounded"
+              />
+              <input
+                name="education_collegeName"
+                value={data.education_collegeName || ''}
+                onChange={onChange}
+                placeholder="College Name"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input
+                name="education_yearOfPassing"
+                value={data.education_yearOfPassing || ''}
+                onChange={onChange}
+                placeholder="Year of Passing"
+                className="border p-2 rounded"
+              />
+              <input
+                name="education_cgpa"
+                value={data.education_cgpa || ''}
+                onChange={onChange}
+                placeholder="CGPA/Percentage"
+                className="border p-2 rounded"
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <input
+                name="education_universityContact"
+                value={data.education_universityContact || ''}
+                onChange={onChange}
+                placeholder="University Contact"
+                className="border p-2 rounded"
+              />
+              <input
+                name="education_universityEmail"
+                value={data.education_universityEmail || ''}
+                onChange={onChange}
+                placeholder="University Email"
+                type="email"
+                className="border p-2 rounded"
+              />
+              <input
+                name="education_collegeContact"
+                value={data.education_collegeContact || ''}
+                onChange={onChange}
+                placeholder="College Contact"
+                className="border p-2 rounded"
+              />
+            </div>
+            <input
+              name="education_collegeEmail"
+              value={data.education_collegeEmail || ''}
+              onChange={onChange}
+              placeholder="College Email"
+              type="email"
+              className="border p-2 rounded w-full"
+            />
+            <textarea
+              name="education_universityAddress"
+              value={data.education_universityAddress || ''}
+              onChange={onChange}
+              placeholder="University Address"
+              rows={2}
+              className="border p-2 rounded w-full"
+            />
+            <textarea
+              name="education_collegeAddress"
+              value={data.education_collegeAddress || ''}
+              onChange={onChange}
+              placeholder="College Address"
+              rows={2}
+              className="border p-2 rounded w-full"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* RESUME UPLOAD */}
       <h3 className="font-semibold text-lg mt-6 mb-3 text-red-600">
         Resume Upload (Optional)
       </h3>
@@ -1131,3 +2047,6 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
     </div>
   );
 }
+
+
+

@@ -87,11 +87,13 @@ export default function OrgBGVRequestsPage() {
   const MANUAL_SERVICES = [
     { id: "address_verification", name: "Address Verification" },
     { id: "education_check_manual", name: "Education Manual Check" },
-    { id: "supervisory_check", name: "Supervisory Check" },
+    { id: "employment_history_manual", name: "Employment History Manual" },
+    { id: "employment_history_manual_2", name: "Employment History Manual 2" },
+    { id: "supervisory_check_1", name: "Supervisory Check 1" },
+    { id: "supervisory_check_2", name: "Supervisory Check 2" },
   ];
 
   const AI_SERVICES = [
-    { id: "ai_cv_validation", name: "Resume Validation" },
     { id: "ai_education_validation", name: "Education AI Check" },
   ];
 

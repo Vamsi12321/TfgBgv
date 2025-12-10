@@ -67,7 +67,7 @@ export default function SelfVerificationPage() {
     "employment_history_manual",
   ];
 
-  const AI_CHECKS = ["ai_cv_validation", "ai_education_validation"];
+  const AI_CHECKS = ["ai_education_validation"];
 
   /* ---------------------------------------------- */
   /* STATE                                           */

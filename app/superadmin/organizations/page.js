@@ -32,8 +32,10 @@ const AVAILABLE_SERVICES = [
   // ⭐ NEW SERVICES ADDED ⭐
   "address_verification",
   "education_check_manual",
-  "supervisory_check",
-  "ai_cv_validation",
+  "employment_history_manual",
+  "employment_history_manual_2",
+  "supervisory_check_1",
+  "supervisory_check_2",
   "ai_education_validation",
 ];
 
@@ -612,8 +614,10 @@ function OrganizationDrawer({
     "court_record",
     "address_verification",
     "education_check_manual",
-    "supervisory_check",
-    "ai_cv_validation",
+    "employment_history_manual",
+    "employment_history_manual_2",
+    "supervisory_check_1",
+    "supervisory_check_2",
     "ai_education_validation",
   ];
 

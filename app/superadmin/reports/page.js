@@ -31,7 +31,7 @@ const SERVICE_ICONS = {
   employment_history: "👔",
   aadhaar_to_uan: "🔗",
   credit_report: "💳",
-  court_record: "⚖️",
+  court_record: "⚖",
 };
 
 /* ----------------------------------------------- */
@@ -56,7 +56,7 @@ const getServiceCertId = (stage, checkName, candId) =>
 /* ----------------------------------------------- */
 /* PDF SINGLE CERT */
 /* ----------------------------------------------- */
-async function downloadSingleCert(id, fileName, setDownloading) {
+async function downloadSingleCert(id, fileName, setDownloading, attachments = []) {
   try {
     setDownloading(true);
 
@@ -84,6 +84,28 @@ async function downloadSingleCert(id, fileName, setDownloading) {
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
     pdf.addImage(img, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    // Add clickable links for attachments
+    if (attachments && attachments.length > 0) {
+      // Find attachment links in the element
+      const attachmentLinks = element.querySelectorAll('a[href^="http"]');
+      attachmentLinks.forEach((link, idx) => {
+        if (idx < attachments.length) {
+          const rect = link.getBoundingClientRect();
+          const elementRect = element.getBoundingClientRect();
+          
+          // Calculate position relative to the element
+          const x = ((rect.left - elementRect.left) * pdfWidth) / element.offsetWidth;
+          const y = ((rect.top - elementRect.top) * pdfWidth) / element.offsetWidth;
+          const width = (rect.width * pdfWidth) / element.offsetWidth;
+          const height = (rect.height * pdfWidth) / element.offsetWidth;
+          
+          // Add clickable link to PDF
+          pdf.link(x, y, width, height, { url: attachments[idx] });
+        }
+      });
+    }
+
     pdf.save(fileName);
   } finally {
     setDownloading(false);
@@ -91,9 +113,9 @@ async function downloadSingleCert(id, fileName, setDownloading) {
 }
 
 /* ----------------------------------------------- */
-/* PDF MERGED FINAL — OPTION C (Title Page + All Reports) */
+/* PDF MERGED FINAL — WITH INDEX PAGE (MATCHING CERTIFICATE STYLE) */
 /* ----------------------------------------------- */
-async function mergeAllCertificates(ids, fileName, setDownloading) {
+async function mergeAllCertificates(ids, fileName, setDownloading, candidate, verification) {
   try {
     setDownloading(true);
 
@@ -104,13 +126,307 @@ async function mergeAllCertificates(ids, fileName, setDownloading) {
     });
 
     /* ---------------------- */
-    /* HEADER PAGE */
+    /* CREATE INDEX PAGE AS HTML ELEMENT */
     /* ---------------------- */
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(28);
-    pdf.setTextColor(0, 0, 0);
+    
+    // Create a temporary div for the index page
+    const indexDiv = document.createElement('div');
+    indexDiv.id = 'temp-index-page';
+    indexDiv.style.position = 'absolute';
+    indexDiv.style.left = '-9999px';
+    indexDiv.style.top = '0';
+    document.body.appendChild(indexDiv);
 
-    pdf.text("ALL VERIFICATION REPORTS", 297.5, 200, { align: "center" });
+    // Get all checks from verification (including AI checks for index page)
+    const allChecks = [];
+    const stages = verification?.stages || {};
+    
+    if (stages.primary) {
+      stages.primary.forEach(chk => {
+        allChecks.push({ ...chk, stage: 'Primary' });
+      });
+    }
+    if (stages.secondary) {
+      stages.secondary.forEach(chk => {
+        allChecks.push({ ...chk, stage: 'Secondary' });
+      });
+    }
+    if (stages.final) {
+      stages.final.forEach(chk => {
+        allChecks.push({ ...chk, stage: 'Final' });
+      });
+    }
+
+    // Build the index page HTML (matching certificate style)
+    indexDiv.innerHTML = `
+      <div style="
+        width: 860px;
+        min-height: 1120px;
+        padding: 40px 50px 60px 50px;
+        background: #ffffff;
+        font-family: Arial, sans-serif;
+        color: #000;
+        position: relative;
+        overflow: hidden;
+      ">
+        <!-- Watermark -->
+        <img 
+          src="/logos/maihooMain.png" 
+          alt="watermark"
+          style="
+            position: absolute;
+            top: 300px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.08;
+            width: 750px;
+            height: 750px;
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 1;
+          "
+        />
+
+        <!-- Content -->
+        <div style="position: relative; z-index: 2;">
+          <!-- Header with Logo and Contact Info -->
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+            <!-- Left: Logo -->
+            <div style="flex-shrink: 0; margin-top: 5px;">
+              <img 
+                src="/logos/maihooMain.png" 
+                alt="logo"
+                style="
+                  max-height: 180px;
+                  max-width: 450px;
+                  height: auto;
+                  width: auto;
+                  display: block;
+                  object-fit: contain;
+                "
+              />
+            </div>
+
+            <!-- Center: Title -->
+            <div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;">
+              <h1 style="
+                font-size: 26px;
+                font-weight: bold;
+                color: #000;
+                margin: 0 0 8px 0;
+                line-height: 1.3;
+              ">
+                All Verification Reports
+              </h1>
+              <p style="
+                font-size: 14px;
+                color: #555;
+                margin: 0;
+                line-height: 1.4;
+              ">
+                Comprehensive Background Verification Summary
+              </p>
+            </div>
+
+            <!-- Right: Contact Information -->
+            <div style="
+              flex-shrink: 0;
+              margin-top: 5px;
+              text-align: right;
+              font-size: 12px;
+              color: #333;
+              line-height: 1.8;
+            ">
+              <p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p>
+              <p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p>
+              <p style="margin: 0;">🌐 maihootech.co.in</p>
+            </div>
+          </div>
+
+          <!-- Candidate Information -->
+          <div style="
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+          ">
+            <h2 style="
+              font-size: 16px;
+              font-weight: bold;
+              color: #000;
+              margin: 0 0 15px 0;
+              border-bottom: 2px solid #ddd;
+              padding-bottom: 8px;
+            ">
+              Candidate Information
+            </h2>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">Name:</td>
+                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.firstName} ${candidate.lastName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Email:</td>
+                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.email || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Phone:</td>
+                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.phone || 'N/A'}</td>
+              </tr>
+              <tr>
+                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Organization:</td>
+                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.organizationName || 'N/A'}</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Verification Summary Table -->
+          <div style="margin-bottom: 30px;">
+            <h2 style="
+              font-size: 16px;
+              font-weight: bold;
+              color: #000;
+              margin: 0 0 15px 0;
+              border-bottom: 2px solid #ddd;
+              padding-bottom: 8px;
+            ">
+              Verification Summary
+            </h2>
+            <table style="
+              width: 100%;
+              border-collapse: collapse;
+              border: 2px solid #e0e0e0;
+            ">
+              <thead>
+                <tr style="background: #f0f0f0;">
+                  <th style="
+                    padding: 12px;
+                    text-align: left;
+                    font-size: 13px;
+                    font-weight: bold;
+                    color: #000;
+                    border-bottom: 2px solid #ddd;
+                    border-right: 1px solid #ddd;
+                  ">BGV Check</th>
+                  <th style="
+                    padding: 12px;
+                    text-align: left;
+                    font-size: 13px;
+                    font-weight: bold;
+                    color: #000;
+                    border-bottom: 2px solid #ddd;
+                    border-right: 1px solid #ddd;
+                  ">Service</th>
+                  <th style="
+                    padding: 12px;
+                    text-align: left;
+                    font-size: 13px;
+                    font-weight: bold;
+                    color: #000;
+                    border-bottom: 2px solid #ddd;
+                  ">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${allChecks.map((chk, index) => {
+                  const status = chk.status || 'PENDING';
+                  let statusText = '';
+                  let statusColor = '';
+                  
+                  if (status === 'COMPLETED') {
+                    statusText = '✓ Verified';
+                    statusColor = '#22c55e';
+                  } else if (status === 'FAILED') {
+                    statusText = '✗ Failed';
+                    statusColor = '#ef4444';
+                  } else {
+                    statusText = '○ Pending';
+                    statusColor = '#9ca3af';
+                  }
+
+                  return `
+                    <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
+                      <td style="
+                        padding: 10px 12px;
+                        font-size: 12px;
+                        color: #000;
+                        border-bottom: 1px solid #e0e0e0;
+                        border-right: 1px solid #e0e0e0;
+                      ">${chk.stage}</td>
+                      <td style="
+                        padding: 10px 12px;
+                        font-size: 12px;
+                        color: #000;
+                        border-bottom: 1px solid #e0e0e0;
+                        border-right: 1px solid #e0e0e0;
+                      ">${formatServiceName(chk.check)}</td>
+                      <td style="
+                        padding: 10px 12px;
+                        font-size: 12px;
+                        font-weight: bold;
+                        color: ${statusColor};
+                        border-bottom: 1px solid #e0e0e0;
+                      ">${statusText}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Footer -->
+          <div style="
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+          ">
+            <!-- Report Stats -->
+            <div style="font-size: 11px; color: #666; margin-bottom: 15px;">
+              <p style="margin: 5px 0;">Generated on: ${new Date().toLocaleString()}</p>
+              <p style="margin: 5px 0;">Total Verifications: ${allChecks.length}</p>
+              <p style="margin: 5px 0;">Completed: ${allChecks.filter(c => c.status === 'COMPLETED').length}</p>
+            </div>
+            
+            <!-- Address - Single line in red with red border -->
+            <div style="
+              margin-top: 230px;
+              padding-top: 15px;
+              border-top: 2px solid #272626ff;
+              font-size: 12px;
+              color: #dc3545;
+              text-align: center;
+              font-weight: 600;
+              line-height: "3px";
+            ">
+              <p style="margin: 0;">
+                Maihoo Technologies Private Limited, Vaishnavi's Cynosure, 2-48/5/6, 8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Wait for images to load
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Convert index page to canvas
+    const indexCanvas = await safeHtml2Canvas(indexDiv, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+    });
+
+    const indexImg = indexCanvas.toDataURL("image/png");
+    const pdfWidth = 595.28;
+    const indexPdfHeight = (indexCanvas.height * pdfWidth) / indexCanvas.width;
+
+    // Add index page to PDF
+    pdf.addImage(indexImg, "PNG", 0, 0, pdfWidth, indexPdfHeight);
+
+    // Clean up
+    document.body.removeChild(indexDiv);
 
     /* ---------------------- */
     /* ADD CERTIFICATES */
@@ -122,11 +438,26 @@ async function mergeAllCertificates(ids, fileName, setDownloading) {
       const canvas = await safeHtml2Canvas(el, { scale: 2 });
       const img = canvas.toDataURL("image/png");
 
-      const pdfWidth = 595.28;
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      const certPdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-      pdf.addPage(); // first certificate page
-      pdf.addImage(img, "PNG", 0, 0, pdfWidth, pdfHeight);
+      pdf.addPage();
+      pdf.addImage(img, "PNG", 0, 0, pdfWidth, certPdfHeight);
+
+      // Add clickable links for attachments on this page
+      const attachmentLinks = el.querySelectorAll('a[href^="http"]');
+      attachmentLinks.forEach((link) => {
+        const rect = link.getBoundingClientRect();
+        const elementRect = el.getBoundingClientRect();
+        
+        // Calculate position relative to the element
+        const x = ((rect.left - elementRect.left) * pdfWidth) / el.offsetWidth;
+        const y = ((rect.top - elementRect.top) * pdfWidth) / el.offsetWidth;
+        const width = (rect.width * pdfWidth) / el.offsetWidth;
+        const height = (rect.height * pdfWidth) / el.offsetWidth;
+        
+        // Add clickable link to PDF
+        pdf.link(x, y, width, height, { url: link.href });
+      });
     }
 
     pdf.save(fileName);
@@ -164,7 +495,7 @@ export default function SuperAdminReportsPage() {
     (async () => {
       try {
         setLoading(true);
-        const res = await fetch(`/api/proxy/secure/getOrganizations`, {
+        const res = await fetch("/api/proxy/secure/getOrganizations", {
           credentials: "include",
         });
         const data = await res.json();
@@ -190,7 +521,7 @@ export default function SuperAdminReportsPage() {
       setLoading(true);
 
       const res = await fetch(
-        `/api/proxy/secure/getCandidates?orgId=${orgId}`,
+        `/api/proxy/secure/getCandidates?orgId=${orgId}`,  
         { credentials: "include" }
       );
 
@@ -203,7 +534,7 @@ export default function SuperAdminReportsPage() {
         list.map(async (c) => {
           try {
             const verRes = await fetch(
-              `/api/proxy/secure/getVerifications?candidateId=${c._id}`,
+              `/api/proxy/secure/getVerifications?candidateId=${c._id}`,  
               { credentials: "include" }
             );
             const verData = await verRes.json();
@@ -507,7 +838,8 @@ export default function SuperAdminReportsPage() {
                                       downloadSingleCert(
                                         certId,
                                         `${c._id}-primary-${chk.check}.pdf`,
-                                        setDownloading
+                                        setDownloading,
+                                        chk.attachments || []
                                       )
                                     }
                                     className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
@@ -594,7 +926,8 @@ export default function SuperAdminReportsPage() {
                                       downloadSingleCert(
                                         certId,
                                         `${c._id}-secondary-${chk.check}.pdf`,
-                                        setDownloading
+                                        setDownloading,
+                                        chk.attachments || []
                                       )
                                     }
                                     className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
@@ -681,7 +1014,8 @@ export default function SuperAdminReportsPage() {
                                       downloadSingleCert(
                                         certId,
                                         `${c._id}-final-${chk.check}.pdf`,
-                                        setDownloading
+                                        setDownloading,
+                                        chk.attachments || []
                                       )
                                     }
                                     className={`mt-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm ${
@@ -714,9 +1048,10 @@ export default function SuperAdminReportsPage() {
                   )}
 
                   {/* MERGED ALL REPORTS */}
-                  {primaryChecks.every((x) => x.status === "COMPLETED") &&
-                    secondaryChecks.every((x) => x.status === "COMPLETED") &&
-                    finalChecks.every((x) => x.status === "COMPLETED") && (
+                  {/* Show button if at least one stage is fully completed */}
+                  {((primaryChecks.length > 0 && primaryChecks.every((x) => x.status === "COMPLETED")) ||
+                    (secondaryChecks.length > 0 && secondaryChecks.every((x) => x.status === "COMPLETED")) ||
+                    (finalChecks.length > 0 && finalChecks.every((x) => x.status === "COMPLETED"))) && (
                       <button
                         disabled={downloading}
                         onClick={() => {
@@ -736,7 +1071,9 @@ export default function SuperAdminReportsPage() {
                           mergeAllCertificates(
                             allIds,
                             `${c._id}-all-verification-reports.pdf`,
-                            setDownloading
+                            setDownloading,
+                            c,
+                            v
                           );
                         }}
                         className={`w-full bg-[#ff004f] text-white hover:bg-[#e60047] rounded-xl shadow py-4 px-6 font-bold text-lg flex justify-center items-center gap-3 mt-10 ${
@@ -803,6 +1140,10 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
   } else {
     bulletItems = [String(remarks)];
   }
+
+  // Get attachments
+  const attachments = checks[0]?.attachments || [];
+  const hasAttachments = attachments && attachments.length > 0;
 
   return (
     <div
@@ -937,7 +1278,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
           style={{
             width: "100%",
             height: "3px",
-            background: "#000",
+            background: "#272626ff",
             marginTop: "10px",
             marginBottom: "60px",
           }}
@@ -957,7 +1298,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
           />
           <div
             style={{
-              flexGrow: 1,
+              width:"25%",
               height: "2px",
               background: "#5cb85c",
               marginLeft: "10px",
@@ -991,6 +1332,46 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             </div>
           ))}
         </div>
+
+        {/* =============================================== */}
+        {/* ATTACHMENTS SECTION                              */}
+        {/* =============================================== */}
+        {hasAttachments && (
+          <div style={{ marginBottom: "30px" }}>
+            <p style={{ fontSize: "14px", color: "#000", fontWeight: "bold", marginBottom: "15px" }}>
+              Please find the proof of this verification as attachments:
+            </p>
+            {attachments.map((url, idx) => {
+              const fileName = url.split('/').pop() || `Attachment ${idx + 1}`;
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginBottom: "8px",
+                    fontSize: "13px",
+                  }}
+                >
+                  <span style={{ marginRight: "8px" }}>📎</span>
+                  <a 
+                    href={url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{ 
+                      color: "#0066cc", 
+                      textDecoration: "underline",
+                      wordBreak: "break-all",
+                      cursor: "pointer"
+                    }}
+                  >
+                    {fileName}
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* =============================================== */}
@@ -999,7 +1380,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
       <div
         style={{
           position: "absolute",
-          bottom: "10px",
+          bottom: "30px",
           left: "50px",
           right: "50px",
           textAlign: "center",
@@ -1008,9 +1389,9 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
         <div
           style={{
             height: "2px",
-            background: "#dc3545",
+            background: "#272626ff",
             width: "100%",
-            marginBottom: "10px",
+            marginBottom: "12px",
           }}
         />
 
@@ -1020,10 +1401,10 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             color: "#dc3545",
             fontWeight: "600",
             margin: 0,
+            lineHeight: "1.4",
           }}
         >
-          Maihoo Technologies Private Limited, Vaishnavi's Cynosure, 2-48/5/6,
-          8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032
+          Maihoo Technologies Private Limited, Vaishnavi's Cynosure, 2-48/5/6, 8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032
         </p>
       </div>
     </div>

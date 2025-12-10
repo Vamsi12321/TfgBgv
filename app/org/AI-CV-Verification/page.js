@@ -375,6 +375,7 @@ export default function OrgAICVVerificationPage() {
     try {
       const fd = new FormData();
       fd.append("verificationId", verificationId);
+      fd.append("candidateId", selectedCandidate._id);
       fd.append("panNumber", selectedCandidate.panNumber || "");
       if (resumeFile) fd.append("resume", resumeFile);
 
@@ -392,7 +393,9 @@ export default function OrgAICVVerificationPage() {
       const data = await res.json();
 
       if (data.verificationId) {
-        loadResults(data.verificationId);
+        // Directly use the results from the response instead of fetching again
+        // The response should contain the full analysis data
+        setAnalysis(data);
         setSuccessModal({
           isOpen: true,
           message: "Validation Complete!",
@@ -450,6 +453,7 @@ export default function OrgAICVVerificationPage() {
     try {
       const body = new URLSearchParams();
       body.append("verificationId", verificationId);
+      body.append("candidateId", selectedCandidate._id);
       body.append("final_status", status);
       body.append("staff_remarks", finalRemarks);
 

@@ -720,14 +720,13 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
     <div
       id={id}
       style={{
-        width: "794px",         // A4 EXACT WIDTH
-        minHeight: "1123px",    // A4 HEIGHT
-        padding: "10px 50px 60px 50px",
+        width: "794px",
+        minHeight: "1123px",
+        padding: "10px 50px 80px 50px", // ⬅ Increased bottom padding for footer visibility
         background: "#fff",
         fontFamily: "Arial, sans-serif",
         color: "#000",
         position: "relative",
-        overflow: "hidden",
       }}
     >
       {/* WATERMARK */}
@@ -748,7 +747,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
         }}
       />
 
-      {/* CONTENT */}
+      {/* MAIN CONTENT */}
       <div style={{ position: "relative", zIndex: 2 }}>
         {/* HEADER */}
         <div
@@ -795,7 +794,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
         </div>
 
         {/* CANDIDATE DETAILS */}
-        <div style={{ fontSize: "15px", lineHeight: "28px", marginBottom: "60px" }}>
+        <div style={{ fontSize: "15px", lineHeight: "28px", marginBottom: "40px" }}>
           <p><b>Candidate Name:</b> {candidate.firstName} {candidate.lastName}</p>
           <p><b>Candidate ID:</b> {candidate._id}</p>
           <p><b>Organization:</b> {orgName}</p>
@@ -815,80 +814,90 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
           </p>
         </div>
 
-        {/* BLACK LINE */}
-        <div
-          style={{
-            width: "100%",
-            height: "3px",
-            background: "#000",
-            marginBottom: "50px",
-          }}
-        />
+       {/* SHORT GREEN BAR (Indicator Bar) */}
+<div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    marginBottom: "18px", // reduced gap
+  }}
+>
+  <div
+    style={{
+      width: "38px",
+      height: "18px", // increased thickness
+      background: "#5cb85c",
+      borderRadius: "5px",
+    }}
+  />
+  <div
+    style={{
+      height: "4px", // thicker line
+      background: "#5cb85c",
+      width: "22%",  // shorter length
+      marginLeft: "10px",
+      borderRadius: "2px",
+    }}
+  />
+</div>
 
-        {/* GREEN STATUS BAR */}
-        <div style={{ display: "flex", alignItems: "center", marginBottom: "80px" }}>
-          <div
-            style={{
-              width: "60px",
-              height: "28px",
-              background: "#5cb85c",
-              borderRadius: "5px",
-            }}
-          />
-          <div
-            style={{
-              height: "2px",
-              background: "#5cb85c",
-              flexGrow: 1,
-              marginLeft: "10px",
-            }}
-          />
-        </div>
+{/* POSITIVE FINDINGS (NO HEADING) */}
+{positives.length > 0 && (
+  <div style={{ marginBottom: "35px" }}>
+    {positives.map((item, i) => (
+      <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+        <span style={{ fontSize: "18px" }}>✓</span>
+        <span>{item}</span>
+      </div>
+    ))}
+  </div>
+)}
 
-        {/* POSITIVE FINDINGS */}
-        {positives.length > 0 && (
-          <>
-            <h3 style={{ fontSize: "20px", color: "#2c7a2c", fontWeight: 700 }}>
-              Positive Findings
-            </h3>
-            <div style={{ marginTop: "10px", marginBottom: "40px" }}>
-              {positives.map((item, i) => (
-                <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-                  <span style={{ fontSize: "18px" }}>✓</span>
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+{/* SHORT RED BAR (Indicator Bar) */}
+{redflags.length > 0 && (
+  <div
+    style={{
+      display: "flex",
+      alignItems: "center",
+      marginBottom: "18px",
+    }}
+  >
+    <div
+      style={{
+        width: "38px",
+        height: "18px", // thicker
+        background: "#d9534f",
+        borderRadius: "5px",
+      }}
+    />
+    <div
+      style={{
+        height: "4px",
+        background: "#d9534f",
+        width: "22%",   // shorter line
+        marginLeft: "10px",
+        borderRadius: "2px",
+      }}
+    />
+  </div>
+)}
 
-        {/* RED FLAGS */}
-        {redflags.length > 0 && (
-          <>
-            <div style={{ display: "flex", gap: "10px", marginBottom: "30px" }}>
-              <div style={{ width: "60px", height: "28px", background: "#d9534f", borderRadius: "5px" }} />
-              <div style={{ height: "2px", background: "#d9534f", flexGrow: 1 }} />
-            </div>
+{/* RED FLAGS (NO HEADING) */}
+{redflags.length > 0 &&
+  redflags.map((rf, i) => (
+    <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
+      <span style={{ color: "#d9534f", fontSize: "18px" }}>•</span>
+      <span>{rf.issue || rf.description}</span>
+    </div>
+  ))}
 
-            <h3 style={{ fontSize: "20px", color: "#d9534f", fontWeight: 700 }}>
-              Red Flags
-            </h3>
-
-            {redflags.map((rf, i) => (
-              <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-                <span style={{ color: "#d9534f", fontSize: "18px" }}>✓</span>
-                <span>{rf.issue || rf.description}</span>
-              </div>
-            ))}
-          </>
-        )}
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER - ALWAYS VISIBLE */}
       <div
         style={{
           position: "absolute",
-          bottom: "10px",
+          bottom: "20px",
           left: "50px",
           right: "50px",
           textAlign: "center",
