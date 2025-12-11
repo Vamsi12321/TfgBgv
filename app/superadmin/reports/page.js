@@ -675,6 +675,9 @@ export default function SuperAdminReportsPage() {
         </div>
       )}
 
+
+      
+
       {/* --------------------------- CANDIDATES --------------------------- */}
       {!loading &&
         candidates.map((c) => {
@@ -1263,12 +1266,34 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             {new Date().toLocaleString()}
           </p>
 
-          <p style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <strong>Status:</strong>
-            <span style={{ color: "#5cb85c", fontWeight: "bold", fontSize: "16px" }}>
-              ✓ Completed
-            </span>
-          </p>
+         {/* STATUS */}
+{(() => {
+  const status = checks[0]?.status || "PENDING";
+
+  let icon = "○";
+  let color = "#9ca3af"; // gray
+  let text = "Pending";
+
+  if (status === "COMPLETED") {
+    icon = "✓";
+    color = "#22c55e"; // green
+    text = "Completed";
+  } else if (status === "FAILED") {
+    icon = "✗";
+    color = "#ef4444"; // red
+    text = "Failed";
+  }
+
+  return (
+    <p style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+      <strong>Status:</strong>
+      <span style={{ fontWeight: "bold", fontSize: "16px", color }}>
+        {icon} {text}
+      </span>
+    </p>
+  );
+})()}
+
         </div>
 
         {/* =============================================== */}

@@ -114,6 +114,19 @@ export default function OrgAdminLayout({ children }) {
       href: "/org/manage-candidates",
       icon: UserSearch,
     },
+    // ⭐ STANDARDIZED NAMES — SAME AS SUPERADMIN
+    { name: "AI Screening", href: "/org/AI-screening", icon: Brain },
+    {
+      name: "AI CV Validation",
+      href: "/org/AI-CV-Verification",
+      icon: ScanSearch,
+    },
+     {
+      name: "AI Edu Validation",
+      href: "/org/AI-Edu-Verification",
+      icon: Sparkles,
+    },
+
     {
       name: "Bgv Services",
       href: "/org/bgv-requests",
@@ -125,19 +138,8 @@ export default function OrgAdminLayout({ children }) {
       icon: UserCheck,
     },
 
-    // ⭐ STANDARDIZED NAMES — SAME AS SUPERADMIN
-    { name: "AI Screening", href: "/org/AI-screening", icon: Brain },
-    {
-      name: "AI CV Validation",
-      href: "/org/AI-CV-Verification",
-      icon: ScanSearch,
-    },
-    {
-      name: "AI Edu Validation",
-      href: "/org/AI-Edu-Verification",
-      icon: Sparkles,
-    },
-
+    
+   
     { name: "Support & Help Desk", href: "/org/help-desk", icon: Headset },
     { name: "Reports", href: "/org/reports", icon: FileText },
     // { name: "Invoices", href: "/org/invoices", icon: Receipt },

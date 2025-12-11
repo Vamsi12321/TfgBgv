@@ -62,18 +62,18 @@ export default function OrgBGVRequestsPage() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
+  const [showStageConfirm, setShowStageConfirm] = useState({
+    open: false,
+    targetStep: 0,
+    targetStage: "",
+  });
 
   const stepNames = ["Primary", "Secondary", "Final"];
   const [currentStep, setCurrentStep] = useState(bgvState.currentStep || 0);
   const [visibleStage, setVisibleStage] = useState(
     bgvState.visibleStage || "primary"
   );
-  const [manualVerifyModal, setManualVerifyModal] = useState({
-    open: false,
-    check: "",
-    remarks: "",
-    status: "COMPLETED",
-  });
+
 
   const API_SERVICES = [
     "pan_aadhaar_seeding",
@@ -490,8 +490,7 @@ export default function OrgBGVRequestsPage() {
       TOGGLE CHECK
   --------------------------------------------------------------------- */
   const handleStageToggle = (checkKey, stageKey) => {
-    if (isStageLocked(stageKey)) return;
-
+    // Allow toggling even if stage is locked - removed the restriction
     setStages((prev) => {
       const copy = { ...prev };
 
@@ -512,18 +511,41 @@ export default function OrgBGVRequestsPage() {
       NEXT / BACK
   --------------------------------------------------------------------- */
   const goNext = () => {
-    if (currentStep === 0 && !isStageCompleted("primary")) return;
-    if (currentStep === 1 && !isStageCompleted("secondary")) return;
-
     const next = Math.min(currentStep + 1, 2);
+    const nextStage = stepNames[next].toLowerCase();
+    
+    // Check if current stage is incomplete and show confirmation
+    if (currentStep === 0 && !isStageCompleted("primary")) {
+      setShowStageConfirm({
+        open: true,
+        targetStep: next,
+        targetStage: nextStage,
+      });
+      return;
+    }
+    if (currentStep === 1 && !isStageCompleted("secondary")) {
+      setShowStageConfirm({
+        open: true,
+        targetStep: next,
+        targetStage: nextStage,
+      });
+      return;
+    }
+
     setCurrentStep(next);
-    setVisibleStage(stepNames[next].toLowerCase());
+    setVisibleStage(nextStage);
   };
 
   const goBack = () => {
     const prev = Math.max(currentStep - 1, 0);
     setCurrentStep(prev);
     setVisibleStage(stepNames[prev].toLowerCase());
+  };
+
+  const confirmStageNavigation = () => {
+    setCurrentStep(showStageConfirm.targetStep);
+    setVisibleStage(showStageConfirm.targetStage);
+    setShowStageConfirm({ open: false, targetStep: 0, targetStage: "" });
   };
 
   /* ---------------------------------------------------------------------
@@ -662,49 +684,7 @@ export default function OrgBGVRequestsPage() {
       setReinitLoading(false);
     }
   };
-  const handleManualVerificationSubmit = async () => {
-    try {
-      setLoading(true);
 
-      const res = await fetch(`/api/proxy/secure/updateInternalVerification`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          verificationId: candidateVerification._id,
-          stage: visibleStage,
-          checkName: manualVerifyModal.check,
-          status: manualVerifyModal.status,
-
-          remarks: manualVerifyModal.remarks,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok)
-        throw new Error(data.message || "Failed to submit manual check");
-
-      showModal({
-        type: "success",
-        title: "Manual Check Updated",
-        message: `${manualVerifyModal.check} marked as completed.`,
-      });
-
-      setManualVerifyModal({
-        open: false,
-        check: "",
-        remarks: "",
-        status: "COMPLETED",
-      });
-
-      fetchCandidateVerification(selectedCandidate);
-    } catch (err) {
-      showModal({ type: "error", title: "Error", message: err.message });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /* ---------------------------------------------------------------------
       START INDIVIDUAL CHECK
@@ -905,7 +885,7 @@ export default function OrgBGVRequestsPage() {
               </div>
               {type === "manual" && (
                 <p className="text-xs text-gray-600 mt-1">
-                  Requires manual verification on this page
+                  Manual verification check
                 </p>
               )}
             </div>
@@ -976,23 +956,7 @@ export default function OrgBGVRequestsPage() {
           </span>
         </div>
 
-        {/* MANUAL VERIFY BUTTON */}
-        {type === "manual" && isStageLocked(stageKey) && !completed && (
-          <button
-            onClick={() =>
-              setManualVerifyModal({
-                open: true,
-                check: key,
-                remarks: "",
-                status: "COMPLETED",
-              })
-            }
-            className="mt-2 w-full px-4 py-3 text-sm bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
-          >
-            <FileCheck size={16} />
-            Verify Manually Here
-          </button>
-        )}
+
 
         {/* AI CHECK REDIRECT BUTTON - Only show after finalization */}
         {type === "ai" && !completed && isStageLocked(stageKey) && (
@@ -1124,7 +1088,7 @@ export default function OrgBGVRequestsPage() {
               Manual Verification
             </h4>
             <p className="text-xs text-blue-700">
-              Click "Verify Manually" on check cards for validation
+              Manual verification checks for detailed validation
             </p>
           </div>
 
@@ -1148,7 +1112,7 @@ export default function OrgBGVRequestsPage() {
               Employment Check
             </h4>
             <p className="text-xs text-green-700">
-              API-based and manual verification with supervisory validation
+              API-based verification with supervisory validation
             </p>
           </div>
 
@@ -1415,13 +1379,9 @@ export default function OrgBGVRequestsPage() {
               </button>
 
               <button
-                disabled={
-                  currentStep === 2 ||
-                  (currentStep === 0 && !isStageCompleted("primary")) ||
-                  (currentStep === 1 && !isStageCompleted("secondary"))
-                }
+                disabled={currentStep === 2}
                 onClick={goNext}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center gap-2 disabled:bg-gray-400"
               >
                 Next <ChevronRight size={16} />
               </button>
@@ -1434,7 +1394,6 @@ export default function OrgBGVRequestsPage() {
                 <>
                   <button
                     disabled={
-                      isStageLocked("primary") ||
                       initLoading ||
                       candidateVerification?.stages?.primary?.length > 0
                     }
@@ -1479,9 +1438,8 @@ export default function OrgBGVRequestsPage() {
                 <>
                   <button
                     disabled={
-                      !isStageCompleted("primary") ||
-                      isStageLocked("secondary") ||
-                      initLoading
+                      initLoading ||
+                      candidateVerification?.stages?.secondary?.length > 0
                     }
                     onClick={() => handleInitiateStage("secondary")}
                     className="w-full py-2 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 disabled:bg-gray-400"
@@ -1498,7 +1456,6 @@ export default function OrgBGVRequestsPage() {
 
                   <button
                     disabled={
-                      !isStageCompleted("primary") ||
                       isStageCompleted("secondary") ||
                       runLoading ||
                       !candidateVerification
@@ -1523,8 +1480,6 @@ export default function OrgBGVRequestsPage() {
                 <>
                   <button
                     disabled={
-                      !isStageCompleted("secondary") ||
-                      isStageLocked("final") ||
                       initLoading ||
                       candidateVerification?.stages?.final?.length > 0
                     }
@@ -1543,9 +1498,9 @@ export default function OrgBGVRequestsPage() {
 
                   <button
                     disabled={
-                      !isStageCompleted("secondary") ||
                       isStageCompleted("final") ||
-                      runLoading
+                      runLoading ||
+                      !candidateVerification
                     }
                     onClick={() => handleRunStage("final")}
                     className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md flex items-center justify-center gap-2 disabled:bg-blue-300"
@@ -1680,8 +1635,7 @@ export default function OrgBGVRequestsPage() {
                         Manual Verification Checks
                       </h3>
                       <p className="text-xs text-gray-600">
-                        Requires manual verification on this page - Click
-                        "Verify Manually Here" button
+                        Manual verification checks for detailed validation
                       </p>
                     </div>
                   </div>
@@ -3156,6 +3110,38 @@ export default function OrgBGVRequestsPage() {
       )}
 
       {/* -----------------------------------------------------------------
+          STAGE NAVIGATION CONFIRMATION MODAL
+      ----------------------------------------------------------------- */}
+      {showStageConfirm.open && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-xl shadow-xl max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-2 text-orange-600">
+              Continue to Next Stage?
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              The current stage is not yet completed. Are you sure you want to continue to the next stage?
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowStageConfirm({ open: false, targetStep: 0, targetStage: "" })}
+                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmStageNavigation}
+                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-md"
+              >
+                Yes, Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* -----------------------------------------------------------------
           GLOBAL MODAL
       ----------------------------------------------------------------- */}
       <AnimatePresence>
@@ -3205,71 +3191,7 @@ export default function OrgBGVRequestsPage() {
           </motion.div>
         )}
       </AnimatePresence>
-      {manualVerifyModal.open && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-xl">
-            <h3 className="text-xl font-semibold mb-4">
-              Verify Manually — {manualVerifyModal.check.replace(/_/g, " ")}
-            </h3>
 
-            {/* STATUS SELECT */}
-            <label className="text-sm font-medium">Verification Result</label>
-            <select
-              value={manualVerifyModal.status}
-              onChange={(e) =>
-                setManualVerifyModal((p) => ({
-                  ...p,
-                  status: e.target.value,
-                }))
-              }
-              className="w-full border rounded-md p-2 mt-1 mb-4"
-            >
-              <option value="COMPLETED">Completed (Pass)</option>
-              <option value="FAILED">Failed (Reject)</option>
-            </select>
-
-            {/* REMARKS */}
-            <label className="text-sm font-medium">Remarks</label>
-            <textarea
-              value={manualVerifyModal.remarks}
-              onChange={(e) =>
-                setManualVerifyModal((p) => ({ ...p, remarks: e.target.value }))
-              }
-              placeholder="Add remarks..."
-              rows={4}
-              className="w-full border rounded-md p-2 mt-1"
-            />
-
-            {/* ACTION BUTTONS */}
-            <div className="mt-4 flex justify-end gap-3">
-              <button
-                onClick={() =>
-                  setManualVerifyModal({
-                    open: false,
-                    check: "",
-                    remarks: "",
-                    status: "COMPLETED",
-                  })
-                }
-                className="px-4 py-2 border rounded-md"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleManualVerificationSubmit}
-                className={`px-4 py-2 rounded-md text-white ${
-                  manualVerifyModal.status === "FAILED"
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-green-600 hover:bg-green-700"
-                }`}
-              >
-                Submit Verification
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

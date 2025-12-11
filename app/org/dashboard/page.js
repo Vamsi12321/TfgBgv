@@ -64,18 +64,27 @@ export default function OrgAdminDashboard() {
         const data = await res.json();
 
         if (res.ok && Array.isArray(data.logs)) {
-          const formatted = data.logs
-            .map((log) => ({
-              ...log,
-              user: log.userName ?? "Unknown User",
-              actionText: buildActivityMessage(log),
-              time: timeAgo(log.timestamp),
-              icon: getLogIcon(log.action).icon,
-              iconColor: getLogIcon(log.action).color,
-            }))
-            .slice(0, 10);
+         const formatted = data.logs
+  .map((log) => {
+    // TRIM LARGE DATA
+    let desc = log.description || "";
 
-          setRecentActivities(formatted);
+    // If description contains huge JSON, compress it
+    if (desc.length > 500) {
+      desc = desc.slice(0, 500) + " ...";
+    }
+
+    return {
+      ...log,
+      user: log.userName ?? "Unknown User",
+      actionText: buildActivityMessage({ ...log, description: desc }),
+      time: timeAgo(log.timestamp),
+      icon: getLogIcon(log.action).icon,
+      iconColor: getLogIcon(log.action).color,
+    };
+  })
+  .slice(0, 10);
+
         }
       } catch (err) {
         console.error("Recent activity error:", err);
