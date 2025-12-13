@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -156,7 +157,7 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
       '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Summary</p></div>' +
       '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p><p style="margin: 0;">🌐 maihootech.co.in</p></div>' +
       '</div>' +
-      '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 30px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
+      '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
       '<table style="width: 100%; border-collapse: collapse;">' +
       '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">Name:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + candidate.firstName + ' ' + candidate.lastName + '</td></tr>' +
       '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Email:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.email || "N/A") + '</td></tr>' +
@@ -172,7 +173,7 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
       '</tr></thead>' +
       '<tbody>' + tableRows + '</tbody>' +
       '</table></div>' +
-      '<div style="margin-top: 80px; padding-top: 20px; border-top: 2px solid #e0e0e0;"><div style="font-size: 11px; color: #666; margin-bottom: 15px;">' +
+      '<div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;"><div style="font-size: 11px; color: #666; margin-bottom: 15px;">' +
       '<p style="margin: 5px 0;">Generated on: ' + new Date().toLocaleString() + '</p>' +
       '<p style="margin: 5px 0;">Total Verifications: ' + allChecks.length + '</p>' +
       '<p style="margin: 5px 0;">Completed: ' + allChecks.filter((c) => c.status === "COMPLETED").length + '</p>' +
@@ -1118,7 +1119,7 @@ function CertificateBase({ id, candidate, orgName, checks }) {
           style={{
             display: "flex",
             alignItems: "center",
-            marginBottom: "90px",
+            marginBottom: "15px",
           }}
         >
           <div
@@ -1210,18 +1211,22 @@ function CertificateBase({ id, candidate, orgName, checks }) {
         )}
       </div>
 
-      <div
-        style={{
-          marginTop: "310px",
-          paddingTop: "15px",
-          borderTop: "2px solid #272626ff",
-          fontSize: "12px",
-          color: "#dc3545",
-          textAlign: "center",
-          fontWeight: "600",
-          lineHeight: "1.4",
-        }}
-      >
+     <div
+  style={{
+    position: "absolute",
+    bottom: "40px",       // ✅ footer sits near page bottom
+    left: "50px",
+    right: "50px",
+    paddingTop: "12px",
+    borderTop: "2px solid #272626ff",
+    fontSize: "12px",
+    color: "#dc3545",
+    textAlign: "center",
+    fontWeight: "600",
+    lineHeight: "1.4",
+  }}
+>
+
         <p style={{ margin: 0 }}>
           Maihoo Technologies Private Limited, Vaishnavi's Cynosure, 2-48/5/6,
           8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032

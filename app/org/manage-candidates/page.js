@@ -130,6 +130,11 @@ export default function ManageCandidatesPage() {
   const [showConfirmClose, setShowConfirmClose] = useState(false);
   const [pendingCloseAction, setPendingCloseAction] = useState(null);
 
+  // Validation popup state
+  const [showValidationPopup, setShowValidationPopup] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [currentFieldErrors, setCurrentFieldErrors] = useState({});
+
   const showError = (msg) => {
     // Handle both string messages and objects with detail property
     const errorMessage = typeof msg === 'string' ? msg : (msg?.detail || msg?.message || 'An error occurred');
@@ -457,6 +462,13 @@ export default function ManageCandidatesPage() {
     }
 
     return true;
+  };
+
+  // Handle validation errors from CandidateForm
+  const handleValidationError = (errorList, fieldErrors) => {
+    setValidationErrors(errorList);
+    setCurrentFieldErrors(fieldErrors);
+    setShowValidationPopup(true);
   };
 
   /* -------------------------------------------- */
@@ -1072,6 +1084,7 @@ export default function ManageCandidatesPage() {
             onSubmit={handleAdd}
             saving={saving}
             submitText="Add Candidate"
+            onValidationError={handleValidationError}
           />
         </Modal>
       )}
@@ -1090,6 +1103,7 @@ export default function ManageCandidatesPage() {
             onSubmit={handleEdit}
             saving={saving}
             submitText="Save Changes"
+            onValidationError={handleValidationError}
           />
         </Modal>
       )}
@@ -1152,6 +1166,124 @@ export default function ManageCandidatesPage() {
               >
                 Discard Changes
               </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* VALIDATION ERROR POPUP */}
+      {showValidationPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Validation Errors</h2>
+                    <p className="text-red-100 text-sm">Please fix the following issues before submitting</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowValidationPopup(false);
+                    // Scroll to first error field
+                    if (validationErrors.length > 0) {
+                      const firstErrorField = Object.keys(currentFieldErrors)[0];
+                      const element = document.querySelector(`[name="${firstErrorField}"]`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.focus();
+                      }
+                    }
+                  }}
+                  className="text-white hover:bg-white/20 rounded-lg p-2 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Error List */}
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-4">
+                {/* Required Field Errors */}
+                {validationErrors.filter(error => error.type === 'required').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-red-600 mb-3 flex items-center gap-2">
+                      <span className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-sm font-bold">!</span>
+                      Required Fields Missing ({validationErrors.filter(error => error.type === 'required').length})
+                    </h3>
+                    <div className="space-y-2">
+                      {validationErrors.filter(error => error.type === 'required').map((error, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                          <span className="text-red-500 mt-0.5">⚠️</span>
+                          <div>
+                            <p className="font-medium text-red-800">{error.field}</p>
+                            <p className="text-red-600 text-sm">{error.message}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Validation Errors */}
+                {validationErrors.filter(error => error.type === 'validation').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-orange-600 mb-3 flex items-center gap-2">
+                      <span className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-sm font-bold">!</span>
+                      Invalid Data ({validationErrors.filter(error => error.type === 'validation').length})
+                    </h3>
+                    <div className="space-y-2">
+                      {validationErrors.filter(error => error.type === 'validation').map((error, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+                          <span className="text-orange-500 mt-0.5">⚠️</span>
+                          <div>
+                            <p className="font-medium text-orange-800">{error.field}</p>
+                            <p className="text-orange-600 text-sm">{error.message}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Total Issues: <span className="font-semibold text-red-600">{validationErrors.length}</span>
+                </p>
+                <button
+                  onClick={() => {
+                    setShowValidationPopup(false);
+                    // Scroll to first error field
+                    if (validationErrors.length > 0) {
+                      const firstErrorField = Object.keys(currentFieldErrors)[0];
+                      const element = document.querySelector(`[name="${firstErrorField}"]`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.focus();
+                      }
+                    }
+                  }}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium"
+                >
+                  Fix Issues
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -1236,9 +1368,9 @@ function Modal({ title, children, onClose }) {
 
 /* -------------------------------------------- */
 /* -------------------------------------------- */
-/* FORM COMPONENT — WITH FULL NEW FIELDS */
+/* FORM COMPONENT — WITH ENHANCED VALIDATION */
 /* -------------------------------------------- */
-function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
+function CandidateForm({ data, onChange, onSubmit, saving, submitText, onValidationError }) {
   const [expandedSections, setExpandedSections] = useState({
     supervisory1: false,
     supervisory2: false,
@@ -1247,29 +1379,318 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
     education: false,
   });
 
+  const [fieldErrors, setFieldErrors] = useState({});
   const [validationError, setValidationError] = useState("");
 
   const toggleSection = (section) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
+  // Enhanced validation function
+  const validateField = (name, value) => {
+    const errors = {};
+
+    // Required field validation
+    const requiredFields = {
+      firstName: "First Name",
+      lastName: "Last Name", 
+      fatherName: "Father's Name",
+      phone: "Phone Number",
+      email: "Email",
+      aadhaarNumber: "Aadhaar Number",
+      panNumber: "PAN Number",
+      address: "Address",
+      district: "District",
+      state: "State",
+      pincode: "Pincode",
+      dob: "Date of Birth",
+      gender: "Gender",
+    };
+
+    if (requiredFields[name] && (!value || !value.toString().trim())) {
+      errors[name] = `${requiredFields[name]} is required`;
+      return errors;
+    }
+
+    // Specific field validations
+    switch (name) {
+      case 'firstName':
+      case 'middleName':
+      case 'lastName':
+      case 'fatherName':
+        if (value && !/^[a-zA-Z\s]+$/.test(value)) {
+          errors[name] = `${requiredFields[name] || 'Name'} must contain only letters and spaces`;
+        }
+        break;
+
+      case 'email':
+        if (value) {
+          const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailRegex.test(value)) {
+            errors[name] = 'Please enter a valid email address (e.g., user@example.com)';
+          }
+        }
+        break;
+
+      case 'phone':
+        if (value && !/^\d{10}$/.test(value)) {
+          errors[name] = 'Phone number must be exactly 10 digits';
+        }
+        break;
+
+      case 'aadhaarNumber':
+        if (value && !/^\d{12}$/.test(value)) {
+          errors[name] = 'Aadhaar number must be exactly 12 digits';
+        }
+        break;
+
+      case 'panNumber':
+        if (value && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value)) {
+          errors[name] = 'PAN must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter)';
+        }
+        break;
+
+      case 'district':
+      case 'state':
+        if (value && !/^[a-zA-Z\s]+$/.test(value)) {
+          errors[name] = `${requiredFields[name]} must contain only letters and spaces`;
+        }
+        break;
+
+      case 'pincode':
+        if (value && !/^[1-9][0-9]{5}$/.test(value)) {
+          errors[name] = 'Pincode must be exactly 6 digits and cannot start with 0';
+        }
+        break;
+
+      case 'dob':
+      case 'employment1_joiningDate':
+      case 'employment1_relievingDate':
+      case 'employment2_joiningDate':
+      case 'employment2_relievingDate':
+        if (value) {
+          const date = new Date(value);
+          const year = date.getFullYear();
+          const currentYear = new Date().getFullYear();
+          
+          if (isNaN(date.getTime())) {
+            errors[name] = 'Please enter a valid date';
+          } else if (year < 1900 || year > currentYear + 1) {
+            errors[name] = `Year must be between 1900 and ${currentYear + 1}`;
+          }
+        }
+        break;
+
+      case 'passportNumber':
+        if (value && !/^[A-PR-WY][1-9]\d{6}$/.test(value)) {
+          errors[name] = 'Passport must be in format: A1234567 (1 letter followed by 7 digits)';
+        }
+        break;
+
+      case 'uanNumber':
+        if (value && !/^[0-9]{10,12}$/.test(value)) {
+          errors[name] = 'UAN must be 10-12 digits';
+        }
+        break;
+
+      case 'bankAccountNumber':
+        if (value && !/^[0-9]{9,18}$/.test(value)) {
+          errors[name] = 'Bank Account Number must be 9-18 digits';
+        }
+        break;
+
+      // Email validations for optional fields
+      case 'supervisory1_email':
+      case 'supervisory2_email':
+      case 'employment1_hrEmail':
+      case 'employment2_hrEmail':
+      case 'education_universityEmail':
+      case 'education_collegeEmail':
+        if (value && !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+          errors[name] = 'Please enter a valid email address';
+        }
+        break;
+
+      // Phone validations for optional fields
+      case 'supervisory1_phone':
+      case 'supervisory2_phone':
+      case 'employment1_hrContact':
+      case 'employment2_hrContact':
+      case 'education_universityContact':
+      case 'education_collegeContact':
+        if (value && !/^\d{10}$/.test(value)) {
+          errors[name] = 'Phone number must be exactly 10 digits';
+        }
+        break;
+
+      case 'education_yearOfPassing':
+        if (value) {
+          const year = parseInt(value);
+          const currentYear = new Date().getFullYear();
+          
+          if (!/^\d{4}$/.test(value)) {
+            errors[name] = 'Year must be exactly 4 digits';
+          } else if (year < 1900 || year > currentYear + 1) {
+            errors[name] = `Year must be between 1900 and ${currentYear + 1}`;
+          }
+        }
+        break;
+    }
+
+    return errors;
+  };
+
   const handleSubmitWithValidation = () => {
-    // Validate required fields
-    if (!data.firstName?.trim() || !data.lastName?.trim() || !data.email?.trim() || !data.phone?.trim()) {
-      setValidationError("Please fill all required details");
+    // Comprehensive validation
+    const allErrors = {};
+    const errorList = [];
+    
+    // Field labels for user-friendly error messages
+    const fieldLabels = {
+      firstName: "First Name",
+      middleName: "Middle Name",
+      lastName: "Last Name",
+      fatherName: "Father's Name",
+      phone: "Phone Number",
+      email: "Email",
+      aadhaarNumber: "Aadhaar Number",
+      panNumber: "PAN Number",
+      address: "Address",
+      district: "District",
+      state: "State",
+      pincode: "Pincode",
+      dob: "Date of Birth",
+      gender: "Gender",
+      passportNumber: "Passport Number",
+      uanNumber: "UAN Number",
+      bankAccountNumber: "Bank Account Number",
+      supervisory1_name: "Supervisory 1 - Name",
+      supervisory1_phone: "Supervisory 1 - Phone",
+      supervisory1_email: "Supervisory 1 - Email",
+      supervisory2_name: "Supervisory 2 - Name",
+      supervisory2_phone: "Supervisory 2 - Phone",
+      supervisory2_email: "Supervisory 2 - Email",
+      employment1_hrContact: "Employment 1 - HR Contact",
+      employment1_hrEmail: "Employment 1 - HR Email",
+      employment1_joiningDate: "Employment 1 - Joining Date",
+      employment1_relievingDate: "Employment 1 - Relieving Date",
+      employment2_hrContact: "Employment 2 - HR Contact",
+      employment2_hrEmail: "Employment 2 - HR Email",
+      employment2_joiningDate: "Employment 2 - Joining Date",
+      employment2_relievingDate: "Employment 2 - Relieving Date",
+      education_universityContact: "Education - University Contact",
+      education_universityEmail: "Education - University Email",
+      education_collegeContact: "Education - College Contact",
+      education_collegeEmail: "Education - College Email",
+      education_yearOfPassing: "Education - Year of Passing"
+    };
+    
+    // Validate all required fields
+    const requiredFields = ['firstName', 'lastName', 'fatherName', 'phone', 'email', 'aadhaarNumber', 'panNumber', 'address', 'district', 'state', 'pincode', 'dob', 'gender'];
+    
+    requiredFields.forEach(field => {
+      const errors = validateField(field, data[field]);
+      Object.assign(allErrors, errors);
+      
+      // Add to error list for popup
+      if (Object.keys(errors).length > 0) {
+        errorList.push({
+          field: fieldLabels[field] || field,
+          message: errors[field],
+          type: 'required'
+        });
+      }
+    });
+
+    // Validate optional fields that have values
+    const optionalFields = [
+      'middleName', 'passportNumber', 'uanNumber', 'bankAccountNumber',
+      'supervisory1_email', 'supervisory1_phone', 'supervisory2_email', 'supervisory2_phone',
+      'employment1_hrEmail', 'employment1_hrContact', 'employment2_hrEmail', 'employment2_hrContact',
+      'education_universityEmail', 'education_universityContact', 'education_collegeEmail', 'education_collegeContact',
+      'employment1_joiningDate', 'employment1_relievingDate', 'employment2_joiningDate', 'employment2_relievingDate',
+      'education_yearOfPassing'
+    ];
+
+    optionalFields.forEach(field => {
+      if (data[field]) {
+        const errors = validateField(field, data[field]);
+        Object.assign(allErrors, errors);
+        
+        // Add to error list for popup
+        if (Object.keys(errors).length > 0) {
+          errorList.push({
+            field: fieldLabels[field] || field,
+            message: errors[field],
+            type: 'validation'
+          });
+        }
+      }
+    });
+
+    if (Object.keys(allErrors).length > 0) {
+      setFieldErrors(allErrors);
+      
+      // Also set the first error for inline display
+      const firstError = Object.values(allErrors)[0];
+      setValidationError(firstError);
+      
+      // Call parent validation error handler
+      if (onValidationError) {
+        onValidationError(errorList, allErrors);
+      }
       return;
     }
     
-    // Clear validation error and proceed with submission
+    // Clear validation errors and proceed with submission
+    setFieldErrors({});
     setValidationError("");
     onSubmit();
   };
 
   const handleInputChange = (e) => {
-    // Clear validation error when user starts typing
+    let { name, value } = e.target;
+    
+    // Special handling for date fields to prevent invalid year input
+    if (e.target.type === 'date' && value) {
+      // Validate date format and year range
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(value)) {
+        const year = parseInt(value.split('-')[0]);
+        const currentYear = new Date().getFullYear();
+        
+        // Restrict year to reasonable range
+        if (year < 1900 || year > currentYear + 1) {
+          // Don't update the value if year is out of range
+          return;
+        }
+      }
+    }
+
+    // Special handling for year of passing field
+    if (name === 'education_yearOfPassing') {
+      // Only allow digits and limit to 4 characters
+      value = value.replace(/\D/g, '').slice(0, 4);
+    }
+    
+    // Clear validation errors when user starts typing
     if (validationError) {
       setValidationError("");
     }
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    // Real-time validation for immediate feedback
+    const errors = validateField(name, value);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(prev => ({ ...prev, ...errors }));
+    }
+
     onChange(e);
   };
 
@@ -1291,39 +1712,75 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input
-          name="firstName"
-          value={data.firstName}
-          onChange={handleInputChange}
-          placeholder="First Name*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="firstName"
+            value={data.firstName}
+            onChange={handleInputChange}
+            placeholder="First Name*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.firstName ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.firstName && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.firstName}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="middleName"
-          value={data.middleName}
-          onChange={handleInputChange}
-          placeholder="Middle Name (Optional)"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="middleName"
+            value={data.middleName}
+            onChange={handleInputChange}
+            placeholder="Middle Name (Optional)"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.middleName ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.middleName && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.middleName}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="lastName"
-          value={data.lastName}
-          onChange={handleInputChange}
-          placeholder="Last Name*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="lastName"
+            value={data.lastName}
+            onChange={handleInputChange}
+            placeholder="Last Name*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.lastName ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.lastName && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.lastName}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* FATHER NAME */}
-      <input
-        name="fatherName"
-        value={data.fatherName}
-        onChange={onChange}
-        placeholder="Father's Name*"
-        className="border p-2 rounded w-full mt-4"
-      />
+      <div className="mt-4">
+        <input
+          name="fatherName"
+          value={data.fatherName}
+          onChange={handleInputChange}
+          placeholder="Father's Name*"
+          className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+            fieldErrors.fatherName ? "border-red-500 bg-red-50" : "border-gray-300"
+          }`}
+        />
+        {fieldErrors.fatherName && (
+          <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span>⚠️</span> {fieldErrors.fatherName}
+          </p>
+        )}
+      </div>
 
       {/* DOB + GENDER PREMIUM */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -1335,9 +1792,18 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
             type="date"
             name="dob"
             value={data.dob}
-            onChange={onChange}
-            className="border p-2 rounded w-full"
+            onChange={handleInputChange}
+            min="1900-01-01"
+            max={new Date().toISOString().split('T')[0]}
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.dob ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
           />
+          {fieldErrors.dob && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.dob}
+            </p>
+          )}
         </div>
 
         {/* 🔥 PREMIUM GENDER BUTTONS */}
@@ -1349,7 +1815,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                 key={g}
                 type="button"
                 onClick={() =>
-                  onChange({ target: { name: "gender", value: g } })
+                  handleInputChange({ target: { name: "gender", value: g } })
                 }
                 className={`px-4 py-2 rounded-md border flex-1 capitalize ${
                   data.gender === g
@@ -1361,6 +1827,11 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
               </button>
             ))}
           </div>
+          {fieldErrors.gender && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.gender}
+            </p>
+          )}
         </div>
       </div>
 
@@ -1370,22 +1841,40 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          name="phone"
-          value={data.phone}
-          onChange={handleInputChange}
-          placeholder="Phone Number*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="phone"
+            value={data.phone}
+            onChange={handleInputChange}
+            placeholder="Phone Number*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.phone ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.phone && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.phone}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="email"
-          value={data.email}
-          onChange={handleInputChange}
-          placeholder="Email*"
-          type="email"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="email"
+            value={data.email}
+            onChange={handleInputChange}
+            placeholder="Email*"
+            type="email"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.email ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.email && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.email}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* IDENTITY */}
@@ -1394,55 +1883,109 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input
-          name="aadhaarNumber"
-          value={data.aadhaarNumber}
-          onChange={onChange}
-          placeholder="Aadhaar* (12 digits)"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="aadhaarNumber"
+            value={data.aadhaarNumber}
+            onChange={handleInputChange}
+            placeholder="Aadhaar* (12 digits)"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.aadhaarNumber ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.aadhaarNumber && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.aadhaarNumber}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="panNumber"
-          value={data.panNumber}
-          onChange={onChange}
-          placeholder="PAN* (ABCDE1234F)"
-          className="border p-2 rounded uppercase"
-        />
+        <div>
+          <input
+            name="panNumber"
+            value={data.panNumber}
+            onChange={handleInputChange}
+            placeholder="PAN* (ABCDE1234F)"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition uppercase ${
+              fieldErrors.panNumber ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.panNumber && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.panNumber}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="uanNumber"
-          value={data.uanNumber}
-          onChange={onChange}
-          placeholder="UAN Number"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="uanNumber"
+            value={data.uanNumber}
+            onChange={handleInputChange}
+            placeholder="UAN Number (Optional)"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.uanNumber ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.uanNumber && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.uanNumber}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-        <input
-          name="passportNumber"
-          value={data.passportNumber}
-          onChange={onChange}
-          placeholder="Passport Number (Optional)"
-          className="border p-2 rounded uppercase"
-        />
+        <div>
+          <input
+            name="passportNumber"
+            value={data.passportNumber}
+            onChange={handleInputChange}
+            placeholder="Passport Number (Optional)"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition uppercase ${
+              fieldErrors.passportNumber ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.passportNumber && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.passportNumber}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="bankAccountNumber"
-          value={data.bankAccountNumber}
-          onChange={onChange}
-          placeholder="Bank Account Number (Optional)"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="bankAccountNumber"
+            value={data.bankAccountNumber}
+            onChange={handleInputChange}
+            placeholder="Bank Account Number (Optional)"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.bankAccountNumber ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.bankAccountNumber && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.bankAccountNumber}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="pincode"
-          value={data.pincode}
-          onChange={onChange}
-          placeholder="Pincode*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="pincode"
+            value={data.pincode}
+            onChange={handleInputChange}
+            placeholder="Pincode*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.pincode ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.pincode && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.pincode}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* ADDRESS */}
@@ -1450,31 +1993,58 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
         Address Details
       </h3>
 
-      <textarea
-        name="address"
-        value={data.address}
-        onChange={onChange}
-        placeholder="Full Address*"
-        rows={3}
-        className="border p-2 rounded w-full"
-      />
+      <div>
+        <textarea
+          name="address"
+          value={data.address}
+          onChange={handleInputChange}
+          placeholder="Full Address*"
+          rows={3}
+          className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+            fieldErrors.address ? "border-red-500 bg-red-50" : "border-gray-300"
+          }`}
+        />
+        {fieldErrors.address && (
+          <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span>⚠️</span> {fieldErrors.address}
+          </p>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <input
-          name="district"
-          value={data.district}
-          onChange={onChange}
-          placeholder="District*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="district"
+            value={data.district}
+            onChange={handleInputChange}
+            placeholder="District*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.district ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.district && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.district}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="state"
-          value={data.state}
-          onChange={onChange}
-          placeholder="State*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="state"
+            value={data.state}
+            onChange={handleInputChange}
+            placeholder="State*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.state ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.state && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.state}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* ============================================ */}
@@ -1497,60 +2067,87 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
         
         {expandedSections.supervisory1 && (
           <div className="p-4 bg-white space-y-3">
-            <input
-              name="supervisory1_name"
-              value={data.supervisory1_name || ''}
-              onChange={onChange}
-              placeholder="Supervisor Name"
-              className="border p-2 rounded w-full"
-            />
+            <div>
+              <input
+                name="supervisory1_name"
+                value={data.supervisory1_name || ''}
+                onChange={handleInputChange}
+                placeholder="Supervisor Name"
+                className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                  fieldErrors.supervisory1_name ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
+              />
+              {fieldErrors.supervisory1_name && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <span>⚠️</span> {fieldErrors.supervisory1_name}
+                </p>
+              )}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input
-                name="supervisory1_phone"
-                value={data.supervisory1_phone || ''}
-                onChange={onChange}
-                placeholder="Phone Number"
-                className="border p-2 rounded"
-              />
-              <input
-                name="supervisory1_email"
-                value={data.supervisory1_email || ''}
-                onChange={onChange}
-                placeholder="Email"
-                type="email"
-                className="border p-2 rounded"
-              />
+              <div>
+                <input
+                  name="supervisory1_phone"
+                  value={data.supervisory1_phone || ''}
+                  onChange={handleInputChange}
+                  placeholder="Phone Number"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.supervisory1_phone ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.supervisory1_phone && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.supervisory1_phone}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  name="supervisory1_email"
+                  value={data.supervisory1_email || ''}
+                  onChange={handleInputChange}
+                  placeholder="Email"
+                  type="email"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.supervisory1_email ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.supervisory1_email && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.supervisory1_email}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <input
                 name="supervisory1_relationship"
                 value={data.supervisory1_relationship || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Relationship (e.g., Former Manager)"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="supervisory1_company"
                 value={data.supervisory1_company || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Company Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <input
                 name="supervisory1_designation"
                 value={data.supervisory1_designation || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Designation"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="supervisory1_workingPeriod"
                 value={data.supervisory1_workingPeriod || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Working Period (e.g., 2020-2023)"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
           </div>
@@ -1577,60 +2174,87 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
         
         {expandedSections.supervisory2 && (
           <div className="p-4 bg-white space-y-3">
-            <input
-              name="supervisory2_name"
-              value={data.supervisory2_name || ''}
-              onChange={onChange}
-              placeholder="Supervisor Name"
-              className="border p-2 rounded w-full"
-            />
+            <div>
+              <input
+                name="supervisory2_name"
+                value={data.supervisory2_name || ''}
+                onChange={handleInputChange}
+                placeholder="Supervisor Name"
+                className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                  fieldErrors.supervisory2_name ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
+              />
+              {fieldErrors.supervisory2_name && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <span>⚠️</span> {fieldErrors.supervisory2_name}
+                </p>
+              )}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input
-                name="supervisory2_phone"
-                value={data.supervisory2_phone || ''}
-                onChange={onChange}
-                placeholder="Phone Number"
-                className="border p-2 rounded"
-              />
-              <input
-                name="supervisory2_email"
-                value={data.supervisory2_email || ''}
-                onChange={onChange}
-                placeholder="Email"
-                type="email"
-                className="border p-2 rounded"
-              />
+              <div>
+                <input
+                  name="supervisory2_phone"
+                  value={data.supervisory2_phone || ''}
+                  onChange={handleInputChange}
+                  placeholder="Phone Number"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.supervisory2_phone ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.supervisory2_phone && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.supervisory2_phone}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  name="supervisory2_email"
+                  value={data.supervisory2_email || ''}
+                  onChange={handleInputChange}
+                  placeholder="Email"
+                  type="email"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.supervisory2_email ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.supervisory2_email && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.supervisory2_email}
+                  </p>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <input
                 name="supervisory2_relationship"
                 value={data.supervisory2_relationship || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Relationship (e.g., Former Team Lead)"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="supervisory2_company"
                 value={data.supervisory2_company || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Company Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <input
                 name="supervisory2_designation"
                 value={data.supervisory2_designation || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Designation"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="supervisory2_workingPeriod"
                 value={data.supervisory2_workingPeriod || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Working Period (e.g., 2018-2020)"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
           </div>
@@ -1661,16 +2285,16 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
               <input
                 name="employment1_company"
                 value={data.employment1_company || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Company Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="employment1_designation"
                 value={data.employment1_designation || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Designation"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1680,8 +2304,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment1_joiningDate"
                   value={data.employment1_joiningDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
               <div>
@@ -1690,8 +2316,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment1_relievingDate"
                   value={data.employment1_relievingDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
             </div>
@@ -1699,33 +2327,51 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
               <input
                 name="employment1_hrName"
                 value={data.employment1_hrName || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="HR Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
-              <input
-                name="employment1_hrContact"
-                value={data.employment1_hrContact || ''}
-                onChange={onChange}
-                placeholder="HR Contact"
-                className="border p-2 rounded"
-              />
-              <input
-                name="employment1_hrEmail"
-                value={data.employment1_hrEmail || ''}
-                onChange={onChange}
-                placeholder="HR Email"
-                type="email"
-                className="border p-2 rounded"
-              />
+              <div>
+                <input
+                  name="employment1_hrContact"
+                  value={data.employment1_hrContact || ''}
+                  onChange={handleInputChange}
+                  placeholder="HR Contact"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.employment1_hrContact ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.employment1_hrContact && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.employment1_hrContact}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  name="employment1_hrEmail"
+                  value={data.employment1_hrEmail || ''}
+                  onChange={handleInputChange}
+                  placeholder="HR Email"
+                  type="email"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.employment1_hrEmail ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.employment1_hrEmail && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.employment1_hrEmail}
+                  </p>
+                )}
+              </div>
             </div>
             <textarea
               name="employment1_address"
               value={data.employment1_address || ''}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder="Company Address"
               rows={2}
-              className="border p-2 rounded w-full"
+              className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
             />
             <div className="space-y-3">
               <div>
@@ -1820,16 +2466,16 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
               <input
                 name="employment2_company"
                 value={data.employment2_company || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Company Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="employment2_designation"
                 value={data.employment2_designation || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Designation"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -1839,8 +2485,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment2_joiningDate"
                   value={data.employment2_joiningDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
               <div>
@@ -1849,8 +2497,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment2_relievingDate"
                   value={data.employment2_relievingDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
             </div>
@@ -1858,33 +2508,51 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
               <input
                 name="employment2_hrName"
                 value={data.employment2_hrName || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="HR Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
-              <input
-                name="employment2_hrContact"
-                value={data.employment2_hrContact || ''}
-                onChange={onChange}
-                placeholder="HR Contact"
-                className="border p-2 rounded"
-              />
-              <input
-                name="employment2_hrEmail"
-                value={data.employment2_hrEmail || ''}
-                onChange={onChange}
-                placeholder="HR Email"
-                type="email"
-                className="border p-2 rounded"
-              />
+              <div>
+                <input
+                  name="employment2_hrContact"
+                  value={data.employment2_hrContact || ''}
+                  onChange={handleInputChange}
+                  placeholder="HR Contact"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.employment2_hrContact ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.employment2_hrContact && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.employment2_hrContact}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  name="employment2_hrEmail"
+                  value={data.employment2_hrEmail || ''}
+                  onChange={handleInputChange}
+                  placeholder="HR Email"
+                  type="email"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.employment2_hrEmail ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.employment2_hrEmail && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.employment2_hrEmail}
+                  </p>
+                )}
+              </div>
             </div>
             <textarea
               name="employment2_address"
               value={data.employment2_address || ''}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder="Company Address"
               rows={2}
-              className="border p-2 rounded w-full"
+              className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
             />
             <div className="space-y-3">
               <div>
@@ -2023,97 +2691,143 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
               <input
                 name="education_degree"
                 value={data.education_degree || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Degree (e.g., Bachelor of Technology)"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="education_specialization"
                 value={data.education_specialization || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="Specialization"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <input
                 name="education_universityName"
                 value={data.education_universityName || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="University Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
               <input
                 name="education_collegeName"
                 value={data.education_collegeName || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="College Name"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input
-                name="education_yearOfPassing"
-                value={data.education_yearOfPassing || ''}
-                onChange={onChange}
-                placeholder="Year of Passing"
-                className="border p-2 rounded"
-              />
+              <div>
+                <input
+                  name="education_yearOfPassing"
+                  value={data.education_yearOfPassing || ''}
+                  onChange={handleInputChange}
+                  placeholder="Year of Passing (e.g., 2023)"
+                  maxLength="4"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.education_yearOfPassing ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.education_yearOfPassing && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.education_yearOfPassing}
+                  </p>
+                )}
+              </div>
               <input
                 name="education_cgpa"
                 value={data.education_cgpa || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="CGPA/Percentage"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <input
-                name="education_universityContact"
-                value={data.education_universityContact || ''}
-                onChange={onChange}
-                placeholder="University Contact"
-                className="border p-2 rounded"
-              />
-              <input
-                name="education_universityEmail"
-                value={data.education_universityEmail || ''}
-                onChange={onChange}
-                placeholder="University Email"
-                type="email"
-                className="border p-2 rounded"
-              />
-              <input
-                name="education_collegeContact"
-                value={data.education_collegeContact || ''}
-                onChange={onChange}
-                placeholder="College Contact"
-                className="border p-2 rounded"
-              />
+              <div>
+                <input
+                  name="education_universityContact"
+                  value={data.education_universityContact || ''}
+                  onChange={handleInputChange}
+                  placeholder="University Contact"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.education_universityContact ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.education_universityContact && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.education_universityContact}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  name="education_universityEmail"
+                  value={data.education_universityEmail || ''}
+                  onChange={handleInputChange}
+                  placeholder="University Email"
+                  type="email"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.education_universityEmail ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.education_universityEmail && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.education_universityEmail}
+                  </p>
+                )}
+              </div>
+              <div>
+                <input
+                  name="education_collegeContact"
+                  value={data.education_collegeContact || ''}
+                  onChange={handleInputChange}
+                  placeholder="College Contact"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.education_collegeContact ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.education_collegeContact && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.education_collegeContact}
+                  </p>
+                )}
+              </div>
             </div>
-            <input
-              name="education_collegeEmail"
-              value={data.education_collegeEmail || ''}
-              onChange={onChange}
-              placeholder="College Email"
-              type="email"
-              className="border p-2 rounded w-full"
-            />
+            <div>
+              <input
+                name="education_collegeEmail"
+                value={data.education_collegeEmail || ''}
+                onChange={handleInputChange}
+                placeholder="College Email"
+                type="email"
+                className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                  fieldErrors.education_collegeEmail ? "border-red-500 bg-red-50" : "border-gray-300"
+                }`}
+              />
+              {fieldErrors.education_collegeEmail && (
+                <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                  <span>⚠️</span> {fieldErrors.education_collegeEmail}
+                </p>
+              )}
+            </div>
             <textarea
               name="education_universityAddress"
               value={data.education_universityAddress || ''}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder="University Address"
               rows={2}
-              className="border p-2 rounded w-full"
+              className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
             />
             <textarea
               name="education_collegeAddress"
               value={data.education_collegeAddress || ''}
-              onChange={onChange}
+              onChange={handleInputChange}
               placeholder="College Address"
               rows={2}
-              className="border p-2 rounded w-full"
+              className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
             />
           </div>
         )}
@@ -2128,7 +2842,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
         type="file"
         accept=".pdf,.doc,.docx"
         onChange={(e) => onChange(e, true)}
-        className="border p-2 rounded w-full"
+        className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition border-gray-300"
       />
 
       {data.resume && (

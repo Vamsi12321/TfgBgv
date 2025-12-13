@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Filter, X, Loader2, CheckCircle2, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useOrgState } from "../../context/OrgStateContext";
 
 export default function OrgVerificationsPage() {
@@ -19,7 +18,7 @@ export default function OrgVerificationsPage() {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [loadingCandidate, setLoadingCandidate] = useState(false);
 
-  const router = useRouter();
+
 
   /* ---------------------- Fetch Verifications ---------------------- */
   useEffect(() => {
@@ -428,9 +427,7 @@ export default function OrgVerificationsPage() {
                   <th className="px-4 py-4 text-left font-semibold tracking-wide text-gray-700">
                     📈 Progress
                   </th>
-                  <th className="px-4 py-4 text-right font-semibold tracking-wide text-gray-700">
-                    ⚙️ Action
-                  </th>
+
                 </tr>
               </thead>
               <tbody>
@@ -468,23 +465,13 @@ export default function OrgVerificationsPage() {
                           {c.completionPercentage}%
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            router.push(`/org/verifications/${c.candidateId}`);
-                          }}
-                          className="text-red-600 hover:text-red-700 text-sm font-semibold"
-                        >
-                          View Verification
-                        </button>
-                      </td>
+
                     </tr>
                   ))
                 ) : (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={5}
                       className="text-center py-6 text-gray-500 font-medium"
                     >
                       No matching records found.

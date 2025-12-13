@@ -274,7 +274,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
           />
           <div
             style={{
-              width :"25%",
+              width: "25%",
               height: "2px",
               background: "#5cb85c",
               marginLeft: "10px",
@@ -332,7 +332,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
               />
               <div
                 style={{
-                    width :"25%",
+                  width: "25%",
                   height: "2px",
                   background: "#d9534f",
                   marginLeft: "10px",

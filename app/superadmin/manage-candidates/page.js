@@ -127,6 +127,11 @@ export default function ManageCandidatesPage() {
     message: "",
   });
 
+  // Validation popup state
+  const [showValidationPopup, setShowValidationPopup] = useState(false);
+  const [validationErrors, setValidationErrors] = useState([]);
+  const [currentFieldErrors, setCurrentFieldErrors] = useState({});
+
   const showError = (msg) => {
     // Handle both string messages and objects with detail property
     const errorMessage = typeof msg === 'string' ? msg : (msg?.detail || msg?.message || 'An error occurred');
@@ -710,6 +715,13 @@ export default function ManageCandidatesPage() {
 
     return true;
   };
+
+  // Handle validation errors from CandidateForm
+  const handleValidationError = (errorList, fieldErrors) => {
+    setValidationErrors(errorList);
+    setCurrentFieldErrors(fieldErrors);
+    setShowValidationPopup(true);
+  };
   const enhancedOnChange = (e) => {
     let { name, value } = e.target;
 
@@ -1036,6 +1048,7 @@ export default function ManageCandidatesPage() {
             onSubmit={handleAdd}
             saving={saving}
             submitText="Add Candidate"
+            onValidationError={handleValidationError}
           />
         </Modal>
       )}
@@ -1048,6 +1061,7 @@ export default function ManageCandidatesPage() {
             onSubmit={handleEdit}
             saving={saving}
             submitText="Save Changes"
+            onValidationError={handleValidationError}
           />
         </Modal>
       )}
@@ -1073,6 +1087,124 @@ export default function ManageCandidatesPage() {
             {saving ? <Loader2 className="animate-spin mx-auto" /> : "Delete"}
           </button>
         </Modal>
+      )}
+
+      {/* VALIDATION ERROR POPUP */}
+      {showValidationPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden"
+          >
+            {/* Header */}
+            <div className="bg-gradient-to-r from-red-500 to-red-600 px-6 py-4 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">Validation Errors</h2>
+                    <p className="text-red-100 text-sm">Please fix the following issues before submitting</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowValidationPopup(false);
+                    // Scroll to first error field
+                    if (validationErrors.length > 0) {
+                      const firstErrorField = Object.keys(currentFieldErrors)[0];
+                      const element = document.querySelector(`[name="${firstErrorField}"]`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.focus();
+                      }
+                    }
+                  }}
+                  className="text-white hover:bg-white/20 rounded-lg p-2 transition-all"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Error List */}
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-4">
+                {/* Required Field Errors */}
+                {validationErrors.filter(error => error.type === 'required').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-red-600 mb-3 flex items-center gap-2">
+                      <span className="w-6 h-6 bg-red-100 rounded-full flex items-center justify-center text-red-600 text-sm font-bold">!</span>
+                      Required Fields Missing ({validationErrors.filter(error => error.type === 'required').length})
+                    </h3>
+                    <div className="space-y-2">
+                      {validationErrors.filter(error => error.type === 'required').map((error, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border-l-4 border-red-400">
+                          <span className="text-red-500 mt-0.5">⚠️</span>
+                          <div>
+                            <p className="font-medium text-red-800">{error.field}</p>
+                            <p className="text-red-600 text-sm">{error.message}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Validation Errors */}
+                {validationErrors.filter(error => error.type === 'validation').length > 0 && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-orange-600 mb-3 flex items-center gap-2">
+                      <span className="w-6 h-6 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 text-sm font-bold">!</span>
+                      Invalid Data ({validationErrors.filter(error => error.type === 'validation').length})
+                    </h3>
+                    <div className="space-y-2">
+                      {validationErrors.filter(error => error.type === 'validation').map((error, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border-l-4 border-orange-400">
+                          <span className="text-orange-500 mt-0.5">⚠️</span>
+                          <div>
+                            <p className="font-medium text-orange-800">{error.field}</p>
+                            <p className="text-orange-600 text-sm">{error.message}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-gray-600">
+                  Total Issues: <span className="font-semibold text-red-600">{validationErrors.length}</span>
+                </p>
+                <button
+                  onClick={() => {
+                    setShowValidationPopup(false);
+                    // Scroll to first error field
+                    if (validationErrors.length > 0) {
+                      const firstErrorField = Object.keys(currentFieldErrors)[0];
+                      const element = document.querySelector(`[name="${firstErrorField}"]`);
+                      if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        element.focus();
+                      }
+                    }
+                  }}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium"
+                >
+                  Fix Issues
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </div>
       )}
 
       {/* GLOBAL MODAL */}
@@ -1154,7 +1286,7 @@ function Modal({ title, children, onClose }) {
 /* -------------------------------------------- */
 /* FORM COMPONENT — WITH FULL NEW FIELDS */
 /* -------------------------------------------- */
-function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
+function CandidateForm({ data, onChange, onSubmit, saving, submitText, onValidationError }) {
   const [expandedSections, setExpandedSections] = useState({
     supervisory1: false,
     supervisory2: false,
@@ -1163,51 +1295,408 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
     education: false,
   });
 
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [validationError, setValidationError] = useState("");
+
   const toggleSection = (section) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
+  // Enhanced validation function
+  const validateField = (name, value) => {
+    const errors = {};
+
+    // Required field validation
+    const requiredFields = {
+      firstName: "First Name",
+      lastName: "Last Name", 
+      fatherName: "Father's Name",
+      phone: "Phone Number",
+      email: "Email",
+      aadhaarNumber: "Aadhaar Number",
+      panNumber: "PAN Number",
+      address: "Address",
+      district: "District",
+      state: "State",
+      pincode: "Pincode",
+      dob: "Date of Birth",
+      gender: "Gender",
+    };
+
+    if (requiredFields[name] && (!value || !value.toString().trim())) {
+      errors[name] = `${requiredFields[name]} is required`;
+      return errors;
+    }
+
+    // Specific field validations
+    switch (name) {
+      case 'firstName':
+      case 'middleName':
+      case 'lastName':
+      case 'fatherName':
+        if (value && !/^[a-zA-Z\s]+$/.test(value)) {
+          errors[name] = `${requiredFields[name] || 'Name'} must contain only letters and spaces`;
+        }
+        break;
+
+      case 'email':
+        if (value) {
+          const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+          if (!emailRegex.test(value)) {
+            errors[name] = 'Please enter a valid email address (e.g., user@example.com)';
+          }
+        }
+        break;
+
+      case 'phone':
+        if (value && !/^\d{10}$/.test(value)) {
+          errors[name] = 'Phone number must be exactly 10 digits';
+        }
+        break;
+
+      case 'aadhaarNumber':
+        if (value && !/^\d{12}$/.test(value)) {
+          errors[name] = 'Aadhaar number must be exactly 12 digits';
+        }
+        break;
+
+      case 'panNumber':
+        if (value && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value)) {
+          errors[name] = 'PAN must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter)';
+        }
+        break;
+
+      case 'district':
+      case 'state':
+        if (value && !/^[a-zA-Z\s]+$/.test(value)) {
+          errors[name] = `${requiredFields[name]} must contain only letters and spaces`;
+        }
+        break;
+
+      case 'pincode':
+        if (value && !/^[1-9][0-9]{5}$/.test(value)) {
+          errors[name] = 'Pincode must be exactly 6 digits and cannot start with 0';
+        }
+        break;
+
+      case 'dob':
+      case 'employment1_joiningDate':
+      case 'employment1_relievingDate':
+      case 'employment2_joiningDate':
+      case 'employment2_relievingDate':
+        if (value) {
+          const date = new Date(value);
+          const year = date.getFullYear();
+          const currentYear = new Date().getFullYear();
+          
+          if (isNaN(date.getTime())) {
+            errors[name] = 'Please enter a valid date';
+          } else if (year < 1900 || year > currentYear + 1) {
+            errors[name] = `Year must be between 1900 and ${currentYear + 1}`;
+          }
+        }
+        break;
+
+      case 'passportNumber':
+        if (value && !/^[A-PR-WY][1-9]\d{6}$/.test(value)) {
+          errors[name] = 'Passport must be in format: A1234567 (1 letter followed by 7 digits)';
+        }
+        break;
+
+      case 'uanNumber':
+        if (value && !/^[0-9]{10,12}$/.test(value)) {
+          errors[name] = 'UAN must be 10-12 digits';
+        }
+        break;
+
+      case 'bankAccountNumber':
+        if (value && !/^[0-9]{9,18}$/.test(value)) {
+          errors[name] = 'Bank Account Number must be 9-18 digits';
+        }
+        break;
+
+      // Email validations for optional fields
+      case 'supervisory1_email':
+      case 'supervisory2_email':
+      case 'employment1_hrEmail':
+      case 'employment2_hrEmail':
+      case 'education_universityEmail':
+      case 'education_collegeEmail':
+        if (value && !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+          errors[name] = 'Please enter a valid email address';
+        }
+        break;
+
+      // Phone validations for optional fields
+      case 'supervisory1_phone':
+      case 'supervisory2_phone':
+      case 'employment1_hrContact':
+      case 'employment2_hrContact':
+      case 'education_universityContact':
+      case 'education_collegeContact':
+        if (value && !/^\d{10}$/.test(value)) {
+          errors[name] = 'Phone number must be exactly 10 digits';
+        }
+        break;
+
+      case 'education_yearOfPassing':
+        if (value) {
+          const year = parseInt(value);
+          const currentYear = new Date().getFullYear();
+          
+          if (!/^\d{4}$/.test(value)) {
+            errors[name] = 'Year must be exactly 4 digits';
+          } else if (year < 1900 || year > currentYear + 1) {
+            errors[name] = `Year must be between 1900 and ${currentYear + 1}`;
+          }
+        }
+        break;
+    }
+
+    return errors;
+  };
+
+  const handleSubmitWithValidation = () => {
+    // Comprehensive validation
+    const allErrors = {};
+    const errorList = [];
+    
+    // Field labels for user-friendly error messages
+    const fieldLabels = {
+      firstName: "First Name",
+      middleName: "Middle Name",
+      lastName: "Last Name",
+      fatherName: "Father's Name",
+      phone: "Phone Number",
+      email: "Email",
+      aadhaarNumber: "Aadhaar Number",
+      panNumber: "PAN Number",
+      address: "Address",
+      district: "District",
+      state: "State",
+      pincode: "Pincode",
+      dob: "Date of Birth",
+      gender: "Gender",
+      passportNumber: "Passport Number",
+      uanNumber: "UAN Number",
+      bankAccountNumber: "Bank Account Number",
+      supervisory1_name: "Supervisory 1 - Name",
+      supervisory1_phone: "Supervisory 1 - Phone",
+      supervisory1_email: "Supervisory 1 - Email",
+      supervisory2_name: "Supervisory 2 - Name",
+      supervisory2_phone: "Supervisory 2 - Phone",
+      supervisory2_email: "Supervisory 2 - Email",
+      employment1_hrContact: "Employment 1 - HR Contact",
+      employment1_hrEmail: "Employment 1 - HR Email",
+      employment1_joiningDate: "Employment 1 - Joining Date",
+      employment1_relievingDate: "Employment 1 - Relieving Date",
+      employment2_hrContact: "Employment 2 - HR Contact",
+      employment2_hrEmail: "Employment 2 - HR Email",
+      employment2_joiningDate: "Employment 2 - Joining Date",
+      employment2_relievingDate: "Employment 2 - Relieving Date",
+      education_universityContact: "Education - University Contact",
+      education_universityEmail: "Education - University Email",
+      education_collegeContact: "Education - College Contact",
+      education_collegeEmail: "Education - College Email",
+      education_yearOfPassing: "Education - Year of Passing"
+    };
+    
+    // Validate all required fields
+    const requiredFields = ['firstName', 'lastName', 'fatherName', 'phone', 'email', 'aadhaarNumber', 'panNumber', 'address', 'district', 'state', 'pincode', 'dob', 'gender'];
+    
+    requiredFields.forEach(field => {
+      const errors = validateField(field, data[field]);
+      Object.assign(allErrors, errors);
+      
+      // Add to error list for popup
+      if (Object.keys(errors).length > 0) {
+        errorList.push({
+          field: fieldLabels[field] || field,
+          message: errors[field],
+          type: 'required'
+        });
+      }
+    });
+
+    // Validate optional fields that have values
+    const optionalFields = [
+      'middleName', 'passportNumber', 'uanNumber', 'bankAccountNumber',
+      'supervisory1_email', 'supervisory1_phone', 'supervisory2_email', 'supervisory2_phone',
+      'employment1_hrEmail', 'employment1_hrContact', 'employment2_hrEmail', 'employment2_hrContact',
+      'education_universityEmail', 'education_universityContact', 'education_collegeEmail', 'education_collegeContact',
+      'employment1_joiningDate', 'employment1_relievingDate', 'employment2_joiningDate', 'employment2_relievingDate',
+      'education_yearOfPassing'
+    ];
+
+    optionalFields.forEach(field => {
+      if (data[field]) {
+        const errors = validateField(field, data[field]);
+        Object.assign(allErrors, errors);
+        
+        // Add to error list for popup
+        if (Object.keys(errors).length > 0) {
+          errorList.push({
+            field: fieldLabels[field] || field,
+            message: errors[field],
+            type: 'validation'
+          });
+        }
+      }
+    });
+
+    if (Object.keys(allErrors).length > 0) {
+      setFieldErrors(allErrors);
+      
+      // Also set the first error for inline display
+      const firstError = Object.values(allErrors)[0];
+      setValidationError(firstError);
+      
+      // Call parent validation error handler
+      if (onValidationError) {
+        onValidationError(errorList, allErrors);
+      }
+      return;
+    }
+    
+    // Clear validation errors and proceed with submission
+    setFieldErrors({});
+    setValidationError("");
+    onSubmit();
+  };
+
+  const handleInputChange = (e) => {
+    let { name, value } = e.target;
+    
+    // Special handling for date fields to prevent invalid year input
+    if (e.target.type === 'date' && value) {
+      // Validate date format and year range
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(value)) {
+        const year = parseInt(value.split('-')[0]);
+        const currentYear = new Date().getFullYear();
+        
+        // Restrict year to reasonable range
+        if (year < 1900 || year > currentYear + 1) {
+          // Don't update the value if year is out of range
+          return;
+        }
+      }
+    }
+
+    // Special handling for year of passing field
+    if (name === 'education_yearOfPassing') {
+      // Only allow digits and limit to 4 characters
+      value = value.replace(/\D/g, '').slice(0, 4);
+    }
+    
+    // Clear validation errors when user starts typing
+    if (validationError) {
+      setValidationError("");
+    }
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    // Real-time validation for immediate feedback
+    const errors = validateField(name, value);
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(prev => ({ ...prev, ...errors }));
+    }
+
+    onChange(e);
+  };
+
   return (
     <div className="text-gray-900 max-h-[70vh] overflow-y-auto pr-2">
+      {/* Validation Error Message */}
+      {validationError && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-sm font-medium flex items-center gap-2">
+            <span>⚠️</span>
+            {validationError}
+          </p>
+        </div>
+      )}
+
       {/* FULL NAME */}
       <h3 className="font-semibold text-lg mb-3 text-[#ff004f]">
         Personal Details
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input
-          name="firstName"
-          value={data.firstName}
-          onChange={onChange}
-          placeholder="First Name*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="firstName"
+            value={data.firstName}
+            onChange={handleInputChange}
+            placeholder="First Name*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.firstName ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.firstName && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.firstName}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="middleName"
-          value={data.middleName}
-          onChange={onChange}
-          placeholder="Middle Name (Optional)"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="middleName"
+            value={data.middleName}
+            onChange={handleInputChange}
+            placeholder="Middle Name (Optional)"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.middleName ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.middleName && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.middleName}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="lastName"
-          value={data.lastName}
-          onChange={onChange}
-          placeholder="Last Name*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="lastName"
+            value={data.lastName}
+            onChange={handleInputChange}
+            placeholder="Last Name*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.lastName ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.lastName && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.lastName}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* FATHER NAME */}
-      <input
-        name="fatherName"
-        value={data.fatherName}
-        onChange={onChange}
-        placeholder="Father's Name*"
-        className="border p-2 rounded w-full mt-4"
-      />
+      <div className="mt-4">
+        <input
+          name="fatherName"
+          value={data.fatherName}
+          onChange={handleInputChange}
+          placeholder="Father's Name*"
+          className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+            fieldErrors.fatherName ? "border-red-500 bg-red-50" : "border-gray-300"
+          }`}
+        />
+        {fieldErrors.fatherName && (
+          <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+            <span>⚠️</span> {fieldErrors.fatherName}
+          </p>
+        )}
+      </div>
 
       {/* DOB + GENDER PREMIUM */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -1219,9 +1708,18 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
             type="date"
             name="dob"
             value={data.dob}
-            onChange={onChange}
-            className="border p-2 rounded w-full"
+            onChange={handleInputChange}
+            min="1900-01-01"
+            max={new Date().toISOString().split('T')[0]}
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.dob ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
           />
+          {fieldErrors.dob && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.dob}
+            </p>
+          )}
         </div>
 
         {/* 🔥 PREMIUM GENDER BUTTONS */}
@@ -1254,22 +1752,40 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input
-          name="phone"
-          value={data.phone}
-          onChange={onChange}
-          placeholder="Phone Number*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="phone"
+            value={data.phone}
+            onChange={handleInputChange}
+            placeholder="Phone Number*"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.phone ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.phone && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.phone}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="email"
-          value={data.email}
-          onChange={onChange}
-          placeholder="Email*"
-          type="email"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="email"
+            value={data.email}
+            onChange={handleInputChange}
+            placeholder="Email*"
+            type="email"
+            className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+              fieldErrors.email ? "border-red-500 bg-red-50" : "border-gray-300"
+            }`}
+          />
+          {fieldErrors.email && (
+            <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.email}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* IDENTITY */}
@@ -1564,8 +2080,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment1_joiningDate"
                   value={data.employment1_joiningDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
               <div>
@@ -1574,8 +2092,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment1_relievingDate"
                   value={data.employment1_relievingDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
             </div>
@@ -1723,8 +2243,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment2_joiningDate"
                   value={data.employment2_joiningDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
               <div>
@@ -1733,8 +2255,10 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
                   type="date"
                   name="employment2_relievingDate"
                   value={data.employment2_relievingDate || ''}
-                  onChange={onChange}
-                  className="border p-2 rounded w-full"
+                  onChange={handleInputChange}
+                  min="1900-01-01"
+                  max={new Date().toISOString().split('T')[0]}
+                  className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                 />
               </div>
             </div>
@@ -1936,19 +2460,29 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input
-                name="education_yearOfPassing"
-                value={data.education_yearOfPassing || ''}
-                onChange={onChange}
-                placeholder="Year of Passing"
-                className="border p-2 rounded"
-              />
+              <div>
+                <input
+                  name="education_yearOfPassing"
+                  value={data.education_yearOfPassing || ''}
+                  onChange={handleInputChange}
+                  placeholder="Year of Passing (e.g., 2023)"
+                  maxLength="4"
+                  className={`border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition ${
+                    fieldErrors.education_yearOfPassing ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                />
+                {fieldErrors.education_yearOfPassing && (
+                  <p className="text-red-500 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.education_yearOfPassing}
+                  </p>
+                )}
+              </div>
               <input
                 name="education_cgpa"
                 value={data.education_cgpa || ''}
-                onChange={onChange}
+                onChange={handleInputChange}
                 placeholder="CGPA/Percentage"
-                className="border p-2 rounded"
+                className="border-2 p-3 rounded-lg w-full text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -2024,7 +2558,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText }) {
       {/* SUBMIT BUTTON */}
       <div className="mt-8 pt-6 border-t-2 border-gray-100">
         <button
-          onClick={onSubmit}
+          onClick={handleSubmitWithValidation}
           disabled={saving}
           className={`w-full py-3.5 rounded-xl text-white font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
             saving
