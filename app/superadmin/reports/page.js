@@ -687,7 +687,8 @@ export default function SuperAdminReportsPage() {
         </div>
 
         {/* ENHANCED ORG SELECTOR */}
-        <div className="relative mb-8 group">
+       <div className="relative mb-8 group z-[100]">
+
           <div className="absolute inset-0 bg-gradient-to-r from-[#ff004f]/10 via-[#ff004f]/5 to-[#ff004f]/10 rounded-3xl blur-xl opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
           <div className="relative bg-white/80 backdrop-blur-sm border border-white/50 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
             <div className="flex items-center gap-3 mb-4">
