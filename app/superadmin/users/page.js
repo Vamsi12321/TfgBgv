@@ -41,6 +41,7 @@ const rolePermissionPresets = {
     "candidate:view",
     "candidate:create",
   ],
+  SPOC: allPermissions.map((p) => p.key), // Full permissions for organization SPOC
   SUPER_ADMIN_HELPER: allPermissions.map((p) => p.key),
   SUPER_ADMIN: allPermissions.map((p) => p.key), // Full permissions
   SUPER_SPOC: allPermissions.map((p) => p.key), // Full permissions
@@ -218,14 +219,15 @@ export default function UsersPage() {
           "SUPER_SPOC",
           "SUPER_ADMIN_HELPER",
           "ORG_HR",
+          "SPOC",
           "HELPER",
         ];
 
       case "SUPER_ADMIN":
-        return ["SUPER_ADMIN_HELPER", "ORG_HR", "HELPER"];
+        return ["SUPER_ADMIN_HELPER", "ORG_HR", "SPOC", "HELPER"];
 
       case "SUPER_ADMIN_HELPER":
-        return ["ORG_HR", "HELPER"];
+        return ["ORG_HR", "SPOC", "HELPER"];
 
       default:
         return ["HELPER"]; // fallback
@@ -462,6 +464,7 @@ export default function UsersPage() {
               <option value="All">🌐 All Roles</option>
               <option value="HELPER">👤 Organization Helper</option>
               <option value="ORG_HR">👔 Organization HR</option>
+              <option value="SPOC">🎯 SPOC</option>
               <option value="SUPER_ADMIN_HELPER">⚡ Super Admin Helper</option>
               <option value="SUPER_ADMIN">🔐 Super Admin</option>
               <option value="SUPER_SPOC">👑 Super SPOC</option>
@@ -612,6 +615,8 @@ export default function UsersPage() {
                             ? "bg-blue-100 text-blue-700"
                             : u.role === "ORG_HR"
                             ? "bg-purple-100 text-purple-700"
+                            : u.role === "SPOC"
+                            ? "bg-green-100 text-green-700"
                             : u.role === "SUPER_ADMIN_HELPER"
                             ? "bg-orange-100 text-orange-700"
                             : u.role === "SUPER_ADMIN"
@@ -624,6 +629,8 @@ export default function UsersPage() {
                             ? "👤 Org Helper"
                             : u.role === "ORG_HR"
                             ? "👔 Org HR"
+                            : u.role === "SPOC"
+                            ? "🎯 SPOC"
                             : u.role === "SUPER_ADMIN_HELPER"
                             ? "⚡ SA Helper"
                             : u.role === "SUPER_ADMIN"
@@ -756,6 +763,8 @@ export default function UsersPage() {
                           ? "bg-blue-100 text-blue-700"
                           : u.role === "ORG_HR"
                           ? "bg-purple-100 text-purple-700"
+                          : u.role === "SPOC"
+                          ? "bg-green-100 text-green-700"
                           : u.role === "SUPER_ADMIN_HELPER"
                           ? "bg-orange-100 text-orange-700"
                           : u.role === "SUPER_ADMIN"
@@ -768,6 +777,8 @@ export default function UsersPage() {
                           ? "👤 Org Helper"
                           : u.role === "ORG_HR"
                           ? "👔 Org HR"
+                          : u.role === "SPOC"
+                          ? "🎯 SPOC"
                           : u.role === "SUPER_ADMIN_HELPER"
                           ? "⚡ SA Helper"
                           : u.role === "SUPER_ADMIN"
@@ -903,12 +914,13 @@ function AddEditUserModal({
 
   const isHelper = form.role === "HELPER";
   const isOrgHR = form.role === "ORG_HR";
+  const isSpoc = form.role === "SPOC";
   const isSuperHelper = form.role === "SUPER_ADMIN_HELPER";
 
-  /* -------------------- AUTO-SELECT ALL FOR SUPER_ADMIN AND SUPER_SPOC (ONLY ON ROLE CHANGE, NOT ON EDIT) -------------------- */
+  /* -------------------- AUTO-SELECT ALL FOR SUPER_ADMIN, SUPER_SPOC, AND SPOC (ONLY ON ROLE CHANGE, NOT ON EDIT) -------------------- */
   useEffect(() => {
     // Only auto-select if role changed and not in edit mode with existing permissions
-    if (form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") {
+    if (form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC" || form.role === "SPOC") {
       // Skip auto-selection if we're editing and already have permissions
       if (isEdit && editData?.permissions?.length > 0 && form.role === editData.role) {
         return; // Don't override existing permissions when editing
@@ -960,7 +972,7 @@ function AddEditUserModal({
       password: "Welcome1",
     };
 
-    if (isSuperHelper || form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") {
+    if (isSuperHelper || form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC" || form.role === "SPOC") {
       payload.accessibleOrganizations = form.accessibleOrganizations;
       payload.permissions = form.permissions;
     } else {
@@ -1154,6 +1166,7 @@ function AddEditUserModal({
             >
               <option value="HELPER">Organization Helper</option>
               <option value="ORG_HR">Organization HR</option>
+              <option value="SPOC">SPOC</option>
 
               {/* SUPER_SPOC can create SUPER_ADMIN */}
               {currentUserRole === "SUPER_SPOC" && (
@@ -1268,12 +1281,12 @@ function AddEditUserModal({
             </div>
           )}
 
-          {/* SUPER HELPER, SUPER_ADMIN, SUPER_SPOC — MULTIPLE ORGANIZATIONS */}
-          {(isSuperHelper || form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") && (
+          {/* SUPER HELPER, SUPER_ADMIN, SUPER_SPOC, SPOC — MULTIPLE ORGANIZATIONS */}
+          {(isSuperHelper || form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC" || form.role === "SPOC") && (
             <div>
               <label className="text-sm font-semibold block mb-1">
                 Accessible Organizations
-                {(form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC") && (
+                {(form.role === "SUPER_ADMIN" || form.role === "SUPER_SPOC" || form.role === "SPOC") && (
                   <span className="ml-2 text-xs text-gray-600">(All organizations by default)</span>
                 )}
               </label>

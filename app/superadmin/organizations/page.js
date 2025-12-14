@@ -928,7 +928,39 @@ function OrganizationDrawer({
 
           {/* Services */}
           <div className="mt-4 border-t pt-4">
-            <h3 className="font-semibold mb-2">Offered Services</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold">Offered Services</h3>
+              {!isView && org.services.length > 0 && (
+                <div className="flex gap-2">
+                  {org.services.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        // Remove all services
+                        setOrg((prev) => ({
+                          ...prev,
+                          services: []
+                        }));
+                        // Clear any price validation errors
+                        setErrors((prev) => {
+                          const newErrors = { ...prev };
+                          Object.keys(newErrors).forEach(key => {
+                            if (key.startsWith('price_')) {
+                              delete newErrors[key];
+                            }
+                          });
+                          return newErrors;
+                        });
+                      }}
+                      className="px-3 py-1 text-xs bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors flex items-center gap-1"
+                    >
+                      <X size={12} />
+                      Unselect All
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
 
             {org.services.map((s, i) => (
               <div key={i} className="flex items-center gap-3 mb-3">
@@ -977,7 +1009,31 @@ function OrganizationDrawer({
 
             {!isView && (
               <>
-                <h3 className="font-semibold mt-4 mb-2">Available Services</h3>
+                <div className="flex items-center justify-between mt-4 mb-2">
+                  <h3 className="font-semibold">Available Services</h3>
+                  <div className="flex gap-2">
+                    {unusedServices.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Add all unused services at once
+                          const newServices = unusedServices.map(service => ({
+                            serviceName: service,
+                            price: ""
+                          }));
+                          setOrg((prev) => ({
+                            ...prev,
+                            services: [...prev.services, ...newServices]
+                          }));
+                        }}
+                        className="px-3 py-1 text-xs bg-[#ff004f] text-white rounded-md hover:bg-[#e60047] transition-colors flex items-center gap-1"
+                      >
+                        <CheckCircle size={12} />
+                        Select All
+                      </button>
+                    )}
+                  </div>
+                </div>
                 {unusedServices.map((s) => (
                   <label key={s} className="flex items-center gap-2 mb-1">
                     <input

@@ -483,7 +483,7 @@ export default function SuperAdminDashboard() {
                 </>
               ) : (
                 <>
-                  View All
+                  View All Verifications
                   <ArrowRight size={18} />
                 </>
               )}
