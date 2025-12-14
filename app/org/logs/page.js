@@ -212,15 +212,15 @@ export default function OrgLogsPage() {
     }
 
     if (action === "Add Candidate") {
-      const candidateMatch = description.match(/candidate: ([^|]+)/);
-      const orgMatch = description.match(/organization: ([^|]+)/);
+      // Extract candidate name, stopping at " in organization:" or end of string
+      const candidateMatch = description.match(/(?:Added candidate: |candidate: )([^|]+?)(?:\s+in organization:|$)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : 'new candidate';
-      const organization = orgMatch ? orgMatch[1].trim() : orgName;
-      return `${userName} added candidate ${candidate} to ${organization}`;
+      return `${userName} added candidate ${candidate} to ${orgName}`;
     }
 
     if (action === "Edit Candidate") {
-      const candidateMatch = description.match(/Updated candidate: ([^|]+)/);
+      // Extract candidate name, stopping at " in organization:" or end of string
+      const candidateMatch = description.match(/Updated candidate: ([^|]+?)(?:\s+in organization:|$)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : 'candidate';
       return `${userName} updated candidate ${candidate}'s information in ${orgName}`;
     }

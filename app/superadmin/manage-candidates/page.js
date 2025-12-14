@@ -1568,20 +1568,22 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, onValidat
     let { name, value } = e.target;
     
     // Special handling for date fields to prevent invalid year input
-    if (e.target.type === 'date' && value) {
-      // Validate date format and year range
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (dateRegex.test(value)) {
-        const year = parseInt(value.split('-')[0]);
-        const currentYear = new Date().getFullYear();
+    // if (e.target.type === 'date' && value) {
+    //   // Only validate if we have a complete date (YYYY-MM-DD format)
+    //   const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    //   if (dateRegex.test(value)) {
+    //     const year = parseInt(value.split('-')[0]);
+    //     const currentYear = new Date().getFullYear();
         
-        // Restrict year to reasonable range
-        if (year < 1900 || year > currentYear + 1) {
-          // Don't update the value if year is out of range
-          return;
-        }
-      }
-    }
+    //     // Restrict year to reasonable range for complete dates
+    //     if (year < 1900 || year > currentYear + 1) {
+    //       // Don't update the value if year is out of range
+    //       return;
+    //     }
+    //   }
+    //   // For partial dates (like just year), allow them to be entered
+    //   // The browser's date input will handle the validation
+    // }
 
     // Special handling for year of passing field
     if (name === 'education_yearOfPassing') {

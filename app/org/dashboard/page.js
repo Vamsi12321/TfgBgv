@@ -267,15 +267,15 @@ export default function OrgAdminDashboard() {
     }
 
     if (action === "Add Candidate") {
-      const candidateMatch = description.match(/candidate: ([^|]+)/);
-      const orgMatch = description.match(/organization: ([^|]+)/);
+      // Extract candidate name, stopping at " in organization:" or end of string
+      const candidateMatch = description.match(/(?:Added candidate: |candidate: )([^|]+?)(?:\s+in organization:|$)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : 'new candidate';
-      const organization = orgMatch ? orgMatch[1].trim() : orgName;
-      return `${userName} added candidate ${candidate} to ${organization}`;
+      return `${userName} added candidate ${candidate} to ${orgName}`;
     }
 
     if (action === "Edit Candidate") {
-      const candidateMatch = description.match(/Updated candidate: ([^|]+)/);
+      // Extract candidate name, stopping at " in organization:" or end of string
+      const candidateMatch = description.match(/Updated candidate: ([^|]+?)(?:\s+in organization:|$)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : 'candidate';
       return `${userName} updated candidate ${candidate}'s information in ${orgName}`;
     }
@@ -283,7 +283,7 @@ export default function OrgAdminDashboard() {
     if (action === "New Verification Initiated") {
       const candidateMatch = description.match(/candidate: ([^|]+)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : '';
-      return `${userName} initiated background verification process for ${candidate} at ${orgName}`;
+      return `${userName} initiated background verification process for ${candidate}`;
     }
 
     if (action === "Stage Initialized") {
@@ -291,31 +291,31 @@ export default function OrgAdminDashboard() {
       const candidateMatch = description.match(/candidate: ([^|]+)/);
       const stage = stageMatch ? stageMatch[1].trim() : '';
       const candidate = candidateMatch ? candidateMatch[1].trim() : '';
-      return `${userName} started ${stage} verification stage for ${candidate} at ${orgName}`;
+      return `${userName} started ${stage} verification stage for ${candidate}`;
     }
 
     if (action === "Self Verification Email Sent") {
       const candidateMatch = description.match(/candidate: ([^|]+)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : '';
-      return `${userName} sent self-verification email to ${candidate} for ${orgName} verification process`;
+      return `${userName} sent self-verification email to ${candidate}`;
     }
 
     if (action === "Login") {
-      return `${userName} logged into ${orgName} dashboard`;
+      return `${userName} logged into dashboard`;
     }
 
     if (action === "Logout") {
-      return `${userName} logged out from ${orgName} dashboard`;
+      return `${userName} logged out from dashboard`;
     }
 
     if (action === "Add User") {
-      return `${userName} added a new team member to ${orgName}`;
+      return `${userName} added a new team member`;
     }
 
     if (action === "Delete Candidate") {
       const candidateMatch = description.match(/candidate: ([^|]+)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : '';
-      return `${userName} removed candidate ${candidate} from ${orgName}`;
+      return `${userName} removed candidate ${candidate}`;
     }
 
     if (action === "Retry Check") {
@@ -324,7 +324,7 @@ export default function OrgAdminDashboard() {
       const checkName = checkMatch ? checkMatch[1].trim().replace(/_/g, ' ') : 'check';
       const candidate = candidateMatch ? candidateMatch[1].trim() : '';
       const formattedCheckName = formatCheckName(checkName);
-      return `${userName} retried ${formattedCheckName} verification for ${candidate} at ${orgName}`;
+      return `${userName} retried ${formattedCheckName} verification for ${candidate}`;
     }
 
     if (action === "Run Stage Failed") {
@@ -332,27 +332,27 @@ export default function OrgAdminDashboard() {
       const stageMatch = description.match(/Stage: ([^|]+)/);
       const candidate = candidateMatch ? candidateMatch[1].trim() : '';
       const stage = stageMatch ? stageMatch[1].trim() : '';
-      return `${userName} encountered issues running ${stage} stage for ${candidate} at ${orgName}`;
+      return `${userName} encountered issues running ${stage} stage for ${candidate}`;
     }
 
     if (action === "Password Reset Failed") {
-      return `${userName} attempted password reset for ${orgName} account - failed`;
+      return `${userName} attempted password reset - failed`;
     }
 
     if (action === "Updated Organization") {
-      return `${userName} updated ${orgName} organization settings`;
+      return `${userName} updated organization settings`;
     }
 
     if (action === "Added Helper User") {
-      return `${userName} added a helper user to ${orgName} team`;
+      return `${userName} added a helper user`;
     }
 
     if (action === "Updated User") {
-      return `${userName} updated user information in ${orgName}`;
+      return `${userName} updated user information`;
     }
 
     // Generic fallback for other actions
-    return `${userName} performed ${action.toLowerCase()} at ${orgName}`;
+    return `${userName} performed ${action.toLowerCase()}`;
   }
 
   // Helper function to format check names

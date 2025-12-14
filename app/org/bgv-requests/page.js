@@ -67,6 +67,8 @@ export default function OrgBGVRequestsPage() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [showConfirmClose, setShowConfirmClose] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
+  const [validationError, setValidationError] = useState("");
 
   const stepNames = ["Primary", "Secondary", "Final"];
   const steps = ["primary", "secondary", "final"]; // Lowercase stage names
@@ -187,8 +189,6 @@ export default function OrgBGVRequestsPage() {
   };
 
   const [newCandidate, setNewCandidate] = useState(emptyCandidate);
-  const [fieldErrors, setFieldErrors] = useState({});
-  const [validationError, setValidationError] = useState("");
   
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
@@ -244,6 +244,7 @@ export default function OrgBGVRequestsPage() {
       // No data entered, close directly
       setShowAddModal(false);
       setNewCandidate(emptyCandidate);
+      setFieldErrors({});
       setValidationError("");
       setExpandedSections({
         supervisory1: false,
@@ -255,7 +256,163 @@ export default function OrgBGVRequestsPage() {
     }
   };
 
-  // Handle form changes including file uploads
+  /* ---------------------------------------------------
+     VALIDATION FUNCTIONS
+  --------------------------------------------------- */
+  const validateField = (name, value) => {
+    const errors = {};
+
+    // Required field validation
+    const requiredFields = [
+      'firstName', 'lastName', 'fatherName', 'dob', 'gender', 
+      'phone', 'email', 'aadhaarNumber', 'panNumber', 
+      'address', 'district', 'state', 'pincode'
+    ];
+
+    if (requiredFields.includes(name) && !value?.trim()) {
+      const fieldNames = {
+        firstName: 'First Name',
+        lastName: 'Last Name', 
+        fatherName: "Father's Name",
+        dob: 'Date of Birth',
+        gender: 'Gender',
+        phone: 'Phone Number',
+        email: 'Email',
+        aadhaarNumber: 'Aadhaar Number',
+        panNumber: 'PAN Number',
+        address: 'Address',
+        district: 'District',
+        state: 'State',
+        pincode: 'Pincode'
+      };
+      errors[name] = `${fieldNames[name]} is required`;
+      return errors;
+    }
+
+    // Name validations - only letters and spaces
+    const nameFields = ['firstName', 'middleName', 'lastName', 'fatherName', 'district', 'state'];
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    
+    if (nameFields.includes(name) && value && !nameRegex.test(value)) {
+      const fieldNames = {
+        firstName: 'First Name',
+        middleName: 'Middle Name',
+        lastName: 'Last Name',
+        fatherName: "Father's Name",
+        district: 'District',
+        state: 'State'
+      };
+      errors[name] = `${fieldNames[name]} must contain only letters and spaces, no numbers allowed`;
+    }
+
+    // Email validation
+    if (name === 'email' && value) {
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(value)) {
+        errors[name] = 'Invalid email format. Please enter a valid email address (e.g., user@example.com)';
+      } else if (!value.includes('@') || !value.split('@')[1]?.includes('.')) {
+        errors[name] = 'Email must include @ symbol and a valid domain (e.g., user@gmail.com)';
+      }
+    }
+
+    // Phone validation
+    if (name === 'phone' && value) {
+      if (!/^\d{10}$/.test(value)) {
+        errors[name] = 'Invalid phone number. Must be exactly 10 digits';
+      }
+    }
+
+    // Aadhaar validation
+    if (name === 'aadhaarNumber' && value) {
+      if (!/^\d{12}$/.test(value)) {
+        errors[name] = 'Invalid Aadhaar number. Must be exactly 12 digits';
+      }
+    }
+
+    // PAN validation
+    if (name === 'panNumber' && value) {
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value)) {
+        errors[name] = 'Invalid PAN format. Must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter)';
+      }
+    }
+
+    // Pincode validation
+    if (name === 'pincode' && value) {
+      if (!/^[1-9][0-9]{5}$/.test(value)) {
+        errors[name] = 'Invalid Pincode. Must be exactly 6 digits and cannot start with 0';
+      }
+    }
+
+    // Date validation
+    if (name === 'dob' && value) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(value)) {
+        const selectedDate = new Date(value);
+        const today = new Date();
+        const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+        const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+        if (selectedDate > today) {
+          errors[name] = 'Date of birth cannot be in the future';
+        } else if (selectedDate < minDate) {
+          errors[name] = 'Date of birth cannot be more than 100 years ago';
+        } else if (selectedDate > maxDate) {
+          errors[name] = 'Candidate must be at least 18 years old';
+        }
+      }
+    }
+
+    // Optional field validations
+    if (name === 'passportNumber' && value) {
+      if (!/^[A-PR-WY][1-9]\d{6}$/.test(value)) {
+        errors[name] = 'Invalid Passport Number. Must be in format: A1234567 (1 letter followed by 7 digits)';
+      }
+    }
+
+    if (name === 'uanNumber' && value) {
+      if (!/^[0-9]{10,12}$/.test(value)) {
+        errors[name] = 'Invalid UAN Number. Must be 10-12 digits';
+      }
+    }
+
+    if (name === 'bankAccountNumber' && value) {
+      if (!/^[0-9]{9,18}$/.test(value)) {
+        errors[name] = 'Invalid Bank Account Number. Must be 9-18 digits';
+      }
+    }
+
+    return errors;
+  };
+
+  const validateAllFields = (candidateData) => {
+    const allErrors = {};
+    
+    // Validate all fields
+    Object.keys(candidateData).forEach(fieldName => {
+      const fieldErrors = validateField(fieldName, candidateData[fieldName]);
+      Object.assign(allErrors, fieldErrors);
+    });
+
+    return allErrors;
+  };
+
+  const showValidationErrorPopup = (errors) => {
+    const errorCount = Object.keys(errors).length;
+    const errorList = Object.entries(errors)
+      .slice(0, 5) // Show first 5 errors
+      .map(([field, message]) => `• ${message}`)
+      .join('\n');
+    
+    const moreErrors = errorCount > 5 ? `\n... and ${errorCount - 5} more errors` : '';
+    
+    showModal({
+      title: "Validation Errors",
+      message: `Please fix the following errors:\n\n${errorList}${moreErrors}`,
+      type: "error",
+    });
+  };
+
+  // Handle form changes including file uploads with enhanced validation
   const handleAddChange = (e, isFile = false, fileField = null) => {
     if (isFile) {
       const file = e.target.files[0];
@@ -273,6 +430,21 @@ export default function OrgBGVRequestsPage() {
 
     let { name, value } = e.target;
 
+    // Special handling for date fields to prevent invalid year input
+    if (e.target.type === 'date' && value) {
+      // Only validate if we have a complete date (YYYY-MM-DD format)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(value)) {
+        const year = parseInt(value.split('-')[0]);
+        const currentYear = new Date().getFullYear();
+        
+        if (year < 1900 || year > currentYear) {
+          // Don't update if year is invalid, but allow partial typing
+          return;
+        }
+      }
+    }
+
     // Auto-format specific fields based on field name
     if (name.includes('phone') || name.includes('hrContact') || name.includes('Contact')) {
       value = value.replace(/\D/g, "").slice(0, 10);
@@ -286,9 +458,24 @@ export default function OrgBGVRequestsPage() {
 
     setNewCandidate((p) => ({ ...p, [name]: value }));
     
-    // Clear validation error when user starts typing
+    // Clear validation error for this field when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    // Clear general validation error when user starts typing
     if (validationError) {
       setValidationError("");
+    }
+
+    // Real-time validation for the current field
+    const fieldValidationErrors = validateField(name, value);
+    if (Object.keys(fieldValidationErrors).length > 0) {
+      setFieldErrors(prev => ({ ...prev, ...fieldValidationErrors }));
     }
   };
 
@@ -1146,12 +1333,20 @@ export default function OrgBGVRequestsPage() {
           )}
         </div>
 
-        {/* NEW: Stage Initiation Indicator */}
+        {/* Stage Initiation Indicator - Show different icons based on status */}
         {initiatedStages.length > 0 && !isCheckLocked && (
           <div className="absolute top-3 right-3 z-10">
-            <div className="relative">
-              <div className="w-7 h-7 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform">
-                <Info size={16} className="text-white" />
+            <div className="relative group">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform ${
+                status === "COMPLETED" ? "bg-gradient-to-r from-green-500 to-emerald-600" :
+                status === "FAILED" ? "bg-gradient-to-r from-red-500 to-red-600" :
+                status === "IN_PROGRESS" ? "bg-gradient-to-r from-orange-500 to-orange-600" :
+                "bg-gradient-to-r from-blue-500 to-blue-600"
+              }`}>
+                {status === "COMPLETED" ? <CheckCircle size={16} className="text-white" /> :
+                 status === "FAILED" ? <XCircle size={16} className="text-white" /> :
+                 status === "IN_PROGRESS" ? <RotateCcw size={16} className="text-white" /> :
+                 <Info size={16} className="text-white" />}
               </div>
               
               {/* Enhanced Tooltip on hover */}
@@ -1245,8 +1440,8 @@ export default function OrgBGVRequestsPage() {
           )}
         </div>
 
-        {/* NEW: Stage Status Info Bar */}
-        {initiatedStages.length > 0 && (
+        {/* Stage Status Info Bar - Only show for non-completed checks */}
+        {initiatedStages.length > 0 && status !== "COMPLETED" && (
           <div className="mb-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2 text-xs">
               <span className="font-bold text-blue-900">🎯 Active in:</span>
@@ -1265,6 +1460,22 @@ export default function OrgBGVRequestsPage() {
                     </span>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Completed Status Info Bar - Show for completed checks */}
+        {status === "COMPLETED" && (
+          <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-bold text-green-900">✅ Already Verified</span>
+              <div className="flex gap-1 flex-wrap">
+                {initiatedStages.map(stage => (
+                  <span key={stage} className="px-2 py-1 rounded-full text-xs font-bold bg-green-500 text-white shadow-sm">
+                    ✓ {stage.charAt(0).toUpperCase() + stage.slice(1)}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
@@ -2613,39 +2824,83 @@ export default function OrgBGVRequestsPage() {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input
-                  name="firstName"
-                  value={newCandidate.firstName}
-                  onChange={handleAddChange}
-                  placeholder="First Name*"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="firstName"
+                    value={newCandidate.firstName}
+                    onChange={handleAddChange}
+                    placeholder="First Name*"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.firstName 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.firstName && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.firstName}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="middleName"
-                  value={newCandidate.middleName}
-                  onChange={handleAddChange}
-                  placeholder="Middle Name (Optional)"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="middleName"
+                    value={newCandidate.middleName}
+                    onChange={handleAddChange}
+                    placeholder="Middle Name (Optional)"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.middleName 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.middleName && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.middleName}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="lastName"
-                  value={newCandidate.lastName}
-                  onChange={handleAddChange}
-                  placeholder="Last Name*"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="lastName"
+                    value={newCandidate.lastName}
+                    onChange={handleAddChange}
+                    placeholder="Last Name*"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.lastName 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.lastName && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.lastName}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* FATHER NAME */}
-              <input
-                name="fatherName"
-                value={newCandidate.fatherName}
-                onChange={handleAddChange}
-                placeholder="Father's Name*"
-                className="border p-2 rounded w-full mt-4"
-              />
+              <div className="mt-4">
+                <input
+                  name="fatherName"
+                  value={newCandidate.fatherName}
+                  onChange={handleAddChange}
+                  placeholder="Father's Name*"
+                  className={`border p-2 rounded w-full ${
+                    fieldErrors.fatherName 
+                      ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                  } focus:outline-none focus:ring-2 transition-all`}
+                />
+                {fieldErrors.fatherName && (
+                  <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.fatherName}
+                  </p>
+                )}
+              </div>
 
               {/* DOB + GENDER PREMIUM */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -2658,8 +2913,19 @@ export default function OrgBGVRequestsPage() {
                     name="dob"
                     value={newCandidate.dob}
                     onChange={handleAddChange}
-                    className="border p-2 rounded w-full"
+                    min="1900-01-01"
+                    max={new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate()).toISOString().split('T')[0]}
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.dob 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
                   />
+                  {fieldErrors.dob && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.dob}
+                    </p>
+                  )}
                 </div>
 
                 {/* 🔥 PREMIUM GENDER BUTTONS */}
@@ -2676,13 +2942,20 @@ export default function OrgBGVRequestsPage() {
                         className={`px-4 py-2 rounded-md border flex-1 capitalize ${
                           newCandidate.gender === g
                             ? "bg-red-600 text-white border-red-600"
+                            : fieldErrors.gender
+                            ? "bg-red-50 text-gray-700 border-red-300 hover:bg-red-100"
                             : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                        }`}
+                        } transition-all`}
                       >
                         {g}
                       </button>
                     ))}
                   </div>
+                  {fieldErrors.gender && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.gender}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -2692,22 +2965,45 @@ export default function OrgBGVRequestsPage() {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  name="phone"
-                  value={newCandidate.phone}
-                  onChange={handleAddChange}
-                  placeholder="Phone Number*"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="phone"
+                    value={newCandidate.phone}
+                    onChange={handleAddChange}
+                    placeholder="Phone Number*"
+                    maxLength="10"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.phone 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.phone && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.phone}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="email"
-                  value={newCandidate.email}
-                  onChange={handleAddChange}
-                  placeholder="Email*"
-                  type="email"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="email"
+                    value={newCandidate.email}
+                    onChange={handleAddChange}
+                    placeholder="Email*"
+                    type="email"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.email 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.email && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.email}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* IDENTITY */}
@@ -2716,55 +3012,124 @@ export default function OrgBGVRequestsPage() {
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input
-                  name="aadhaarNumber"
-                  value={newCandidate.aadhaarNumber}
-                  onChange={handleAddChange}
-                  placeholder="Aadhaar* (12 digits)"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="aadhaarNumber"
+                    value={newCandidate.aadhaarNumber}
+                    onChange={handleAddChange}
+                    placeholder="Aadhaar* (12 digits)"
+                    maxLength="12"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.aadhaarNumber 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.aadhaarNumber && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.aadhaarNumber}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="panNumber"
-                  value={newCandidate.panNumber}
-                  onChange={handleAddChange}
-                  placeholder="PAN* (ABCDE1234F)"
-                  className="border p-2 rounded uppercase"
-                />
+                <div>
+                  <input
+                    name="panNumber"
+                    value={newCandidate.panNumber}
+                    onChange={handleAddChange}
+                    placeholder="PAN* (ABCDE1234F)"
+                    maxLength="10"
+                    className={`border p-2 rounded uppercase w-full ${
+                      fieldErrors.panNumber 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.panNumber && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.panNumber}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="uanNumber"
-                  value={newCandidate.uanNumber}
-                  onChange={handleAddChange}
-                  placeholder="UAN Number"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="uanNumber"
+                    value={newCandidate.uanNumber}
+                    onChange={handleAddChange}
+                    placeholder="UAN Number"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.uanNumber 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.uanNumber && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.uanNumber}
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                <input
-                  name="passportNumber"
-                  value={newCandidate.passportNumber}
-                  onChange={handleAddChange}
-                  placeholder="Passport Number (Optional)"
-                  className="border p-2 rounded uppercase"
-                />
+                <div>
+                  <input
+                    name="passportNumber"
+                    value={newCandidate.passportNumber}
+                    onChange={handleAddChange}
+                    placeholder="Passport Number (Optional)"
+                    className={`border p-2 rounded uppercase w-full ${
+                      fieldErrors.passportNumber 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.passportNumber && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.passportNumber}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="bankAccountNumber"
-                  value={newCandidate.bankAccountNumber}
-                  onChange={handleAddChange}
-                  placeholder="Bank Account Number (Optional)"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="bankAccountNumber"
+                    value={newCandidate.bankAccountNumber}
+                    onChange={handleAddChange}
+                    placeholder="Bank Account Number (Optional)"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.bankAccountNumber 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.bankAccountNumber && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.bankAccountNumber}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="pincode"
-                  value={newCandidate.pincode}
-                  onChange={handleAddChange}
-                  placeholder="Pincode*"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="pincode"
+                    value={newCandidate.pincode}
+                    onChange={handleAddChange}
+                    placeholder="Pincode*"
+                    maxLength="6"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.pincode 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.pincode && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.pincode}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* ADDRESS */}
@@ -2772,31 +3137,64 @@ export default function OrgBGVRequestsPage() {
                 Address Details
               </h3>
 
-              <textarea
-                name="address"
-                value={newCandidate.address}
-                onChange={handleAddChange}
-                placeholder="Full Address*"
-                rows={3}
-                className="border p-2 rounded w-full"
-              />
+              <div>
+                <textarea
+                  name="address"
+                  value={newCandidate.address}
+                  onChange={handleAddChange}
+                  placeholder="Full Address*"
+                  rows={3}
+                  className={`border p-2 rounded w-full ${
+                    fieldErrors.address 
+                      ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                  } focus:outline-none focus:ring-2 transition-all`}
+                />
+                {fieldErrors.address && (
+                  <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {fieldErrors.address}
+                  </p>
+                )}
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <input
-                  name="district"
-                  value={newCandidate.district}
-                  onChange={handleAddChange}
-                  placeholder="District*"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="district"
+                    value={newCandidate.district}
+                    onChange={handleAddChange}
+                    placeholder="District*"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.district 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.district && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.district}
+                    </p>
+                  )}
+                </div>
 
-                <input
-                  name="state"
-                  value={newCandidate.state}
-                  onChange={handleAddChange}
-                  placeholder="State*"
-                  className="border p-2 rounded"
-                />
+                <div>
+                  <input
+                    name="state"
+                    value={newCandidate.state}
+                    onChange={handleAddChange}
+                    placeholder="State*"
+                    className={`border p-2 rounded w-full ${
+                      fieldErrors.state 
+                        ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+                    } focus:outline-none focus:ring-2 transition-all`}
+                  />
+                  {fieldErrors.state && (
+                    <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {fieldErrors.state}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* ============================================ */}
@@ -3430,153 +3828,18 @@ export default function OrgBGVRequestsPage() {
 
                 <button
                   onClick={async () => {
-                    // Check required fields first
-                    if (!newCandidate.firstName?.trim() || !newCandidate.lastName?.trim() || !newCandidate.email?.trim() || !newCandidate.phone?.trim()) {
-                      setValidationError("Please fill all required details");
-                      return;
-                    }
+                    // Comprehensive validation using the validation functions
+                    const errors = validateAllFields(newCandidate);
                     
-                    // Clear validation error if basic fields are filled
-                    setValidationError("");
-                    
-                    // ENHANCED VALIDATION
-                    const errors = {};
-
-                    const {
-                      firstName,
-                      lastName,
-                      fatherName,
-                      dob,
-                      gender,
-                      phone,
-                      email,
-                      aadhaarNumber,
-                      panNumber,
-                      district,
-                      state,
-                      pincode,
-                      address,
-                      middleName,
-                      passportNumber,
-                      uanNumber,
-                      bankAccountNumber,
-                    } = newCandidate;
-
-                    // Required field checks
-                    if (!firstName) errors.firstName = "First Name is required";
-                    if (!lastName) errors.lastName = "Last Name is required";
-                    if (!fatherName)
-                      errors.fatherName = "Father's Name is required";
-                    if (!dob) errors.dob = "Date of Birth is required";
-                    if (!gender) errors.gender = "Gender is required";
-                    if (!phone) errors.phone = "Phone Number is required";
-                    if (!email) errors.email = "Email is required";
-                    if (!aadhaarNumber)
-                      errors.aadhaarNumber = "Aadhaar Number is required";
-                    if (!panNumber) errors.panNumber = "PAN Number is required";
-                    if (!address) errors.address = "Address is required";
-                    if (!district) errors.district = "District is required";
-                    if (!state) errors.state = "State is required";
-                    if (!pincode) errors.pincode = "Pincode is required";
-
-                    // Name validations - only letters and spaces, no numbers
-                    const nameRegex = /^[a-zA-Z\s]+$/;
-                    if (firstName && !nameRegex.test(firstName)) {
-                      errors.firstName =
-                        "First Name must contain only letters and spaces, no numbers allowed";
-                    }
-                    if (middleName && !nameRegex.test(middleName)) {
-                      errors.middleName =
-                        "Middle Name must contain only letters and spaces, no numbers allowed";
-                    }
-                    if (lastName && !nameRegex.test(lastName)) {
-                      errors.lastName =
-                        "Last Name must contain only letters and spaces, no numbers allowed";
-                    }
-                    if (fatherName && !nameRegex.test(fatherName)) {
-                      errors.fatherName =
-                        "Father's Name must contain only letters and spaces, no numbers allowed";
-                    }
-
-                    // Email validation
-                    const emailRegex =
-                      /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-                    if (email && !emailRegex.test(email)) {
-                      errors.email =
-                        "Invalid email format. Please enter a valid email address (e.g., user@example.com)";
-                    } else if (
-                      email &&
-                      (!email.includes("@") ||
-                        !email.split("@")[1]?.includes("."))
-                    ) {
-                      errors.email =
-                        "Email must include @ symbol and a valid domain (e.g., user@gmail.com)";
-                    }
-
-                    // Aadhaar validation
-                    if (aadhaarNumber && !/^\d{12}$/.test(aadhaarNumber)) {
-                      errors.aadhaarNumber =
-                        "Invalid Aadhaar number. Must be exactly 12 digits";
-                    }
-
-                    // PAN validation
-                    if (
-                      panNumber &&
-                      !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)
-                    ) {
-                      errors.panNumber =
-                        "Invalid PAN format. Must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter)";
-                    }
-
-                    // Phone validation
-                    if (phone && !/^\d{10}$/.test(phone)) {
-                      errors.phone =
-                        "Invalid phone number. Must be exactly 10 digits";
-                    }
-
-                    // District and State validation - only letters and spaces
-                    if (district && !nameRegex.test(district)) {
-                      errors.district =
-                        "District must contain only letters and spaces, no numbers or special characters allowed";
-                    }
-
-                    if (state && !nameRegex.test(state)) {
-                      errors.state =
-                        "State must contain only letters and spaces, no numbers or special characters allowed";
-                    }
-
-                    // Pincode validation
-                    if (pincode && !/^[1-9][0-9]{5}$/.test(pincode)) {
-                      errors.pincode =
-                        "Invalid Pincode. Must be exactly 6 digits and cannot start with 0";
-                    }
-
-                    // Optional field validations
-                    if (
-                      passportNumber &&
-                      !/^[A-PR-WY][1-9]\d{6}$/.test(passportNumber)
-                    ) {
-                      errors.passportNumber =
-                        "Invalid Passport Number. Must be in format: A1234567 (1 letter followed by 7 digits)";
-                    }
-
-                    if (uanNumber && !/^[0-9]{10,12}$/.test(uanNumber)) {
-                      errors.uanNumber =
-                        "Invalid UAN Number. Must be 10-12 digits";
-                    }
-
-                    if (
-                      bankAccountNumber &&
-                      !/^[0-9]{9,18}$/.test(bankAccountNumber)
-                    ) {
-                      errors.bankAccountNumber =
-                        "Invalid Bank Account Number. Must be 9-18 digits";
-                    }
-
                     if (Object.keys(errors).length > 0) {
                       setFieldErrors(errors);
+                      showValidationErrorPopup(errors);
                       return;
                     }
+                    
+                    // Clear any existing errors
+                    setFieldErrors({});
+                    setValidationError("");
 
                     try {
                       setLoading(true);

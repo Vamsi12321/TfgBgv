@@ -1600,12 +1600,20 @@ export default function BGVInitiationPage() {
           )}
         </div>
 
-        {/* NEW: Stage Initiation Indicator */}
+        {/* Stage Initiation Indicator - Show different icons based on status */}
         {initiatedStages.length > 0 && !isCheckLocked && (
           <div className="absolute top-3 right-3 z-10">
-            <div className="relative">
-              <div className="w-7 h-7 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform">
-                <Info size={16} className="text-white" />
+            <div className="relative group">
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform ${
+                status === "COMPLETED" ? "bg-gradient-to-r from-green-500 to-emerald-600" :
+                status === "FAILED" ? "bg-gradient-to-r from-red-500 to-red-600" :
+                status === "IN_PROGRESS" ? "bg-gradient-to-r from-orange-500 to-orange-600" :
+                "bg-gradient-to-r from-blue-500 to-blue-600"
+              }`}>
+                {status === "COMPLETED" ? <CheckCircle size={16} className="text-white" /> :
+                 status === "FAILED" ? <XCircle size={16} className="text-white" /> :
+                 status === "IN_PROGRESS" ? <RotateCcw size={16} className="text-white" /> :
+                 <Info size={16} className="text-white" />}
               </div>
               
               {/* Enhanced Tooltip on hover */}
@@ -1699,8 +1707,8 @@ export default function BGVInitiationPage() {
           )}
         </div>
 
-        {/* NEW: Stage Status Info Bar */}
-        {initiatedStages.length > 0 && (
+        {/* Stage Status Info Bar - Only show for non-completed checks */}
+        {initiatedStages.length > 0 && status !== "COMPLETED" && (
           <div className="mb-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2 text-xs">
               <span className="font-bold text-blue-900">🎯 Active in:</span>
@@ -1719,6 +1727,22 @@ export default function BGVInitiationPage() {
                     </span>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Completed Status Info Bar - Show for completed checks */}
+        {status === "COMPLETED" && (
+          <div className="mb-3 p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="font-bold text-green-900">✅ Already Verified</span>
+              <div className="flex gap-1 flex-wrap">
+                {initiatedStages.map(stage => (
+                  <span key={stage} className="px-2 py-1 rounded-full text-xs font-bold bg-green-500 text-white shadow-sm">
+                    ✓ {stage.charAt(0).toUpperCase() + stage.slice(1)}
+                  </span>
+                ))}
               </div>
             </div>
           </div>

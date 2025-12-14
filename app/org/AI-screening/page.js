@@ -988,13 +988,19 @@ export default function OrgAIResumeScreeningPage() {
 
         // Render certificate component
         const certId = `cert-${i}`;
-        container.innerHTML = renderCertificateHTML(result, type, timestamp);
+        container.innerHTML = renderCertificateHTML(result, type, timestamp, i);
 
         // Wait for images to load
         await new Promise(resolve => setTimeout(resolve, 500));
 
-        // Generate PDF
-        const certElement = document.getElementById(certId);
+        // Generate PDF - use the container directly instead of searching by ID
+        const certElement = container.querySelector(`#cert-${i}`) || container.firstElementChild;
+        
+        if (!certElement) {
+          console.error(`Certificate element not found for result ${i}`);
+          continue;
+        }
+        
         const canvas = await safeHtml2Canvas(certElement, { scale: 2 });
         const canvasWidth = canvas?.width || 1;
         const canvasHeight = canvas?.height || 1;
@@ -1033,11 +1039,11 @@ export default function OrgAIResumeScreeningPage() {
   /* -----------------------------------------------------------
      RENDER CERTIFICATE HTML (Helper for PDF generation)
   ------------------------------------------------------------*/
-  const renderCertificateHTML = (result, type, timestamp) => {
+  const renderCertificateHTML = (result, type, timestamp, index = 0) => {
     const isPositive = ["GOOD_FIT", "MODERATE_FIT"].includes(result.recommendation);
     
     return `
-      <div id="cert-${result.rank || 0}" style="width: 794px; min-height: 1123px; padding: 10px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; position: relative; color: #000; overflow: hidden;">
+      <div id="cert-${index}" style="width: 794px; min-height: 1123px; padding: 10px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; position: relative; color: #000; overflow: hidden;">
         <img src="/logos/maihooMain.png" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; z-index: 1; pointer-events: none;" />
         
         <div style="position: relative; z-index: 2; margin-top: -10px;">

@@ -73,6 +73,162 @@ export default function OrgCandidateSelfVerification() {
   const [fieldErrors, setFieldErrors] = useState({});
   const [validationError, setValidationError] = useState("");
   const [showConfirmClose, setShowConfirmClose] = useState(false);
+
+  /* ---------------------------------------------------
+     VALIDATION FUNCTIONS
+  --------------------------------------------------- */
+  const validateField = (name, value) => {
+    const errors = {};
+
+    // Required field validation
+    const requiredFields = [
+      'firstName', 'lastName', 'fatherName', 'dob', 'gender', 
+      'phone', 'email', 'aadhaarNumber', 'panNumber', 
+      'address', 'district', 'state', 'pincode'
+    ];
+
+    if (requiredFields.includes(name) && !value?.trim()) {
+      const fieldNames = {
+        firstName: 'First Name',
+        lastName: 'Last Name', 
+        fatherName: "Father's Name",
+        dob: 'Date of Birth',
+        gender: 'Gender',
+        phone: 'Phone Number',
+        email: 'Email',
+        aadhaarNumber: 'Aadhaar Number',
+        panNumber: 'PAN Number',
+        address: 'Address',
+        district: 'District',
+        state: 'State',
+        pincode: 'Pincode'
+      };
+      errors[name] = `${fieldNames[name]} is required`;
+      return errors;
+    }
+
+    // Name validations - only letters and spaces
+    const nameFields = ['firstName', 'middleName', 'lastName', 'fatherName', 'district', 'state'];
+    const nameRegex = /^[a-zA-Z\s]+$/;
+    
+    if (nameFields.includes(name) && value && !nameRegex.test(value)) {
+      const fieldNames = {
+        firstName: 'First Name',
+        middleName: 'Middle Name',
+        lastName: 'Last Name',
+        fatherName: "Father's Name",
+        district: 'District',
+        state: 'State'
+      };
+      errors[name] = `${fieldNames[name]} must contain only letters and spaces, no numbers allowed`;
+    }
+
+    // Email validation
+    if (name === 'email' && value) {
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(value)) {
+        errors[name] = 'Invalid email format. Please enter a valid email address (e.g., user@example.com)';
+      } else if (!value.includes('@') || !value.split('@')[1]?.includes('.')) {
+        errors[name] = 'Email must include @ symbol and a valid domain (e.g., user@gmail.com)';
+      }
+    }
+
+    // Phone validation
+    if (name === 'phone' && value) {
+      if (!/^\d{10}$/.test(value)) {
+        errors[name] = 'Invalid phone number. Must be exactly 10 digits';
+      }
+    }
+
+    // Aadhaar validation
+    if (name === 'aadhaarNumber' && value) {
+      if (!/^\d{12}$/.test(value)) {
+        errors[name] = 'Invalid Aadhaar number. Must be exactly 12 digits';
+      }
+    }
+
+    // PAN validation
+    if (name === 'panNumber' && value) {
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(value)) {
+        errors[name] = 'Invalid PAN format. Must be in format: ABCDE1234F (5 letters, 4 digits, 1 letter)';
+      }
+    }
+
+    // Pincode validation
+    if (name === 'pincode' && value) {
+      if (!/^[1-9][0-9]{5}$/.test(value)) {
+        errors[name] = 'Invalid Pincode. Must be exactly 6 digits and cannot start with 0';
+      }
+    }
+
+    // Date validation
+    if (name === 'dob' && value) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(value)) {
+        const selectedDate = new Date(value);
+        const today = new Date();
+        const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
+        const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate());
+
+        if (selectedDate > today) {
+          errors[name] = 'Date of birth cannot be in the future';
+        } else if (selectedDate < minDate) {
+          errors[name] = 'Date of birth cannot be more than 100 years ago';
+        } else if (selectedDate > maxDate) {
+          errors[name] = 'Candidate must be at least 18 years old';
+        }
+      }
+    }
+
+    // Optional field validations
+    if (name === 'passportNumber' && value) {
+      if (!/^[A-PR-WY][1-9]\d{6}$/.test(value)) {
+        errors[name] = 'Invalid Passport Number. Must be in format: A1234567 (1 letter followed by 7 digits)';
+      }
+    }
+
+    if (name === 'uanNumber' && value) {
+      if (!/^[0-9]{10,12}$/.test(value)) {
+        errors[name] = 'Invalid UAN Number. Must be 10-12 digits';
+      }
+    }
+
+    if (name === 'bankAccountNumber' && value) {
+      if (!/^[0-9]{9,18}$/.test(value)) {
+        errors[name] = 'Invalid Bank Account Number. Must be 9-18 digits';
+      }
+    }
+
+    return errors;
+  };
+
+  const validateAllFields = (candidateData) => {
+    const allErrors = {};
+    
+    // Validate all fields
+    Object.keys(candidateData).forEach(fieldName => {
+      const fieldErrors = validateField(fieldName, candidateData[fieldName]);
+      Object.assign(allErrors, fieldErrors);
+    });
+
+    return allErrors;
+  };
+
+  const showValidationErrorPopup = (errors) => {
+    const errorCount = Object.keys(errors).length;
+    const errorList = Object.entries(errors)
+      .slice(0, 5) // Show first 5 errors
+      .map(([field, message]) => `• ${message}`)
+      .join('\n');
+    
+    const moreErrors = errorCount > 5 ? `\n... and ${errorCount - 5} more errors` : '';
+    
+    showModal({
+      title: "Validation Errors",
+      message: `Please fix the following errors:\n\n${errorList}${moreErrors}`,
+      type: "error",
+    });
+  };
   
   // Collapsible sections state
   const [expandedSections, setExpandedSections] = useState({
@@ -210,6 +366,7 @@ export default function OrgCandidateSelfVerification() {
       // No data entered, close directly
       setShowAddModal(false);
       setNewCandidate(createEmptyCandidate());
+      setFieldErrors({});
       setValidationError("");
       setExpandedSections({
         supervisory1: false,
@@ -444,6 +601,21 @@ export default function OrgCandidateSelfVerification() {
 
     let { name, value } = e.target;
 
+    // Special handling for date fields to prevent invalid year input
+    if (e.target.type === 'date' && value) {
+      // Only validate if we have a complete date (YYYY-MM-DD format)
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (dateRegex.test(value)) {
+        const year = parseInt(value.split('-')[0]);
+        const currentYear = new Date().getFullYear();
+        
+        if (year < 1900 || year > currentYear) {
+          // Don't update if year is invalid, but allow partial typing
+          return;
+        }
+      }
+    }
+
     // Auto-format specific fields based on field name
     if (name.includes('phone') || name.includes('hrContact') || name.includes('Contact')) {
       value = value.replace(/\D/g, "").slice(0, 10);
@@ -461,9 +633,24 @@ export default function OrgCandidateSelfVerification() {
 
     setNewCandidate((prev) => ({ ...prev, [name]: value }));
     
-    // Clear validation error when user starts typing
+    // Clear validation error for this field when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+
+    // Clear general validation error when user starts typing
     if (validationError) {
       setValidationError("");
+    }
+
+    // Real-time validation for the current field
+    const fieldValidationErrors = validateField(name, value);
+    if (Object.keys(fieldValidationErrors).length > 0) {
+      setFieldErrors(prev => ({ ...prev, ...fieldValidationErrors }));
     }
   };
 
@@ -1059,6 +1246,19 @@ export default function OrgCandidateSelfVerification() {
   /* ADD CANDIDATE FUNCTION                          */
   /* ---------------------------------------------- */
   const handleAddCandidate = async () => {
+    // Comprehensive validation using the validation functions
+    const errors = validateAllFields(newCandidate);
+    
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      showValidationErrorPopup(errors);
+      return;
+    }
+    
+    // Clear any existing errors
+    setFieldErrors({});
+    setValidationError("");
+
     setSubmitting(true);
 
     try {
@@ -1191,6 +1391,7 @@ export default function OrgCandidateSelfVerification() {
 
         setShowAddModal(false);
         setNewCandidate(createEmptyCandidate());
+        setFieldErrors({});
         setValidationError("");
         setExpandedSections({
           supervisory1: false,
@@ -1927,6 +2128,8 @@ export default function OrgCandidateSelfVerification() {
               submitText="Add Candidate"
               validationError={validationError}
               setValidationError={setValidationError}
+              fieldErrors={fieldErrors}
+              validateField={validateField}
             />
           </Modal>
         )}
@@ -2091,7 +2294,7 @@ function Modal({ title, children, onClose }) {
 /* -------------------------------------------- */
 /* FORM COMPONENT — WITH FULL NEW FIELDS */
 /* -------------------------------------------- */
-function CandidateForm({ data, onChange, onSubmit, saving, submitText, validationError, setValidationError }) {
+function CandidateForm({ data, onChange, onSubmit, saving, submitText, validationError, setValidationError, fieldErrors = {}, validateField }) {
   const [expandedSections, setExpandedSections] = useState({
     supervisory1: false,
     supervisory2: false,
@@ -2105,14 +2308,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, validatio
   };
 
   const handleSubmitWithValidation = () => {
-    // Validate required fields
-    if (!data.firstName?.trim() || !data.lastName?.trim() || !data.email?.trim() || !data.phone?.trim()) {
-      setValidationError("Please fill all required details");
-      return;
-    }
-    
-    // Clear validation error and proceed with submission
-    setValidationError("");
+    // Use the comprehensive validation from parent component
     onSubmit();
   };
 
@@ -2142,39 +2338,83 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, validatio
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input
-          name="firstName"
-          value={data.firstName}
-          onChange={handleInputChange}
-          placeholder="First Name*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="firstName"
+            value={data.firstName}
+            onChange={handleInputChange}
+            placeholder="First Name*"
+            className={`border p-2 rounded w-full ${
+              fieldErrors.firstName 
+                ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+            } focus:outline-none focus:ring-2 transition-all`}
+          />
+          {fieldErrors.firstName && (
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.firstName}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="middleName"
-          value={data.middleName}
-          onChange={handleInputChange}
-          placeholder="Middle Name (Optional)"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="middleName"
+            value={data.middleName}
+            onChange={handleInputChange}
+            placeholder="Middle Name (Optional)"
+            className={`border p-2 rounded w-full ${
+              fieldErrors.middleName 
+                ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+            } focus:outline-none focus:ring-2 transition-all`}
+          />
+          {fieldErrors.middleName && (
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.middleName}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="lastName"
-          value={data.lastName}
-          onChange={handleInputChange}
-          placeholder="Last Name*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="lastName"
+            value={data.lastName}
+            onChange={handleInputChange}
+            placeholder="Last Name*"
+            className={`border p-2 rounded w-full ${
+              fieldErrors.lastName 
+                ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+            } focus:outline-none focus:ring-2 transition-all`}
+          />
+          {fieldErrors.lastName && (
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.lastName}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* FATHER NAME */}
-      <input
-        name="fatherName"
-        value={data.fatherName}
-        onChange={onChange}
-        placeholder="Father's Name*"
-        className="border p-2 rounded w-full mt-4"
-      />
+      <div className="mt-4">
+        <input
+          name="fatherName"
+          value={data.fatherName}
+          onChange={handleInputChange}
+          placeholder="Father's Name*"
+          className={`border p-2 rounded w-full ${
+            fieldErrors.fatherName 
+              ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+              : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+          } focus:outline-none focus:ring-2 transition-all`}
+        />
+        {fieldErrors.fatherName && (
+          <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+            <span>⚠️</span> {fieldErrors.fatherName}
+          </p>
+        )}
+      </div>
 
       {/* DOB + GENDER PREMIUM */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -2186,9 +2426,20 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, validatio
             type="date"
             name="dob"
             value={data.dob}
-            onChange={onChange}
-            className="border p-2 rounded w-full"
+            onChange={handleInputChange}
+            min="1900-01-01"
+            max={new Date(new Date().getFullYear() - 18, new Date().getMonth(), new Date().getDate()).toISOString().split('T')[0]}
+            className={`border p-2 rounded w-full ${
+              fieldErrors.dob 
+                ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+            } focus:outline-none focus:ring-2 transition-all`}
           />
+          {fieldErrors.dob && (
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.dob}
+            </p>
+          )}
         </div>
 
         {/* 🔥 PREMIUM GENDER BUTTONS */}
@@ -2200,38 +2451,69 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, validatio
                 key={g}
                 type="button"
                 onClick={() =>
-                  onChange({ target: { name: "gender", value: g } })
+                  handleInputChange({ target: { name: "gender", value: g } })
                 }
                 className={`px-4 py-2 rounded-md border flex-1 capitalize ${
                   data.gender === g
                     ? "bg-[#ff004f] text-white border-[#ff004f]"
+                    : fieldErrors.gender
+                    ? "bg-red-50 text-gray-700 border-red-300 hover:bg-red-100"
                     : "bg-white text-gray-700 border-gray-300 hover:border-[#ff004f]"
-                }`}
+                } transition-all`}
               >
                 {g}
               </button>
             ))}
           </div>
+          {fieldErrors.gender && (
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.gender}
+            </p>
+          )}
         </div>
       </div>
 
       {/* CONTACT INFO */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <input
-          name="phone"
-          value={data.phone}
-          onChange={onChange}
-          placeholder="Phone Number*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="phone"
+            value={data.phone}
+            onChange={handleInputChange}
+            placeholder="Phone Number*"
+            maxLength="10"
+            className={`border p-2 rounded w-full ${
+              fieldErrors.phone 
+                ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+            } focus:outline-none focus:ring-2 transition-all`}
+          />
+          {fieldErrors.phone && (
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.phone}
+            </p>
+          )}
+        </div>
 
-        <input
-          name="email"
-          value={data.email}
-          onChange={onChange}
-          placeholder="Email Address*"
-          className="border p-2 rounded"
-        />
+        <div>
+          <input
+            name="email"
+            value={data.email}
+            onChange={handleInputChange}
+            placeholder="Email Address*"
+            type="email"
+            className={`border p-2 rounded w-full ${
+              fieldErrors.email 
+                ? 'border-red-500 bg-red-50 focus:border-red-500 focus:ring-red-200' 
+                : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'
+            } focus:outline-none focus:ring-2 transition-all`}
+          />
+          {fieldErrors.email && (
+            <p className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <span>⚠️</span> {fieldErrors.email}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* DOCUMENT NUMBERS */}

@@ -55,7 +55,7 @@ const getServiceCertId = (stage, checkName, candId) =>
 /* ----------------------------------------------- */
 /* PAGINATION FUNCTIONS */
 /* ----------------------------------------------- */
-async function splitContentIntoPages(element, pdf, pdfWidth, pdfHeight, attachments = []) {
+async function splitContentIntoPages(element, pdf, pdfWidth, pdfHeight) {
   const maxContentHeight = pdfHeight - 120; // Leave space for margins
   let currentPageContent = [];
   let currentHeight = 0;
@@ -237,7 +237,7 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
     document.body.appendChild(clonedElement);
 
     // Split content into pages
-    await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight, attachments);
+    await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
     
     // Clean up
     document.body.removeChild(clonedElement);
@@ -568,20 +568,12 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
     // Wait for images to load
     await new Promise(resolve => setTimeout(resolve, 500));
 
-    // Convert index page to canvas
-    const indexCanvas = await safeHtml2Canvas(indexDiv, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-    });
-
-    const indexImg = indexCanvas.toDataURL("image/png");
     const pdfWidth = 595.28;
-    const indexPdfHeight = (indexCanvas.height * pdfWidth) / indexCanvas.width;
+    const pdfHeight = 841.89; // A4 height in points
 
-    // Add index page to PDF
-    pdf.addImage(indexImg, "PNG", 0, 0, pdfWidth, indexPdfHeight);
-
+    // Use pagination for index page
+    await splitContentIntoPages(indexDiv, pdf, pdfWidth, pdfHeight);
+    
     // Clean up
     document.body.removeChild(indexDiv);
 
@@ -592,15 +584,21 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
       const el = document.getElementById(id);
       if (!el) continue;
 
-      const canvas = await safeHtml2Canvas(el, { scale: 2 });
-      const img = canvas.toDataURL("image/png");
+      // Clone the element to avoid modifying the original
+      const clonedElement = el.cloneNode(true);
+      clonedElement.style.position = "absolute";
+      clonedElement.style.left = "-9999px";
+      clonedElement.style.width = "860px"; // Fixed width for consistency
+      document.body.appendChild(clonedElement);
 
-      const certPdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
+      // Use pagination for each certificate
       pdf.addPage();
-      pdf.addImage(img, "PNG", 0, 0, pdfWidth, certPdfHeight);
+      await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
+      
+      // Clean up
+      document.body.removeChild(clonedElement);
 
-      // Add clickable links for attachments on this page
+      // Add clickable links for attachments
       const attachmentLinks = el.querySelectorAll('a[href^="http"]');
       attachmentLinks.forEach((link) => {
         const rect = link.getBoundingClientRect();

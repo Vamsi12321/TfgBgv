@@ -51,13 +51,7 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
       return;
     }
 
-    const canvas = await safeHtml2Canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-    });
-
-    const img = canvas.toDataURL("image/png");
+    // Create PDF with proper A4 pagination
     const pdf = new jsPDF({
       orientation: "portrait",
       unit: "pt",
@@ -65,8 +59,20 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
     });
 
     const pdfWidth = 595.28;
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(img, "PNG", 0, 0, pdfWidth, pdfHeight);
+    const pdfHeight = 841.89; // A4 height in points
+    
+    // Clone the element to avoid modifying the original
+    const clonedElement = element.cloneNode(true);
+    clonedElement.style.position = "absolute";
+    clonedElement.style.left = "-9999px";
+    clonedElement.style.width = "860px"; // Fixed width for consistency
+    document.body.appendChild(clonedElement);
+
+    // Split content into pages
+    await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
+    
+    // Clean up
+    document.body.removeChild(clonedElement);
 
     if (attachments && attachments.length > 0) {
       const attachmentLinks = element.querySelectorAll('a[href^="http"]');
@@ -89,6 +95,158 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
   }
 }
 
+// A4 pagination helper functions
+async function splitContentIntoPages(element, pdf, pdfWidth, pdfHeight) {
+  const maxContentHeight = pdfHeight - 120; // Leave space for margins
+  let currentPageContent = [];
+  let currentHeight = 0;
+  let pageNumber = 1;
+  
+  // Get all child elements
+  const children = Array.from(element.children);
+  
+  // Separate footer from main content
+  const footer = element.querySelector('[style*="margin-top: 120px"], [style*="border-top: 2px solid #272626ff"]');
+  const mainContent = children.filter(child => child !== footer);
+  
+  for (let i = 0; i < mainContent.length; i++) {
+    const child = mainContent[i];
+    
+    // Create temporary element to measure height
+    const tempDiv = document.createElement('div');
+    tempDiv.style.position = 'absolute';
+    tempDiv.style.left = '-9999px';
+    tempDiv.style.width = '860px';
+    tempDiv.appendChild(child.cloneNode(true));
+    document.body.appendChild(tempDiv);
+    
+    const childHeight = tempDiv.offsetHeight;
+    document.body.removeChild(tempDiv);
+    
+    // Check if adding this element would exceed page height
+    if (currentHeight + childHeight > maxContentHeight && currentPageContent.length > 0) {
+      // Create current page
+      await createPage(currentPageContent, pdf, pdfWidth, pdfHeight, pageNumber, false);
+      
+      // Start new page
+      pageNumber++;
+      currentPageContent = [child];
+      currentHeight = childHeight;
+    } else {
+      currentPageContent.push(child);
+      currentHeight += childHeight;
+    }
+  }
+  
+  // Add remaining content and footer to last page
+  if (currentPageContent.length > 0 || footer) {
+    if (footer) {
+      currentPageContent.push(footer);
+    }
+    await createPage(currentPageContent, pdf, pdfWidth, pdfHeight, pageNumber, true);
+  }
+}
+
+async function createPage(contentElements, pdf, pdfWidth, pdfHeight, pageNumber, isLastPage) {
+  if (pageNumber > 1) {
+    pdf.addPage();
+  }
+  
+  // Create page container
+  const pageDiv = document.createElement('div');
+  pageDiv.style.width = '860px';
+  pageDiv.style.minHeight = '1120px';
+  pageDiv.style.padding = '40px 50px 60px 50px';
+  pageDiv.style.background = '#ffffff';
+  pageDiv.style.fontFamily = 'Arial, sans-serif';
+  pageDiv.style.color = '#000';
+  pageDiv.style.position = 'absolute';
+  pageDiv.style.left = '-9999px';
+  
+  // Add watermark
+  const watermark = document.createElement('img');
+  watermark.src = '/logos/maihooMain.png';
+  watermark.alt = 'watermark';
+  watermark.style.position = 'absolute';
+  watermark.style.top = '300px';
+  watermark.style.left = '50%';
+  watermark.style.transform = 'translateX(-50%)';
+  watermark.style.opacity = '0.08';
+  watermark.style.width = '750px';
+  watermark.style.height = '750px';
+  watermark.style.objectFit = 'contain';
+  watermark.style.pointerEvents = 'none';
+  watermark.style.zIndex = '1';
+  pageDiv.appendChild(watermark);
+  
+  // Add content container
+  const contentDiv = document.createElement('div');
+  contentDiv.style.position = 'relative';
+  contentDiv.style.zIndex = '2';
+  
+  // Add header only on first page
+  if (pageNumber === 1) {
+    const header = createReportHeader();
+    contentDiv.appendChild(header);
+  } else {
+    // Add page number for subsequent pages
+    const pageHeader = document.createElement('div');
+    pageHeader.style.textAlign = 'center';
+    pageHeader.style.marginBottom = '30px';
+    pageHeader.style.fontSize = '12px';
+    pageHeader.style.color = '#666';
+    pageHeader.innerHTML = `Page ${pageNumber}`;
+    contentDiv.appendChild(pageHeader);
+  }
+  
+  // Add content elements
+  contentElements.forEach(element => {
+    contentDiv.appendChild(element.cloneNode(true));
+  });
+  
+  pageDiv.appendChild(contentDiv);
+  document.body.appendChild(pageDiv);
+  
+  // Wait for images to load
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Convert to canvas and add to PDF
+  const canvas = await safeHtml2Canvas(pageDiv, {
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+  });
+  
+  const img = canvas.toDataURL("image/png");
+  const scaledHeight = (canvas.height * pdfWidth) / canvas.width;
+  
+  pdf.addImage(img, "PNG", 0, 0, pdfWidth, scaledHeight);
+  
+  // Clean up
+  document.body.removeChild(pageDiv);
+}
+
+function createReportHeader() {
+  const header = document.createElement('div');
+  header.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+      <div style="flex-shrink: 0; margin-top: 5px;">
+        <img src="/logos/maihooMain.png" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" />
+      </div>
+      <div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;">
+        <h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1>
+        <p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Summary</p>
+      </div>
+      <div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;">
+        <p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p>
+        <p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p>
+        <p style="margin: 0;">🌐 maihootech.co.in</p>
+      </div>
+    </div>
+  `;
+  return header;
+}
+
 async function mergeAllCertificates(ids, fileName, setDownloading, candidate, verification) {
   try {
     setDownloading(true);
@@ -97,6 +255,9 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
       unit: "pt",
       format: "a4",
     });
+
+    const pdfWidth = 595.28;
+    const pdfHeight = 841.89; // A4 height in points
 
     const indexDiv = document.createElement("div");
     indexDiv.id = "temp-index-page";
@@ -183,30 +344,29 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const indexCanvas = await safeHtml2Canvas(indexDiv, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-    });
-
-    const indexImg = indexCanvas.toDataURL("image/png");
-    const pdfWidth = 595.28;
-    const indexPdfHeight = (indexCanvas.height * pdfWidth) / indexCanvas.width;
-
-    pdf.addImage(indexImg, "PNG", 0, 0, pdfWidth, indexPdfHeight);
+    // Use pagination for index page
+    await splitContentIntoPages(indexDiv, pdf, pdfWidth, pdfHeight);
     document.body.removeChild(indexDiv);
 
     for (const id of ids) {
       const el = document.getElementById(id);
       if (!el) continue;
 
-      const canvas = await safeHtml2Canvas(el, { scale: 2 });
-      const img = canvas.toDataURL("image/png");
-      const certPdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      // Clone the element to avoid modifying the original
+      const clonedElement = el.cloneNode(true);
+      clonedElement.style.position = "absolute";
+      clonedElement.style.left = "-9999px";
+      clonedElement.style.width = "860px"; // Fixed width for consistency
+      document.body.appendChild(clonedElement);
 
+      // Use pagination for each certificate
       pdf.addPage();
-      pdf.addImage(img, "PNG", 0, 0, pdfWidth, certPdfHeight);
+      await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
+      
+      // Clean up
+      document.body.removeChild(clonedElement);
 
+      // Add clickable links for attachments
       const attachmentLinks = el.querySelectorAll('a[href^="http"]');
       attachmentLinks.forEach((link) => {
         const rect = link.getBoundingClientRect();
