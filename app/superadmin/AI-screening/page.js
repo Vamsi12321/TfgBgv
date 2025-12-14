@@ -1056,7 +1056,7 @@ export default function AIResumeScreeningPage() {
             </div>
           </div>
           
-          <div style="font-size: 15px; line-height: 28px; margin-bottom: 25px; margin-top: -20px;">
+          <div style="font-size: 15px; line-height: 28px; margin-bottom: 20px; margin-top: -20px;">
             <p><b>Candidate:</b> ${result.filename}</p>
             <p><b>Rank:</b> #${result.rank}</p>
             <p><b>Score:</b> ${result.final_weighted_score || result.match_score}</p>

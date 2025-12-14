@@ -51,28 +51,23 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
       return;
     }
 
-    // Create PDF with proper A4 pagination
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
+    const canvas = await safeHtml2Canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      width: element.offsetWidth,
+      height: element.offsetHeight,
     });
 
-    const pdfWidth = 595.28;
-    const pdfHeight = 841.89; // A4 height in points
-    
-    // Clone the element to avoid modifying the original
-    const clonedElement = element.cloneNode(true);
-    clonedElement.style.position = "absolute";
-    clonedElement.style.left = "-9999px";
-    clonedElement.style.width = "860px"; // Fixed width for consistency
-    document.body.appendChild(clonedElement);
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+      unit: "pt",
+      format: [canvas.width * 0.75, canvas.height * 0.75],
+    });
 
-    // Split content into pages
-    await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
-    
-    // Clean up
-    document.body.removeChild(clonedElement);
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width * 0.75, canvas.height * 0.75);
 
     if (attachments && attachments.length > 0) {
       const attachmentLinks = element.querySelectorAll('a[href^="http"]');
@@ -80,10 +75,10 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
         if (idx < attachments.length) {
           const rect = link.getBoundingClientRect();
           const elementRect = element.getBoundingClientRect();
-          const x = ((rect.left - elementRect.left) * pdfWidth) / element.offsetWidth;
-          const y = ((rect.top - elementRect.top) * pdfWidth) / element.offsetWidth;
-          const width = (rect.width * pdfWidth) / element.offsetWidth;
-          const height = (rect.height * pdfWidth) / element.offsetWidth;
+          const x = ((rect.left - elementRect.left) * canvas.width * 0.75) / element.offsetWidth;
+          const y = ((rect.top - elementRect.top) * canvas.height * 0.75) / element.offsetHeight;
+          const width = (rect.width * canvas.width * 0.75) / element.offsetWidth;
+          const height = (rect.height * canvas.height * 0.75) / element.offsetHeight;
           pdf.link(x, y, width, height, { url: attachments[idx] });
         }
       });
@@ -250,14 +245,7 @@ function createReportHeader() {
 async function mergeAllCertificates(ids, fileName, setDownloading, candidate, verification) {
   try {
     setDownloading(true);
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
-    });
-
-    const pdfWidth = 595.28;
-    const pdfHeight = 841.89; // A4 height in points
+    let pdf;
 
     const indexDiv = document.createElement("div");
     indexDiv.id = "temp-index-page";
@@ -344,37 +332,51 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
 
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Use pagination for index page
-    await splitContentIntoPages(indexDiv, pdf, pdfWidth, pdfHeight);
+    // Use simple canvas approach for index page (clean and neat)
+    const canvas = await safeHtml2Canvas(indexDiv, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+    });
+
+    const imgData = canvas.toDataURL("image/png");
+    pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+      unit: "pt",
+      format: [canvas.width * 0.75, canvas.height * 0.75],
+    });
+
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width * 0.75, canvas.height * 0.75);
     document.body.removeChild(indexDiv);
 
     for (const id of ids) {
       const el = document.getElementById(id);
       if (!el) continue;
 
-      // Clone the element to avoid modifying the original
-      const clonedElement = el.cloneNode(true);
-      clonedElement.style.position = "absolute";
-      clonedElement.style.left = "-9999px";
-      clonedElement.style.width = "860px"; // Fixed width for consistency
-      document.body.appendChild(clonedElement);
+      // Use simple canvas approach for each certificate (clean and neat)
+      const canvas = await safeHtml2Canvas(el, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+      });
 
-      // Use pagination for each certificate
-      pdf.addPage();
-      await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
+      const imgData = canvas.toDataURL("image/png");
       
-      // Clean up
-      document.body.removeChild(clonedElement);
+      // Add new page with proper dimensions for each certificate
+      pdf.addPage([canvas.width * 0.75, canvas.height * 0.75]);
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width * 0.75, canvas.height * 0.75);
 
       // Add clickable links for attachments
       const attachmentLinks = el.querySelectorAll('a[href^="http"]');
-      attachmentLinks.forEach((link) => {
+      attachmentLinks.forEach((link, idx) => {
         const rect = link.getBoundingClientRect();
         const elementRect = el.getBoundingClientRect();
-        const x = ((rect.left - elementRect.left) * pdfWidth) / el.offsetWidth;
-        const y = ((rect.top - elementRect.top) * pdfWidth) / el.offsetWidth;
-        const width = (rect.width * pdfWidth) / el.offsetWidth;
-        const height = (rect.height * pdfWidth) / el.offsetWidth;
+        const x = ((rect.left - elementRect.left) * canvas.width * 0.75) / el.offsetWidth;
+        const y = ((rect.top - elementRect.top) * canvas.height * 0.75) / el.offsetHeight;
+        const width = (rect.width * canvas.width * 0.75) / el.offsetWidth;
+        const height = (rect.height * canvas.height * 0.75) / el.offsetHeight;
         pdf.link(x, y, width, height, { url: link.href });
       });
     }
@@ -1001,7 +1003,7 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
                       </div>
                     ) : (
                       <button
-                        disabled={!done || downloading}
+                        disabled={downloading}
                         onClick={() =>
                           downloadSingleCert(
                             certId,

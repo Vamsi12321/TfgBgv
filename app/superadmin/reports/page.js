@@ -219,28 +219,23 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
       return;
     }
 
-    // Create PDF with proper A4 pagination
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
+    const canvas = await safeHtml2Canvas(element, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      width: element.offsetWidth,
+      height: element.offsetHeight,
     });
 
-    const pdfWidth = 595.28;
-    const pdfHeight = 841.89; // A4 height in points
-    
-    // Clone the element to avoid modifying the original
-    const clonedElement = element.cloneNode(true);
-    clonedElement.style.position = "absolute";
-    clonedElement.style.left = "-9999px";
-    clonedElement.style.width = "860px"; // Fixed width for consistency
-    document.body.appendChild(clonedElement);
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+      unit: "pt",
+      format: [canvas.width * 0.75, canvas.height * 0.75],
+    });
 
-    // Split content into pages
-    await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
-    
-    // Clean up
-    document.body.removeChild(clonedElement);
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width * 0.75, canvas.height * 0.75);
 
     // Add clickable links for attachments
     if (attachments && attachments.length > 0) {
@@ -252,10 +247,10 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
           const elementRect = element.getBoundingClientRect();
           
           // Calculate position relative to the element
-          const x = ((rect.left - elementRect.left) * pdfWidth) / element.offsetWidth;
-          const y = ((rect.top - elementRect.top) * pdfWidth) / element.offsetWidth;
-          const width = (rect.width * pdfWidth) / element.offsetWidth;
-          const height = (rect.height * pdfWidth) / element.offsetWidth;
+          const x = ((rect.left - elementRect.left) * canvas.width * 0.75) / element.offsetWidth;
+          const y = ((rect.top - elementRect.top) * canvas.height * 0.75) / element.offsetHeight;
+          const width = (rect.width * canvas.width * 0.75) / element.offsetWidth;
+          const height = (rect.height * canvas.height * 0.75) / element.offsetHeight;
           
           // Add clickable link to PDF
           pdf.link(x, y, width, height, { url: attachments[idx] });
@@ -275,342 +270,138 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
 async function mergeAllCertificates(ids, fileName, setDownloading, candidate, verification) {
   try {
     setDownloading(true);
+    let pdf;
 
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "pt",
-      format: "a4",
-    });
-
-    /* ---------------------- */
-    /* CREATE INDEX PAGE AS HTML ELEMENT */
-    /* ---------------------- */
-    
-    // Create a temporary div for the index page
-    const indexDiv = document.createElement('div');
-    indexDiv.id = 'temp-index-page';
-    indexDiv.style.position = 'absolute';
-    indexDiv.style.left = '-9999px';
-    indexDiv.style.top = '0';
+    const indexDiv = document.createElement("div");
+    indexDiv.id = "temp-index-page";
+    indexDiv.style.position = "absolute";
+    indexDiv.style.left = "-9999px";
+    indexDiv.style.top = "0";
     document.body.appendChild(indexDiv);
 
-    // Get all checks from verification (including AI checks for index page)
     const allChecks = [];
     const stages = verification?.stages || {};
-    
+
     if (stages.primary) {
-      stages.primary.forEach(chk => {
-        allChecks.push({ ...chk, stage: 'Primary' });
+      stages.primary.forEach((chk) => {
+        allChecks.push({ ...chk, stage: "Primary" });
       });
     }
     if (stages.secondary) {
-      stages.secondary.forEach(chk => {
-        allChecks.push({ ...chk, stage: 'Secondary' });
+      stages.secondary.forEach((chk) => {
+        allChecks.push({ ...chk, stage: "Secondary" });
       });
     }
     if (stages.final) {
-      stages.final.forEach(chk => {
-        allChecks.push({ ...chk, stage: 'Final' });
+      stages.final.forEach((chk) => {
+        allChecks.push({ ...chk, stage: "Final" });
       });
     }
 
-    // Build the index page HTML (matching certificate style)
-    indexDiv.innerHTML = `
-      <div style="
-        width: 860px;
-        min-height: 1120px;
-        padding: 40px 50px 60px 50px;
-        background: #ffffff;
-        font-family: Arial, sans-serif;
-        color: #000;
-        position: relative;
-        overflow: hidden;
-      ">
-        <!-- Watermark -->
-        <img 
-          src="/logos/maihooMain.png" 
-          alt="watermark"
-          style="
-            position: absolute;
-            top: 300px;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0.08;
-            width: 750px;
-            height: 750px;
-            object-fit: contain;
-            pointer-events: none;
-            z-index: 1;
-          "
-        />
+    // Build verification summary table rows
+    const tableRows = allChecks.map((chk, index) => {
+      const status = chk.status || "PENDING";
+      let statusText = "";
+      let statusColor = "";
 
-        <!-- Content -->
-        <div style="position: relative; z-index: 2;">
-          <!-- Header with Logo and Contact Info -->
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
-            <!-- Left: Logo -->
-            <div style="flex-shrink: 0; margin-top: 5px;">
-              <img 
-                src="/logos/maihooMain.png" 
-                alt="logo"
-                style="
-                  max-height: 180px;
-                  max-width: 450px;
-                  height: auto;
-                  width: auto;
-                  display: block;
-                  object-fit: contain;
-                "
-              />
-            </div>
+      if (status === "COMPLETED") {
+        statusText = "✓ Verified";
+        statusColor = "#22c55e";
+      } else if (status === "FAILED") {
+        statusText = "✗ Failed";
+        statusColor = "#ef4444";
+      } else {
+        statusText = "○ Pending";
+        statusColor = "#9ca3af";
+      }
 
-            <!-- Center: Title -->
-            <div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;">
-              <h1 style="
-                font-size: 26px;
-                font-weight: bold;
-                color: #000;
-                margin: 0 0 8px 0;
-                line-height: 1.3;
-              ">
-                All Verification Reports
-              </h1>
-              <p style="
-                font-size: 14px;
-                color: #555;
-                margin: 0;
-                line-height: 1.4;
-              ">
-                Comprehensive Background Verification Summary
-              </p>
-            </div>
+      return '<tr style="background: ' + (index % 2 === 0 ? "#ffffff" : "#f9f9f9") + ';">' +
+        '<td style="padding: 10px 12px; font-size: 12px; color: #000; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;">' + chk.stage + '</td>' +
+        '<td style="padding: 10px 12px; font-size: 12px; color: #000; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;">' + formatServiceName(chk.check) + '</td>' +
+        '<td style="padding: 10px 12px; font-size: 12px; font-weight: bold; color: ' + statusColor + '; border-bottom: 1px solid #e0e0e0;">' + statusText + '</td>' +
+        '</tr>';
+    }).join("");
 
-            <!-- Right: Contact Information -->
-            <div style="
-              flex-shrink: 0;
-              margin-top: 5px;
-              text-align: right;
-              font-size: 12px;
-              color: #333;
-              line-height: 1.8;
-            ">
-              <p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p>
-              <p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p>
-              <p style="margin: 0;">🌐 maihootech.co.in</p>
-            </div>
-          </div>
+    indexDiv.innerHTML = 
+      '<div style="width: 860px; min-height: 1120px; padding: 40px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; color: #000; position: relative; overflow: hidden;">' +
+      '<img src="/logos/maihooMain.png" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; pointer-events: none; z-index: 1;" />' +
+      '<div style="position: relative; z-index: 2;">' +
+      '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
+      '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/maihooMain.png" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
+      '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Summary</p></div>' +
+      '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p><p style="margin: 0;">🌐 maihootech.co.in</p></div>' +
+      '</div>' +
+      '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
+      '<table style="width: 100%; border-collapse: collapse;">' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">Name:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + candidate.firstName + ' ' + candidate.lastName + '</td></tr>' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Email:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.email || "N/A") + '</td></tr>' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Phone:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.phone || "N/A") + '</td></tr>' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Organization:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.organizationName || "N/A") + '</td></tr>' +
+      '</table></div>' +
+      '<div style="margin-bottom: 30px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Verification Summary</h2>' +
+      '<table style="width: 100%; border-collapse: collapse; border: 2px solid #e0e0e0;">' +
+      '<thead><tr style="background: #f0f0f0;">' +
+      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">BGV Check</th>' +
+      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">Service</th>' +
+      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd;">Status</th>' +
+      '</tr></thead>' +
+      '<tbody>' + tableRows + '</tbody>' +
+      '</table></div>' +
+      '<div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;"><div style="font-size: 11px; color: #666; margin-bottom: 15px;">' +
+      '<p style="margin: 5px 0;">Generated on: ' + new Date().toLocaleString() + '</p>' +
+      '<p style="margin: 5px 0;">Total Verifications: ' + allChecks.length + '</p>' +
+      '<p style="margin: 5px 0;">Completed: ' + allChecks.filter((c) => c.status === "COMPLETED").length + '</p>' +
+      '</div><div style="margin-top: 120px; padding-top: 15px; border-top: 2px solid #272626ff; font-size: 12px; color: #dc3545; text-align: center; font-weight: 600; line-height: 1.4;">' +
+      '<p style="margin: 0;">Maihoo Technologies Private Limited, Vaishnavi\'s Cynosure, 2-48/5/6, 8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032</p>' +
+      '</div></div></div></div>';
 
-          <!-- Candidate Information -->
-          <div style="
-            background: #f8f9fa;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 30px;
-          ">
-            <h2 style="
-              font-size: 16px;
-              font-weight: bold;
-              color: #000;
-              margin: 0 0 15px 0;
-              border-bottom: 2px solid #ddd;
-              padding-bottom: 8px;
-            ">
-              Candidate Information
-            </h2>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">Name:</td>
-                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.firstName} ${candidate.lastName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Email:</td>
-                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.email || 'N/A'}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Phone:</td>
-                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.phone || 'N/A'}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Organization:</td>
-                <td style="padding: 8px 0; font-size: 13px; color: #000;">${candidate.organizationName || 'N/A'}</td>
-              </tr>
-            </table>
-          </div>
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-          <!-- Verification Summary Table -->
-          <div style="margin-bottom: 30px;">
-            <h2 style="
-              font-size: 16px;
-              font-weight: bold;
-              color: #000;
-              margin: 0 0 15px 0;
-              border-bottom: 2px solid #ddd;
-              padding-bottom: 8px;
-            ">
-              Verification Summary
-            </h2>
-            <table style="
-              width: 100%;
-              border-collapse: collapse;
-              border: 2px solid #e0e0e0;
-            ">
-              <thead>
-                <tr style="background: #f0f0f0;">
-                  <th style="
-                    padding: 12px;
-                    text-align: left;
-                    font-size: 13px;
-                    font-weight: bold;
-                    color: #000;
-                    border-bottom: 2px solid #ddd;
-                    border-right: 1px solid #ddd;
-                  ">BGV Check</th>
-                  <th style="
-                    padding: 12px;
-                    text-align: left;
-                    font-size: 13px;
-                    font-weight: bold;
-                    color: #000;
-                    border-bottom: 2px solid #ddd;
-                    border-right: 1px solid #ddd;
-                  ">Service</th>
-                  <th style="
-                    padding: 12px;
-                    text-align: left;
-                    font-size: 13px;
-                    font-weight: bold;
-                    color: #000;
-                    border-bottom: 2px solid #ddd;
-                  ">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${allChecks.map((chk, index) => {
-                  const status = chk.status || 'PENDING';
-                  let statusText = '';
-                  let statusColor = '';
-                  
-                  if (status === 'COMPLETED') {
-                    statusText = '✓ Verified';
-                    statusColor = '#22c55e';
-                  } else if (status === 'FAILED') {
-                    statusText = '✗ Failed';
-                    statusColor = '#ef4444';
-                  } else {
-                    statusText = '○ Pending';
-                    statusColor = '#9ca3af';
-                  }
+    // Use simple canvas approach for index page (clean and neat)
+    const canvas = await safeHtml2Canvas(indexDiv, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+    });
 
-                  return `
-                    <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
-                      <td style="
-                        padding: 10px 12px;
-                        font-size: 12px;
-                        color: #000;
-                        border-bottom: 1px solid #e0e0e0;
-                        border-right: 1px solid #e0e0e0;
-                      ">${chk.stage}</td>
-                      <td style="
-                        padding: 10px 12px;
-                        font-size: 12px;
-                        color: #000;
-                        border-bottom: 1px solid #e0e0e0;
-                        border-right: 1px solid #e0e0e0;
-                      ">${formatServiceName(chk.check)}</td>
-                      <td style="
-                        padding: 10px 12px;
-                        font-size: 12px;
-                        font-weight: bold;
-                        color: ${statusColor};
-                        border-bottom: 1px solid #e0e0e0;
-                      ">${statusText}</td>
-                    </tr>
-                  `;
-                }).join('')}
-              </tbody>
-            </table>
-          </div>
+    const imgData = canvas.toDataURL("image/png");
+    pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+      unit: "pt",
+      format: [canvas.width * 0.75, canvas.height * 0.75],
+    });
 
-          <!-- Footer -->
-          <div style="
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #e0e0e0;
-          ">
-            <!-- Report Stats -->
-            <div style="font-size: 11px; color: #666; margin-bottom: 15px;">
-              <p style="margin: 5px 0;">Generated on: ${new Date().toLocaleString()}</p>
-              <p style="margin: 5px 0;">Total Verifications: ${allChecks.length}</p>
-              <p style="margin: 5px 0;">Completed: ${allChecks.filter(c => c.status === 'COMPLETED').length}</p>
-            </div>
-            
-            <!-- Address - Single line in red with red border -->
-            <div style="
-              margin-top: 230px;
-              padding-top: 15px;
-              border-top: 2px solid #272626ff;
-              font-size: 12px;
-              color: #dc3545;
-              text-align: center;
-              font-weight: 600;
-              line-height: "3px";
-            ">
-              <p style="margin: 0;">
-                Maihoo Technologies Private Limited, Vaishnavi's Cynosure, 2-48/5/6, 8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Wait for images to load
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    const pdfWidth = 595.28;
-    const pdfHeight = 841.89; // A4 height in points
-
-    // Use pagination for index page
-    await splitContentIntoPages(indexDiv, pdf, pdfWidth, pdfHeight);
-    
-    // Clean up
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width * 0.75, canvas.height * 0.75);
     document.body.removeChild(indexDiv);
 
-    /* ---------------------- */
-    /* ADD CERTIFICATES */
-    /* ---------------------- */
     for (const id of ids) {
       const el = document.getElementById(id);
       if (!el) continue;
 
-      // Clone the element to avoid modifying the original
-      const clonedElement = el.cloneNode(true);
-      clonedElement.style.position = "absolute";
-      clonedElement.style.left = "-9999px";
-      clonedElement.style.width = "860px"; // Fixed width for consistency
-      document.body.appendChild(clonedElement);
+      // Use simple canvas approach for each certificate (clean and neat)
+      const canvas = await safeHtml2Canvas(el, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+      });
 
-      // Use pagination for each certificate
-      pdf.addPage();
-      await splitContentIntoPages(clonedElement, pdf, pdfWidth, pdfHeight);
+      const imgData = canvas.toDataURL("image/png");
       
-      // Clean up
-      document.body.removeChild(clonedElement);
+      // Add new page with proper dimensions for each certificate
+      pdf.addPage([canvas.width * 0.75, canvas.height * 0.75]);
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width * 0.75, canvas.height * 0.75);
 
       // Add clickable links for attachments
       const attachmentLinks = el.querySelectorAll('a[href^="http"]');
-      attachmentLinks.forEach((link) => {
+      attachmentLinks.forEach((link, idx) => {
         const rect = link.getBoundingClientRect();
         const elementRect = el.getBoundingClientRect();
-        
-        // Calculate position relative to the element
-        const x = ((rect.left - elementRect.left) * pdfWidth) / el.offsetWidth;
-        const y = ((rect.top - elementRect.top) * pdfWidth) / el.offsetWidth;
-        const width = (rect.width * pdfWidth) / el.offsetWidth;
-        const height = (rect.height * pdfWidth) / el.offsetWidth;
-        
-        // Add clickable link to PDF
+        const x = ((rect.left - elementRect.left) * canvas.width * 0.75) / el.offsetWidth;
+        const y = ((rect.top - elementRect.top) * canvas.height * 0.75) / el.offsetHeight;
+        const width = (rect.width * canvas.width * 0.75) / el.offsetWidth;
+        const height = (rect.height * canvas.height * 0.75) / el.offsetHeight;
         pdf.link(x, y, width, height, { url: link.href });
       });
     }
@@ -1361,7 +1152,7 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
                       </div>
                     ) : (
                       <button
-                        disabled={!done || downloading}
+                        disabled={downloading}
                         onClick={() =>
                           downloadSingleCert(
                             certId,
@@ -1602,7 +1393,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             fontSize: "15px",
             lineHeight: "28px",
             marginTop: "-20px",
-            marginBottom: "50px",
+            marginBottom: "30px",
           }}
         >
           <p><strong>Candidate Name:</strong> {candidate.firstName} {candidate.lastName}</p>
@@ -1661,7 +1452,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
         {/* =============================================== */}
         {/* DYNAMIC STATUS BAR                               */}
         {/* =============================================== */}
-        <div style={{ display: "flex", alignItems: "center", marginBottom: "90px" }}>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "30px" }}>
           <div
             style={{
               width: "70px",
