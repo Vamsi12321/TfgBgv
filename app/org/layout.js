@@ -273,22 +273,24 @@ export default function OrgAdminLayout({ children }) {
                 {isSidebarOpen ? <X size={26} /> : <Menu size={26} />}
               </button>
 
-              <div className="flex items-center gap-3">
-                <UserCircle2
-                  size={32}
-                  className="hidden sm:block text-[#ff004f] flex-shrink-0"
-                  strokeWidth={2}
-                />
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-xl shadow-lg">
+                  <Building size={20} className="text-white" strokeWidth={2} />
+                </div>
                 <div>
                   <h1 className="text-base sm:text-lg font-bold text-gray-800 leading-tight">
+                    <span className="text-sm font-medium text-gray-500 mr-2">
+                      🏢 {org?.organizationName || user?.organizationName || "Organization"}
+                    </span>
+                    <br className="sm:hidden" />
                     Welcome back,{" "}
                     <span className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] bg-clip-text text-transparent">
                       {displayName.split(" ")[0]}
                     </span>
                     ! 👋
                   </h1>
-                  <p className="text-xs text-gray-500 hidden sm:block font-medium">
-                    Have a productive day
+                  <p className="text-xs text-gray-500 hidden sm:block font-medium mt-1">
+                    Have a productive day managing your verifications
                   </p>
                 </div>
               </div>

@@ -11,6 +11,7 @@ import {
   CheckCircle,
   XCircle,
   Brain,
+  RefreshCcw,
 } from "lucide-react";
 
 import { jsPDF } from "jspdf";
@@ -25,6 +26,15 @@ const SERVICE_ICONS = {
   credit_report: "💳",
   court_record: "⚖️",
 };
+
+const MANUAL_SERVICES = [
+  { id: "address_verification", name: "Address Verification" },
+  { id: "education_check_manual", name: "Education Manual Check" },
+  { id: "employment_history_manual", name: "Employment History Manual" },
+  { id: "employment_history_manual_2", name: "Employment History Manual 2" },
+  { id: "supervisory_check_1", name: "Supervisory Check 1" },
+  { id: "supervisory_check_2", name: "Supervisory Check 2" },
+];
 
 const formatServiceName = (raw = "") =>
   raw
@@ -410,8 +420,8 @@ export default function OrgReportsPage() {
     }
   }, []);
 
-  const fetchCandidates = async (orgId) => {
-    if (candidates.length > 0) {
+  const fetchCandidates = async (orgId, forceRefresh = false) => {
+    if (!forceRefresh && candidates.length > 0) {
       setLoading(false);
       return;
     }
@@ -462,6 +472,35 @@ export default function OrgReportsPage() {
                   Comprehensive verification reports & analytics
                 </p>
               </div>
+              {/* Refresh Button */}
+              <button
+                onClick={() => {
+                  const stored = localStorage.getItem("bgvUser");
+                  if (stored) {
+                    try {
+                      const user = JSON.parse(stored);
+                      if (user.organizationId) {
+                        fetchCandidates(user.organizationId, true); // Force refresh
+                      }
+                    } catch (err) {
+                      console.error("User parse error:", err);
+                    }
+                  }
+                }}
+                disabled={loading}
+                className={`ml-4 p-3 rounded-xl transition-all duration-300 ${
+                  loading
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-gradient-to-r from-[#ff004f] to-red-500 text-white hover:from-[#e60047] hover:to-red-600 shadow-lg hover:shadow-xl hover:scale-105"
+                }`}
+                title="Refresh Reports & Verifications"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  <RefreshCcw size={20} />
+                )}
+              </button>
             </div>
 
             <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-2xl border border-white/50 shadow-lg">
@@ -770,6 +809,12 @@ export default function OrgReportsPage() {
                         <button
                           disabled={downloading}
                           onClick={() => {
+                            // Check if candidate has any verifications initiated
+                            if (totalChecks === 0) {
+                              alert(`No verifications initiated for ${c.firstName} ${c.lastName} yet. Please initiate verification process first.`);
+                              return;
+                            }
+
                             const allIds = [
                               ...primary
                                 .filter((chk) => !isAIValidationCheck(chk.check))
@@ -1130,6 +1175,28 @@ function CertificateBase({ id, candidate, orgName, checks }) {
 
   const attachments = checks[0]?.attachments || [];
   const hasAttachments = attachments && attachments.length > 0;
+  
+  // Get proof files for manual verifications
+  const proofFiles = checks[0]?.proofFiles || [];
+  const hasProofFiles = proofFiles && proofFiles.length > 0;
+  
+  // Filter out proof file URLs from attachments to get only candidate documents
+  const proofFileUrls = proofFiles.map(pf => pf.s3_url);
+  const candidateDocuments = attachments.filter(url => !proofFileUrls.includes(url));
+  const hasCandidateDocuments = candidateDocuments && candidateDocuments.length > 0;
+  
+  // Check if this is a manual verification (check against MANUAL_SERVICES or has proofFiles)
+  const checkName = checks[0]?.check;
+  const isManualService = MANUAL_SERVICES.some(service => service.id === checkName);
+  const isManualVerification = isManualService || hasProofFiles;
+  
+  // Define which checks should show candidate documents (only employment and education checks)
+  const checksWithCandidateDocuments = [
+    'employment_history_manual',
+    'employment_history_manual_2', 
+    'education_check_manual'
+  ];
+  const shouldShowCandidateDocuments = checksWithCandidateDocuments.includes(checkName) && hasCandidateDocuments;
 
   return (
     <div
@@ -1328,7 +1395,120 @@ function CertificateBase({ id, candidate, orgName, checks }) {
           ))}
         </div>
 
-        {hasAttachments && (
+        {/* Manual Verification Sections */}
+        {isManualVerification && (
+          <>
+            {/* Documents for Verification Section - Only show for employment/education checks with candidate documents */}
+            {shouldShowCandidateDocuments && (
+              <div style={{ marginBottom: "30px" }}>
+                <p
+                  style={{
+                    fontSize: "14px",
+                    color: "#000",
+                    fontWeight: "bold",
+                    marginBottom: "15px",
+                  }}
+                >
+                  Documents for Verification
+                </p>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "#666",
+                    marginBottom: "15px",
+                  }}
+                >
+                  The following document(s) were submitted for verification based on details provided by the candidate.
+                </p>
+                {candidateDocuments.map((url, idx) => {
+                  const fileName = url.split("/").pop() || `Document ${idx + 1}`;
+                  return (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: "8px",
+                        fontSize: "13px",
+                      }}
+                    >
+                      <span style={{ marginRight: "8px" }}>📄</span>
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: "#0066cc",
+                          textDecoration: "underline",
+                          wordBreak: "break-all",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {fileName}
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Verification Proof Section */}
+            <div style={{ marginBottom: "30px" }}>
+              <p
+                style={{
+                  fontSize: "14px",
+                  color: "#000",
+                  fontWeight: "bold",
+                  marginBottom: "15px",
+                }}
+              >
+                Verification Proof
+              </p>
+              <p
+                style={{
+                  fontSize: "13px",
+                  color: "#666",
+                  marginBottom: "15px",
+                }}
+              >
+                Verification was completed through independent verification. The following proof document(s) were obtained as confirmation.
+              </p>
+              {proofFiles.map((proofFile, idx) => {
+                const fileName = proofFile.filename || `Proof ${idx + 1}`;
+                const fileUrl = proofFile.s3_url;
+                return (
+                  <div
+                    key={idx}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "8px",
+                      fontSize: "13px",
+                    }}
+                  >
+                    <span style={{ marginRight: "8px" }}>✅</span>
+                    <a
+                      href={fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        color: "#0066cc",
+                        textDecoration: "underline",
+                        wordBreak: "break-all",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {fileName}
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+
+        {/* Attachments Section (for non-manual verifications) */}
+        {!isManualVerification && hasAttachments && (
           <div style={{ marginBottom: "30px" }}>
             <p
               style={{

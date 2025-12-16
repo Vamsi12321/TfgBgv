@@ -78,14 +78,15 @@ export default function BGVInitiationPage() {
     open: false,
     stage: null,
   });
-  const [manualModal, setManualModal] = useState({
-    open: false,
-    check: null,
-    stage: null,
-    remarks: "",
-    status: "COMPLETED",
-    loading: false,
-  });
+ const [manualModal, setManualModal] = useState({
+  open: false,
+  stage: "",
+  check: "",
+  status: "COMPLETED",
+  remarks: "",
+  files: [],
+  loading: false,
+});
 
 
   const API_SERVICES = [
@@ -1870,55 +1871,64 @@ export default function BGVInitiationPage() {
   }
 
   function openManualVerify(check, stage) {
-    setManualModal({
-      open: true,
-      check,
-      stage,
-      remarks: "",
-      status: "COMPLETED",
-      loading: false,
-    });
-  }
-  async function handleManualSubmit() {
-    try {
-      setManualModal((m) => ({ ...m, loading: true }));
+  setManualModal({
+    open: true,
+    check,
+    stage,
+    remarks: "",
+    status: "COMPLETED",
+    loading: false,
+  files: [], // keep state shape consistent
+  });
+}
 
-      const res = await fetch(`/api/proxy/secure/updateInternalVerification`, {
+ async function handleManualSubmit() {
+  try {
+    setManualModal((m) => ({ ...m, loading: true }));
+
+    const formData = new FormData();
+
+    formData.append("verificationId", candidateVerification._id);
+    formData.append("stage", manualModal.stage);
+    formData.append("checkName", manualModal.check);
+    formData.append("status", manualModal.status);
+    formData.append("remarks", manualModal.remarks);
+
+    // 👇 SAME KEY AS POSTMAN
+    manualModal.files.forEach((file) => {
+      formData.append("proofFiles", file);
+    });
+
+    const res = await fetch(
+      `/api/proxy/secure/updateInternalVerification`,
+      {
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          verificationId: candidateVerification._id,
-          stage: manualModal.stage,
-          checkName: manualModal.check,
-          status: manualModal.status,
-          remarks: manualModal.remarks,
-        }),
-      });
+        body: formData, // ❌ no headers
+      }
+    );
 
-      const data = await res.json();
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed");
 
-      if (!res.ok) throw new Error(data.message || "Failed");
+    showModal({
+      title: "Manual Verification Updated",
+      message: data.message, // exact backend message
+      type: "success",
+    });
 
-      showModal({
-        title: "Manual Verification Updated",
-        message: `${manualModal.check} marked as ${manualModal.status}`,
-        type: "success",
-      });
-
-      setManualModal({ ...manualModal, open: false });
-
-      await fetchCandidateVerification(selectedCandidate);
-    } catch (err) {
-      showModal({
-        title: "Error",
-        message: err.message,
-        type: "error",
-      });
-    } finally {
-      setManualModal((m) => ({ ...m, loading: false }));
-    }
+    setManualModal((m) => ({ ...m, open: false, files: [] }));
+    await fetchCandidateVerification(selectedCandidate);
+  } catch (err) {
+    showModal({
+      title: "Error",
+      message: err.message,
+      type: "error",
+    });
+  } finally {
+    setManualModal((m) => ({ ...m, loading: false }));
   }
+}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 text-gray-900 p-4 sm:p-6 lg:p-8">
@@ -4483,63 +4493,154 @@ export default function BGVInitiationPage() {
       )}
 
       {manualModal.open && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-xl max-w-md w-full shadow-xl">
-            <h3 className="text-lg font-semibold mb-3 capitalize">
-              Manual Verification — {manualModal.check.replace(/_/g, " ")}
-            </h3>
-
-            {/* Status */}
-            <label className="block text-sm font-medium text-gray-700 mt-2">
-              Status
-            </label>
-            <select
-              value={manualModal.status}
-              onChange={(e) =>
-                setManualModal((m) => ({ ...m, status: e.target.value }))
-              }
-              className="border rounded-md p-2 w-full"
-            >
-              <option value="COMPLETED">Completed</option>
-              <option value="FAILED">Failed</option>
-            </select>
-
-            {/* Remarks */}
-            <label className="block text-sm font-medium text-gray-700 mt-4">
-              Remarks
-            </label>
-            <textarea
-              value={manualModal.remarks}
-              onChange={(e) =>
-                setManualModal((m) => ({ ...m, remarks: e.target.value }))
-              }
-              className="border rounded-md p-2 w-full mt-1"
-              rows={4}
-              placeholder="Add manual verification notes..."
-            />
-
-            {/* ACTIONS */}
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setManualModal({ ...manualModal, open: false })}
-                className="px-4 py-2 border rounded-md"
-              >
-                Cancel
-              </button>
-
-              <button
-                disabled={manualModal.loading}
-                onClick={handleManualSubmit}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
-              >
-                {manualModal.loading ? (
-                  <Loader2 size={16} className="animate-spin inline" />
-                ) : (
-                  "Submit"
-                )}
-              </button>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl max-w-lg w-full shadow-2xl border border-white/20 relative overflow-hidden"
+          >
+            {/* Background Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#ff004f]/5 via-transparent to-blue-500/5 pointer-events-none"></div>
+            
+            {/* Header */}
+            <div className="relative z-10 mb-8">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="p-3 bg-gradient-to-br from-[#ff004f] to-red-500 rounded-2xl shadow-lg">
+                  <FileCheck size={24} className="text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-[#ff004f] to-red-600 bg-clip-text text-transparent capitalize">
+                    Manual Verification
+                  </h3>
+                  <p className="text-sm text-gray-600 font-medium">
+                    {manualModal.check.replace(/_/g, " ")}
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
+
+            <div className="relative z-10 space-y-6">
+              {/* Status Selection */}
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-800">
+                  Verification Status
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setManualModal((m) => ({ ...m, status: "COMPLETED" }))}
+                    className={`p-4 rounded-2xl border-2 transition-all duration-300 ${
+                      manualModal.status === "COMPLETED"
+                        ? "border-green-500 bg-green-50 text-green-700 shadow-lg scale-105"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-green-300 hover:bg-green-50"
+                    }`}
+                  >
+                    <CheckCircle size={20} className="mx-auto mb-2" />
+                    <span className="font-semibold">Completed</span>
+                  </button>
+                  <button
+                    onClick={() => setManualModal((m) => ({ ...m, status: "FAILED" }))}
+                    className={`p-4 rounded-2xl border-2 transition-all duration-300 ${
+                      manualModal.status === "FAILED"
+                        ? "border-red-500 bg-red-50 text-red-700 shadow-lg scale-105"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-red-300 hover:bg-red-50"
+                    }`}
+                  >
+                    <XCircle size={20} className="mx-auto mb-2" />
+                    <span className="font-semibold">Failed</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* File Upload */}
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-800">
+                  Upload Proof Documents
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    multiple
+                    onChange={(e) =>
+                      setManualModal((m) => ({
+                        ...m,
+                        files: Array.from(e.target.files),
+                      }))
+                    }
+                    className="hidden"
+                    id="proof-files"
+                  />
+                  <label
+                    htmlFor="proof-files"
+                    className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-2xl cursor-pointer hover:border-[#ff004f] hover:bg-[#ff004f]/5 transition-all duration-300 group"
+                  >
+                    <div className="p-3 bg-gray-100 rounded-xl group-hover:bg-[#ff004f]/10 transition-colors">
+                      <FileText size={24} className="text-gray-500 group-hover:text-[#ff004f]" />
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-gray-600 group-hover:text-[#ff004f]">
+                      Click to upload files
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Multiple files supported
+                    </p>
+                  </label>
+                  {manualModal.files.length > 0 && (
+                    <div className="mt-3 space-y-2">
+                      {manualModal.files.map((file, idx) => (
+                        <div key={idx} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                          <FileText size={16} className="text-gray-500" />
+                          <span className="text-sm text-gray-700 truncate">{file.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Remarks */}
+              <div className="space-y-3">
+                <label className="block text-sm font-bold text-gray-800">
+                  Verification Notes
+                </label>
+                <textarea
+                  value={manualModal.remarks}
+                  onChange={(e) =>
+                    setManualModal((m) => ({ ...m, remarks: e.target.value }))
+                  }
+                  className="w-full p-4 border-2 border-gray-200 rounded-2xl focus:border-[#ff004f] focus:ring-2 focus:ring-[#ff004f]/20 transition-all duration-300 resize-none"
+                  rows={4}
+                  placeholder="Add detailed verification notes and observations..."
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-4 pt-4">
+                <button
+                  onClick={() => setManualModal({ ...manualModal, open: false })}
+                  className="flex-1 py-3 px-6 border-2 border-gray-200 text-gray-600 rounded-2xl font-semibold hover:border-gray-300 hover:bg-gray-50 transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  disabled={manualModal.loading}
+                  onClick={handleManualSubmit}
+                  className="flex-1 py-3 px-6 bg-gradient-to-r from-[#ff004f] to-red-500 text-white rounded-2xl font-semibold hover:from-[#e60047] hover:to-red-600 shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {manualModal.loading ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      <span>Processing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={18} />
+                      <span>Submit Verification</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

@@ -3,7 +3,7 @@ import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 
 export const metadata = {
-  title: "Maihoo Admin",
+  title: "Maihoo ",
   description: "Background Verification Platform",
 
   icons: {
