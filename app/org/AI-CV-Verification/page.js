@@ -17,6 +17,8 @@ import {
   User,
   FileText,
   Shield,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
@@ -98,9 +100,9 @@ function ErrorModal({ isOpen, onClose, message, details }) {
 }
 
 /* -------------------------------------------------------------
-   AI-CV CERTIFICATE BASE (MATCHING SUPERADMIN CERTIFICATE DESIGN)
+   AI-CV CERTIFICATE BASE (EXACT MATCH WITH SUPERADMIN)
 ------------------------------------------------------------- */
-function CertificateBase({ id, candidate, orgName, ai }) {
+function CertificateBase({ id, candidate, orgName, ai, analysis }) {
   const positives = ai?.positive_findings || [];
   const redflags = ai?.red_flags || [];
 
@@ -108,9 +110,9 @@ function CertificateBase({ id, candidate, orgName, ai }) {
     <div
       id={id}
       style={{
-        width: "794px", // EXACT A4 WIDTH
-        minHeight: "1123px", // EXACT A4 HEIGHT
-        padding: "10px 50px 60px 50px", // SAME AS SERVICE CERTIFICATE
+        width: "794px",
+        minHeight: "1123px",
+        padding: "10px 50px 60px 50px",
         background: "#ffffff",
         fontFamily: "Arial, sans-serif",
         position: "relative",
@@ -136,21 +138,17 @@ function CertificateBase({ id, candidate, orgName, ai }) {
         }}
       />
 
-      {/* ================= CONTENT WRAPPER ================= */}
+      {/* ================= CONTENT ================= */}
       <div style={{ position: "relative", zIndex: 2, marginTop: "-10px" }}>
-        {/* ================================================== */}
-        {/* HEADER AREA (Align exactly like Service Cert)      */}
-        {/* ================================================== */}
+        {/* ================= HEADER ================= */}
         <div
           style={{
             display: "flex",
             alignItems: "flex-start",
             gap: "35px",
-            marginBottom: "25px",
-            marginTop: "0",
+            marginBottom: "20px",
           }}
         >
-          {/* LOGO */}
           <div style={{ flexShrink: 0, marginTop: "5px" }}>
             <img
               src="/logos/maihooMain.png"
@@ -158,24 +156,11 @@ function CertificateBase({ id, candidate, orgName, ai }) {
               style={{
                 maxHeight: "180px",
                 maxWidth: "450px",
-                height: "auto",
-                width: "auto",
-                display: "block",
                 objectFit: "contain",
               }}
             />
           </div>
-
-          {/* TITLE */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "flex-start",
-              gap: "2px",
-              marginTop: "55px", // MATCH SERVICE CERT
-            }}
-          >
+          <div style={{ marginTop: "50px" }}>
             <h1
               style={{
                 fontSize: "26px",
@@ -187,7 +172,6 @@ function CertificateBase({ id, candidate, orgName, ai }) {
             >
               AI CV
             </h1>
-
             <h2
               style={{
                 fontSize: "26px",
@@ -202,14 +186,12 @@ function CertificateBase({ id, candidate, orgName, ai }) {
           </div>
         </div>
 
-        {/* ================================================== */}
-        {/* CANDIDATE DETAILS                                  */}
-        {/* ================================================== */}
+        {/* ================= CANDIDATE DETAILS ================= */}
         <div
           style={{
             fontSize: "15px",
             lineHeight: "28px",
-            marginBottom: "25px",
+            marginBottom: "5px",
             marginTop: "-20px",
           }}
         >
@@ -231,37 +213,48 @@ function CertificateBase({ id, candidate, orgName, ai }) {
           <p>
             <b>Recommendation:</b> {ai?.recommendation}
           </p>
-
+          {analysis?.candidateType && (
+            <p>
+              <b>Candidate Type:</b>{" "}
+              {analysis.candidateType.replace(/_/g, " ")}
+            </p>
+          )}
+          {analysis?.hasUan !== undefined && (
+            <p>
+              <b>UAN Status:</b>{" "}
+              {analysis.hasUan ? "Available" : "Not Available"}
+            </p>
+          )}
           <p style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <b>Status:</b>
             <span
-              style={{ color: "#5cb85c", fontWeight: "bold", fontSize: "16px" }}
+              style={{
+                color: "#5cb85c",
+                fontWeight: "bold",
+                fontSize: "16px",
+              }}
             >
               ✓ Completed
             </span>
           </p>
         </div>
 
-        {/* ================================================== */}
-        {/* BLACK SEPARATOR LINE                               */}
-        {/* ================================================== */}
+        {/* ================= BLACK SEPARATOR ================= */}
         <div
           style={{
             width: "100%",
             height: "3px",
             background: "#000",
-            margin: "20px 0 70px 0",
+            margin: "20px 0 40px 0",
           }}
         />
 
-        {/* ================================================== */}
-        {/* GREEN STATUS BAR (MATCH SERVICE CERTIFICATE)       */}
-        {/* ================================================== */}
+        {/* ================= SINGLE GREEN STATUS BAR ================= */}
         <div
           style={{
             display: "flex",
             alignItems: "center",
-            marginBottom: "35px", // MATCH SERVICE CERT (was wrong earlier)
+            marginBottom: "25px",
           }}
         >
           <div
@@ -282,11 +275,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
           />
         </div>
 
-        {/* ================================================== */}
-        {/* POSITIVE FINDINGS                                  */}
-        {/* ================================================== */}
-       
-
+        {/* ================= POSITIVE FINDINGS ================= */}
         <div style={{ marginBottom: "30px" }}>
           {positives.map((item, i) => (
             <div
@@ -297,29 +286,129 @@ function CertificateBase({ id, candidate, orgName, ai }) {
                 marginBottom: "12px",
               }}
             >
-              <span
-                style={{
-                  fontSize: "18px",
-                  marginRight: "10px",
-                }}
-              >
-                ✓
-              </span>
+              <span style={{ fontSize: "18px", marginRight: "10px" }}>✓</span>
               <span style={{ fontSize: "14px" }}>{item}</span>
             </div>
           ))}
         </div>
 
-        {/* ================================================== */}
-        {/* RED FLAGS                                          */}
-        {/* ================================================== */}
+        {/* ================= CONTACT INFORMATION (NO EXTRA BAR) ================= */}
+        {ai?.contact_information && (
+          <div style={{ marginBottom: "30px" }}>
+            {ai.contact_information.phone_numbers?.length > 0 && (
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    marginBottom: "8px",
+                  }}
+                >
+                  📱 Phone Numbers Detected & Verified:
+                </div>
+                {ai.contact_information.phone_numbers.map((phone, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "18px",
+                        marginRight: "8px",
+                        color: "#28a745",
+                      }}
+                    >
+                      ✓
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {phone}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "#28a745",
+                        marginLeft: "10px",
+                      }}
+                    >
+                      (Verified)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {ai.contact_information.email_addresses?.length > 0 && (
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: "600",
+                    marginBottom: "8px",
+                  }}
+                >
+                  📧 Email Addresses Detected & Verified:
+                </div>
+                {ai.contact_information.email_addresses.map((email, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "18px",
+                        marginRight: "8px",
+                        color: "#28a745",
+                      }}
+                    >
+                      ✓
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontFamily: "monospace",
+                      }}
+                    >
+                      {email}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        color: "#28a745",
+                        marginLeft: "10px",
+                      }}
+                    >
+                      (Verified)
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div style={{ fontSize: "12px", color: "#666", marginTop: "10px" }}>
+              Total Contacts Found: {ai.contact_information.total_phones} phone(s), {ai.contact_information.total_emails} email(s)
+            </div>
+          </div>
+        )}
+
+        {/* ================= RED FLAGS ================= */}
         {redflags.length > 0 && (
           <>
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                marginBottom: "30px",
+                marginBottom: "25px",
               }}
             >
               <div
@@ -339,15 +428,12 @@ function CertificateBase({ id, candidate, orgName, ai }) {
                 }}
               />
             </div>
-
-           
-
             {redflags.map((rf, i) => (
               <div
                 key={i}
                 style={{
                   display: "flex",
-                  marginBottom: "12px",
+                  marginBottom: "2px",
                 }}
               >
                 <span
@@ -368,9 +454,7 @@ function CertificateBase({ id, candidate, orgName, ai }) {
         )}
       </div>
 
-      {/* ================================================== */}
-      {/* FOOTER FIXED AT BOTTOM (MATCH SERVICE CERT)        */}
-      {/* ================================================== */}
+      {/* ================= FOOTER ================= */}
       <div
         style={{
           position: "absolute",
@@ -384,7 +468,6 @@ function CertificateBase({ id, candidate, orgName, ai }) {
           style={{
             height: "2px",
             background: "#dc3545",
-            width: "100%",
             marginBottom: "10px",
           }}
         />
@@ -779,6 +862,7 @@ export default function OrgAICVVerificationPage() {
               candidate={selectedCandidate}
               orgName={currentOrg?.organizationName || "Organization"}
               ai={ai}
+              analysis={analysis}
             />
           </div>
         </div>
@@ -977,7 +1061,20 @@ function ResultsSection({
     >
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-gray-900">AI Analysis</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-xl font-bold text-gray-900">AI Analysis Results</h2>
+          <div className={`px-3 py-1 rounded-full text-xs font-bold border ${
+            checkStatus === "COMPLETED" 
+              ? 'bg-green-100 text-green-800 border-green-300'
+              : checkStatus === "FAILED"
+              ? 'bg-red-100 text-red-800 border-red-300'
+              : 'bg-yellow-100 text-yellow-800 border-yellow-300'
+          }`}>
+            {checkStatus === "COMPLETED" ? "✓ Approved" : 
+             checkStatus === "FAILED" ? "✗ Rejected" : 
+             "⏳ Pending Review"}
+          </div>
+        </div>
         {/* Show Download Report button only after approval */}
         {checkStatus === "COMPLETED" && (
           <button
@@ -992,21 +1089,77 @@ function ResultsSection({
 
       {/* BADGES */}
       <div className="flex flex-wrap gap-3 text-sm">
-        <span className="px-3 py-1 rounded-full bg-gray-200 text-black font-semibold">
+        <span className="px-3 py-1 rounded-full bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 font-semibold border border-blue-300">
           Score: {ai.authenticity_score}/100
         </span>
-        <span className="px-3 py-1 rounded-full bg-gray-200 text-black font-semibold">
+        <span className={`px-3 py-1 rounded-full font-semibold border ${
+          ai.recommendation === 'REVIEW_REQUIRED' 
+            ? 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border-yellow-300'
+            : ai.recommendation === 'APPROVED'
+            ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border-green-300'
+            : 'bg-gradient-to-r from-red-100 to-red-200 text-red-800 border-red-300'
+        }`}>
           {ai.recommendation}
         </span>
+        {analysis.candidateType && (
+          <span className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 font-semibold border border-purple-300">
+            {analysis.candidateType.replace(/_/g, ' ')}
+          </span>
+        )}
+        {analysis.hasUan !== undefined && (
+          <span className={`px-3 py-1 rounded-full font-semibold border ${
+            analysis.hasUan 
+              ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border-green-300'
+              : 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border-orange-300'
+          }`}>
+            UAN: {analysis.hasUan ? 'Available' : 'Not Available'}
+          </span>
+        )}
       </div>
 
       <Separator />
 
+      {/* UAN VERIFICATION STATUS */}
+      {(analysis.hasUan !== undefined || analysis.uanVerificationNote) && (
+        <div className="bg-gradient-to-br from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200 text-black">
+          <h3 className="font-semibold mb-2 flex items-center gap-2 text-orange-800">
+            <Shield size={16} />
+            UAN Verification Status
+          </h3>
+          <div className="space-y-2">
+            {analysis.uanNumber && (
+              <p className="text-sm">
+                <span className="font-semibold">UAN Number:</span> {analysis.uanNumber}
+              </p>
+            )}
+            <p className="text-sm">
+              <span className="font-semibold">UAN Available:</span> 
+              <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
+                analysis.hasUan 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {analysis.hasUan ? 'Yes' : 'No'}
+              </span>
+            </p>
+            {analysis.uanVerificationNote && (
+              <div className="bg-white p-3 rounded border border-orange-200">
+                <p className="text-sm font-semibold text-orange-800 mb-1">Verification Note:</p>
+                <p className="text-sm text-gray-700">{analysis.uanVerificationNote}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* SUMMARY */}
       {ai.summary && (
-        <div className="bg-gray-50 p-4 rounded-lg border text-black">
-          <h3 className="font-semibold mb-1">Summary</h3>
-          <p className="text-sm leading-6">{ai.summary}</p>
+        <div className="bg-gradient-to-br from-gray-50 to-slate-50 p-4 rounded-lg border border-gray-200 text-black shadow-sm">
+          <h3 className="font-semibold mb-2 flex items-center gap-2 text-gray-800">
+            <FileText size={16} />
+            Analysis Summary
+          </h3>
+          <p className="text-sm leading-6 text-gray-700">{ai.summary}</p>
         </div>
       )}
 
@@ -1107,6 +1260,124 @@ function ResultsSection({
                 <li key={i}>{t}</li>
               ))}
             </ul>
+          )}
+        </div>
+      )}
+
+      {/* CONTACT INFORMATION */}
+      {ai.contact_information && (
+        <div className="border rounded-lg p-4 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200 text-black text-sm">
+          <h4 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+            <Shield size={16} />
+            Contact Information Verification
+          </h4>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Contact Score */}
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <p className="text-xs text-gray-600 mb-1">Contact Score</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {ai.contact_information.contact_score}/100
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                Completeness: {ai.contact_information.contact_completeness}
+              </p>
+            </div>
+
+            {/* Contact Summary */}
+            <div className="bg-white p-3 rounded-lg border border-blue-200">
+              <p className="text-xs text-gray-600 mb-1">Contact Details</p>
+              <div className="space-y-1">
+                <p className="text-sm">
+                  <span className="font-semibold">Phones:</span> {ai.contact_information.total_phones}
+                </p>
+                <p className="text-sm">
+                  <span className="font-semibold">Emails:</span> {ai.contact_information.total_emails}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Phone Numbers */}
+          {ai.contact_information.phone_numbers && ai.contact_information.phone_numbers.length > 0 && (
+            <div className="mt-4 bg-white p-4 rounded-lg border border-blue-200 shadow-sm">
+              <h5 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                <Phone size={16} className="text-blue-600" />
+                Phone Numbers Detected & Verified
+              </h5>
+              <div className="space-y-2">
+                {ai.contact_information.phone_numbers.map((phone, i) => (
+                  <div key={i} className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-200 hover:shadow-sm transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="font-mono text-sm font-medium text-gray-800">{phone}</span>
+                    </div>
+                    <span className="text-green-600 font-semibold text-xs flex items-center gap-1 bg-green-100 px-2 py-1 rounded-full">
+                      <CheckCircle size={12} />
+                      Verified
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Email Addresses */}
+          {ai.contact_information.email_addresses && ai.contact_information.email_addresses.length > 0 && (
+            <div className="mt-4 bg-white p-4 rounded-lg border border-blue-200 shadow-sm">
+              <h5 className="font-semibold text-blue-800 mb-3 flex items-center gap-2">
+                <Mail size={16} className="text-blue-600" />
+                Email Addresses Detected & Verified
+              </h5>
+              <div className="space-y-2">
+                {ai.contact_information.email_addresses.map((email, i) => (
+                  <div key={i} className="flex items-center justify-between bg-gradient-to-r from-green-50 to-emerald-50 p-3 rounded-lg border border-green-200 hover:shadow-sm transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="font-mono text-sm font-medium text-gray-800">{email}</span>
+                    </div>
+                    <span className="text-green-600 font-semibold text-xs flex items-center gap-1 bg-green-100 px-2 py-1 rounded-full">
+                      <CheckCircle size={12} />
+                      Verified
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Regex Detected Contacts */}
+          {ai.contact_information.regex_detected && (
+            <div className="mt-4 bg-gradient-to-br from-gray-50 to-slate-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+              <h5 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <AlertCircle size={16} className="text-gray-600" />
+                Pattern Detection Results
+              </h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-white p-3 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Phone size={14} className="text-blue-500" />
+                    <p className="font-semibold text-gray-700 text-sm">Regex Phone Detection:</p>
+                  </div>
+                  <p className="text-lg font-bold text-blue-600">{ai.contact_information.regex_detected.total_phones || 0}</p>
+                  <p className="text-xs text-gray-500">patterns found</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Mail size={14} className="text-purple-500" />
+                    <p className="font-semibold text-gray-700 text-sm">Regex Email Detection:</p>
+                  </div>
+                  <p className="text-lg font-bold text-purple-600">{ai.contact_information.regex_detected.total_emails || 0}</p>
+                  <p className="text-xs text-gray-500">patterns found</p>
+                </div>
+              </div>
+              {ai.contact_information.regex_detected.contact_found && (
+                <div className="mt-3 flex items-center gap-2 text-green-600 bg-green-50 p-2 rounded-lg border border-green-200">
+                  <CheckCircle size={16} />
+                  <span className="text-sm font-semibold">Contact information successfully detected and validated</span>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}

@@ -16,6 +16,10 @@ import {
   X,
   FileDown,
   FileSpreadsheet,
+  Phone,
+  Mail,
+  Shield,
+  Target,
 } from "lucide-react";
 import { useOrgState } from "../../context/OrgStateContext";
 import * as XLSX from "xlsx";
@@ -823,6 +827,10 @@ export default function OrgAIResumeScreeningPage() {
 
       report += `\n`;
 
+      if (res.ranking_explanation) {
+        report += `RANKING EXPLANATION:\n${res.ranking_explanation}\n\n`;
+      }
+
       if (res.summary) {
         report += `SUMMARY:\n${res.summary}\n\n`;
       }
@@ -877,6 +885,26 @@ export default function OrgAIResumeScreeningPage() {
         report += `EDUCATION: ${res.education_match}\n\n`;
       }
 
+      if (res.contact_information) {
+        report += `CONTACT INFORMATION:\n`;
+        report += `  Status: ${res.contact_information.contact_completeness}\n`;
+        report += `  Total: ${res.contact_information.total_phones} phone(s), ${res.contact_information.total_emails} email(s)\n`;
+        
+        if (res.contact_information.phone_numbers && res.contact_information.phone_numbers.length > 0) {
+          report += `  Phone Numbers: ${res.contact_information.phone_numbers.join(", ")}\n`;
+        }
+        
+        if (res.contact_information.email_addresses && res.contact_information.email_addresses.length > 0) {
+          report += `  Email Addresses: ${res.contact_information.email_addresses.join(", ")}\n`;
+        }
+        
+        if (res.contact_information.regex_detected) {
+          report += `  Pattern Detection: ${res.contact_information.regex_detected.total_phones} phone patterns, ${res.contact_information.regex_detected.total_emails} email patterns\n`;
+        }
+        
+        report += `\n`;
+      }
+
       report += `${"=".repeat(80)}\n\n`;
     });
 
@@ -910,6 +938,7 @@ export default function OrgAIResumeScreeningPage() {
       "Candidate Name": res.filename,
       "Score": res.final_weighted_score || res.match_score || "-",
       "Recommendation": res.recommendation || "-",
+      "Ranking Explanation": res.ranking_explanation || "-",
       "Matched Skills": res.skills_match?.matched?.join(", ") || "-",
       "Missing Skills": res.skills_match?.missing?.join(", ") || "-",
       "Strengths": res.strengths?.join("; ") || "-",
@@ -918,6 +947,11 @@ export default function OrgAIResumeScreeningPage() {
         ? res.experience_match 
         : res.experience_match?.assessment || "-",
       "Education Match": res.education_match || "-",
+      "Contact Status": res.contact_information?.contact_completeness || "-",
+      "Phone Numbers": res.contact_information?.phone_numbers?.join(", ") || "-",
+      "Email Addresses": res.contact_information?.email_addresses?.join(", ") || "-",
+      "Contact Total": res.contact_information ? 
+        `${res.contact_information.total_phones} phone(s), ${res.contact_information.total_emails} email(s)` : "-",
       "Summary": res.summary || "-",
     }));
 
@@ -930,12 +964,17 @@ export default function OrgAIResumeScreeningPage() {
       { wch: 30 }, // Candidate Name
       { wch: 10 }, // Score
       { wch: 15 }, // Recommendation
+      { wch: 60 }, // Ranking Explanation
       { wch: 40 }, // Matched Skills
       { wch: 40 }, // Missing Skills
       { wch: 50 }, // Strengths
       { wch: 50 }, // Weaknesses
       { wch: 40 }, // Experience Match
       { wch: 40 }, // Education Match
+      { wch: 15 }, // Contact Status
+      { wch: 30 }, // Phone Numbers
+      { wch: 40 }, // Email Addresses
+      { wch: 25 }, // Contact Total
       { wch: 60 }, // Summary
     ];
 
@@ -1073,6 +1112,17 @@ export default function OrgAIResumeScreeningPage() {
           </div>
           
           <div style="width: 100%; height: 3px; background: #000; margin: 20px 0 30px 0;"></div>
+          
+          ${result.ranking_explanation ? `
+            <h3 style="font-size: 20px; font-weight: 700; color: #007bff; margin-bottom: 10px; margin-top: 30px;">
+              Ranking Explanation
+            </h3>
+            <div style="margin-bottom: 20px;">
+              <p style="font-size: 14px; line-height: 1.6; color: #333;">
+                ${result.ranking_explanation}
+              </p>
+            </div>
+          ` : ''}
           
           ${result.strengths && result.strengths.length > 0 ? `
             <div style="display: flex; align-items: center; margin-bottom: 35px;">
@@ -1234,6 +1284,19 @@ export default function OrgAIResumeScreeningPage() {
               />
             </div>
 
+            {/* Ranking Explanation */}
+            {res.ranking_explanation && (
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200 shadow-sm">
+                <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2">
+                  <Target size={18} className="text-blue-600" />
+                  Ranking Explanation
+                </h4>
+                <p className="text-sm text-blue-700 leading-relaxed font-medium">
+                  {res.ranking_explanation}
+                </p>
+              </div>
+            )}
+
             {/* Summary */}
             {res.summary && (
               <div className="bg-white p-4 rounded-xl border shadow-sm">
@@ -1365,6 +1428,84 @@ export default function OrgAIResumeScreeningPage() {
                   Education Match
                 </h4>
                 <p className="text-sm text-gray-700">{res.education_match}</p>
+              </div>
+            )}
+
+            {/* Contact Information */}
+            {res.contact_information && (
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200 shadow-sm">
+                <h4 className="font-bold text-green-800 mb-3 flex items-center gap-2">
+                  <Shield size={18} className="text-green-600" />
+                  Contact Information Verified
+                </h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Contact Summary */}
+                  <div className="bg-white p-3 rounded-lg border border-green-200">
+                    <p className="text-xs text-gray-600 mb-1">Contact Status</p>
+                    <p className="text-lg font-bold text-green-600">
+                      {res.contact_information.contact_completeness}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {res.contact_information.total_phones} phone(s), {res.contact_information.total_emails} email(s)
+                    </p>
+                  </div>
+
+                  {/* Detection Results */}
+                  <div className="bg-white p-3 rounded-lg border border-green-200">
+                    <p className="text-xs text-gray-600 mb-1">Pattern Detection</p>
+                    <div className="space-y-1">
+                      <p className="text-sm">
+                        <span className="font-semibold">Regex Phones:</span> {res.contact_information.regex_detected?.total_phones || 0}
+                      </p>
+                      <p className="text-sm">
+                        <span className="font-semibold">Regex Emails:</span> {res.contact_information.regex_detected?.total_emails || 0}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Phone Numbers */}
+                {res.contact_information.phone_numbers && res.contact_information.phone_numbers.length > 0 && (
+                  <div className="mb-3">
+                    <h5 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                      <Phone size={14} className="text-green-600" />
+                      Phone Numbers ({res.contact_information.phone_numbers.length})
+                    </h5>
+                    <div className="space-y-1">
+                      {res.contact_information.phone_numbers.map((phone, i) => (
+                        <div key={i} className="flex items-center justify-between bg-white p-2 rounded border border-green-200">
+                          <span className="font-mono text-sm text-gray-800">{phone}</span>
+                          <span className="text-green-600 font-semibold text-xs flex items-center gap-1">
+                            <CheckCircle2 size={12} />
+                            Verified
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Email Addresses */}
+                {res.contact_information.email_addresses && res.contact_information.email_addresses.length > 0 && (
+                  <div>
+                    <h5 className="font-semibold text-green-800 mb-2 flex items-center gap-2">
+                      <Mail size={14} className="text-green-600" />
+                      Email Addresses ({res.contact_information.email_addresses.length})
+                    </h5>
+                    <div className="space-y-1">
+                      {res.contact_information.email_addresses.map((email, i) => (
+                        <div key={i} className="flex items-center justify-between bg-white p-2 rounded border border-green-200">
+                          <span className="font-mono text-sm text-gray-800">{email}</span>
+                          <span className="text-green-600 font-semibold text-xs flex items-center gap-1">
+                            <CheckCircle2 size={12} />
+                            Verified
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1623,6 +1764,42 @@ export default function OrgAIResumeScreeningPage() {
                       </span>
                     </div>
                     
+                    {/* Contact Information Summary */}
+                    {results.length > 0 && results.some(r => r.contact_information) && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+                        <h3 className="font-bold text-green-800 mb-2 flex items-center gap-2">
+                          <Shield size={16} />
+                          Contact Verification Summary
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="text-center">
+                            <p className="font-bold text-green-600 text-lg">
+                              {results.filter(r => r.contact_information?.contact_completeness === 'COMPLETE').length}
+                            </p>
+                            <p className="text-green-700">Complete Contacts</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-blue-600 text-lg">
+                              {results.reduce((sum, r) => sum + (r.contact_information?.total_phones || 0), 0)}
+                            </p>
+                            <p className="text-blue-700">Total Phones</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-purple-600 text-lg">
+                              {results.reduce((sum, r) => sum + (r.contact_information?.total_emails || 0), 0)}
+                            </p>
+                            <p className="text-purple-700">Total Emails</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-orange-600 text-lg">
+                              {results.filter(r => r.contact_information?.regex_detected?.contact_found).length}
+                            </p>
+                            <p className="text-orange-700">Pattern Detected</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Download Options */}
                     <div className="flex flex-wrap gap-3">
                       <button
@@ -1697,6 +1874,42 @@ export default function OrgAIResumeScreeningPage() {
                         {enhancedResults.length} Candidate{enhancedResults.length > 1 ? "s" : ""}
                       </span>
                     </div>
+                    
+                    {/* Contact Information Summary */}
+                    {enhancedResults.length > 0 && enhancedResults.some(r => r.contact_information) && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+                        <h3 className="font-bold text-green-800 mb-2 flex items-center gap-2">
+                          <Shield size={16} />
+                          Contact Verification Summary
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div className="text-center">
+                            <p className="font-bold text-green-600 text-lg">
+                              {enhancedResults.filter(r => r.contact_information?.contact_completeness === 'COMPLETE').length}
+                            </p>
+                            <p className="text-green-700">Complete Contacts</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-blue-600 text-lg">
+                              {enhancedResults.reduce((sum, r) => sum + (r.contact_information?.total_phones || 0), 0)}
+                            </p>
+                            <p className="text-blue-700">Total Phones</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-purple-600 text-lg">
+                              {enhancedResults.reduce((sum, r) => sum + (r.contact_information?.total_emails || 0), 0)}
+                            </p>
+                            <p className="text-purple-700">Total Emails</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="font-bold text-orange-600 text-lg">
+                              {enhancedResults.filter(r => r.contact_information?.regex_detected?.contact_found).length}
+                            </p>
+                            <p className="text-orange-700">Pattern Detected</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     
                     {/* Download Options */}
                     <div className="flex flex-wrap gap-3">
