@@ -4493,12 +4493,12 @@ export default function BGVInitiationPage() {
       )}
 
       {manualModal.open && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl max-w-lg w-full shadow-2xl border border-white/20 relative overflow-hidden"
+            className="bg-white/95 backdrop-blur-xl p-8 rounded-3xl max-w-lg w-full shadow-2xl border border-white/20 relative my-8 max-h-[90vh] overflow-y-auto"
           >
             {/* Background Gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-[#ff004f]/5 via-transparent to-blue-500/5 pointer-events-none"></div>
