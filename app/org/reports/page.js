@@ -1049,14 +1049,20 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
                     ) : (
                       <button
                         disabled={downloading}
-                        onClick={() =>
+                        onClick={() => {
+                          // For credit reports, include the credit report link in attachments
+                          let attachments = chk.attachments || [];
+                          if (chk.check === "credit_report" && chk.remarks?.credit_report_link_permanent) {
+                            attachments = [...attachments, chk.remarks.credit_report_link_permanent];
+                          }
+                          
                           downloadSingleCert(
                             certId,
                             `${candidate._id}-${stage}-${chk.check}.pdf`,
                             setDownloading,
-                            chk.attachments || []
-                          )
-                        }
+                            attachments
+                          );
+                        }}
                         className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold transition-all duration-300 ${
                           done
                             ? "bg-gradient-to-r from-[#ff004f] to-red-600 text-white hover:from-[#e60047] hover:to-red-700 shadow-lg hover:shadow-xl hover:scale-105"
@@ -1113,8 +1119,8 @@ function CertificateBase({ id, candidate, orgName, checks }) {
     bulletItems = remarks.map((r) => truncateText(String(r)));
   } else if (typeof remarks === "object") {
     // Special handling for credit reports
-    if (checkName === "credit_report" && remarks.credit_report_link) {
-      creditReportLink = remarks.credit_report_link;
+    if (checkName === "credit_report" && remarks.credit_report_link_permanent) {
+      creditReportLink = remarks.credit_report_link_permanent;
       bulletItems.push(`Name: ${remarks.name || 'N/A'}`);
       bulletItems.push(`Mobile: ${remarks.mobile || 'N/A'}`);
       bulletItems.push(`PAN: ${remarks.pan || 'N/A'}`);
