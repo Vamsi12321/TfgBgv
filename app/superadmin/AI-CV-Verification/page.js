@@ -98,7 +98,7 @@ function ErrorModal({ isOpen, onClose, message, details }) {
     </Modal>
   );
 }
-
+ 
 /* -------------------------------------------------------------
    PDF CERTIFICATE COMPONENT
 ------------------------------------------------------------- */

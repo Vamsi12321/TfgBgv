@@ -1244,9 +1244,11 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
     return str.substring(0, maxLength) + "...";
   };
 
-  // Prepare remarks with enhanced employment history handling and content truncation
+  // Prepare remarks with enhanced handling for credit reports and court records
   let bulletItems = [];
+  let creditReportLink = null;
   const remarks = checks[0]?.remarks;
+  const checkName = checks[0]?.check;
 
   if (!remarks) {
     bulletItems = ["No remarks available"];
@@ -1255,8 +1257,58 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
   } else if (Array.isArray(remarks)) {
     bulletItems = remarks.map((r) => truncateText(String(r)));
   } else if (typeof remarks === "object") {
+    // Special handling for credit reports
+    if (checkName === "credit_report" && remarks.credit_report_link) {
+      creditReportLink = remarks.credit_report_link;
+      bulletItems.push(`Name: ${remarks.name || 'N/A'}`);
+      bulletItems.push(`Mobile: ${remarks.mobile || 'N/A'}`);
+      bulletItems.push(`PAN: ${remarks.pan || 'N/A'}`);
+      bulletItems.push(`Credit Score: ${remarks.credit_score || 'N/A'}`);
+      bulletItems.push(`Client ID: ${remarks.client_id || 'N/A'}`);
+      // Credit report link will be handled separately in the attachments section
+    }
+    // Special handling for court records - filter by exact name match
+    else if (checkName === "court_record" && remarks.result && Array.isArray(remarks.result)) {
+      const firstName = candidate.firstName.toLowerCase().trim();
+      const lastName = candidate.lastName.toLowerCase().trim();
+      const candidateNameNormal = `${firstName} ${lastName}`;
+      const candidateNameReversed = `${lastName} ${firstName}`;
+      
+      // Filter court records to only show exact matches with candidate name (both orders)
+      const matchingRecords = remarks.result.filter(record => {
+        const petitioner = (record.petitioner || '').toLowerCase().trim();
+        const respondent = (record.respondent || '').toLowerCase().trim();
+        
+        // Check for exact name match in both normal and reversed order
+        return petitioner === candidateNameNormal || respondent === candidateNameNormal ||
+               petitioner === candidateNameReversed || respondent === candidateNameReversed;
+      });
+
+      bulletItems.push(`Name: ${remarks.name || 'N/A'}`);
+      bulletItems.push(`Client ID: ${remarks.client_id || 'N/A'}`);
+      bulletItems.push(`Total Records Found: ${remarks.result.length}`);
+      bulletItems.push(`Matching Records: ${matchingRecords.length}`);
+      
+      if (matchingRecords.length > 0) {
+        matchingRecords.slice(0, 3).forEach((record, index) => {
+          bulletItems.push(`Record ${index + 1}:`);
+          bulletItems.push(`  Case: ${record.case_name || 'N/A'}`);
+          bulletItems.push(`  Petitioner: ${record.petitioner || 'N/A'}`);
+          bulletItems.push(`  Respondent: ${record.respondent || 'N/A'}`);
+          bulletItems.push(`  Status: ${record.case_status || 'N/A'}`);
+          bulletItems.push(`  Court: ${record.court_name || 'N/A'}`);
+          bulletItems.push(`  Filing Date: ${record.filing_date || 'N/A'}`);
+        });
+        
+        if (matchingRecords.length > 3) {
+          bulletItems.push(`... and ${matchingRecords.length - 3} more matching records`);
+        }
+      } else {
+        bulletItems.push("No cases found for candidate - Verification successful");
+      }
+    }
     // Enhanced handling for employment history and other complex structures
-    if (remarks.message && remarks.message_code) {
+    else if (remarks.message && remarks.message_code) {
       // Handle employment history verification format
       bulletItems.push(`Status: ${truncateText(remarks.message)}`);
       bulletItems.push(`Code: ${remarks.message_code}`);
@@ -1301,7 +1353,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
         bulletItems.push(`Success: ${remarks.success ? 'Yes' : 'No'}`);
       }
     } else {
-      // Handle other object types (like court records, credit reports) with truncation
+      // Handle other object types with truncation
       const entries = Object.entries(remarks);
       const maxEntries = 10; // Limit number of entries to prevent overflow
       
@@ -1335,7 +1387,6 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
   const hasCandidateDocuments = candidateDocuments && candidateDocuments.length > 0;
   
   // Check if this is a manual verification (check against MANUAL_SERVICES or has proofFiles)
-  const checkName = checks[0]?.check;
   const isManualService = MANUAL_SERVICES.some(service => service.id === checkName);
   const isManualVerification = isManualService || hasProofFiles;
   
@@ -1558,6 +1609,40 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             </div>
           ))}
         </div>
+
+        {/* =============================================== */}
+        {/* CREDIT REPORT LINK SECTION                       */}
+        {/* =============================================== */}
+        {creditReportLink && (
+          <div style={{ marginBottom: "30px" }}>
+            <p style={{ fontSize: "14px", color: "#000", fontWeight: "bold", marginBottom: "15px" }}>
+              Credit Report Document
+            </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "8px",
+                fontSize: "13px",
+              }}
+            >
+              <span style={{ marginRight: "8px" }}>💳</span>
+              <a 
+                href={creditReportLink} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ 
+                  color: "#0066cc", 
+                  textDecoration: "underline",
+                  wordBreak: "break-all",
+                  cursor: "pointer"
+                }}
+              >
+                View Credit Report (PDF)
+              </a>
+            </div>
+          </div>
+        )}
 
         {/* =============================================== */}
         {/* MANUAL VERIFICATION SECTIONS                     */}
