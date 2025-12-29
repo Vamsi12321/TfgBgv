@@ -224,14 +224,14 @@ export default function ConsentClient() {
           <div className="relative p-8">
             <div className="flex items-center gap-6">
               <div className="w-20 h-20 bg-gradient-to-br from-[#ff004f] to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-3xl text-white">📋</span>
+                <span className="text-2xl text-white font-bold">TFG</span>
               </div>
               <div className="flex-1">
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Verification Consent Required
+                  TFG Verification Consent Required
                 </h1>
                 <p className="text-gray-600 text-lg">
-                  Please review and provide your consent for background verification
+                  Please review and provide your consent for background verification by TFG AI powered IT solutions
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                   <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
@@ -255,22 +255,22 @@ export default function ConsentClient() {
         </div>
 
         {/* BEAUTIFUL INFO BAR */}
-        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-2xl">
+        <div className="relative overflow-hidden bg-gradient-to-r from-[#ff004f] via-purple-500 to-pink-500 rounded-2xl shadow-2xl">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-12 -translate-x-12"></div>
           <div className="relative px-8 py-6">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg backdrop-blur-sm">
-                <span className="text-3xl">🔒</span>
+                <span className="text-2xl text-white font-bold">TFG</span>
               </div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
-                  🛡️ Secure Consent Process
+                  🛡️ TFG Secure Consent Process
                 </h3>
                 <div className="space-y-2">
                   <p className="text-white/90 text-base font-medium">
-                    📋 Your organization has requested consent for background verification
+                    📋 TFG AI powered IT solutions has requested consent for background verification
                   </p>
                   <p className="text-white/80 text-sm">
                     💡 <strong>Simple & Secure:</strong> Review the verification details below and provide your consent with a single click
@@ -297,17 +297,17 @@ export default function ConsentClient() {
 
         {/* ENHANCED VERIFICATION CHECKS */}
         <div className="bg-white border-2 border-gray-200 rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="bg-gradient-to-r from-[#ff004f] to-purple-600 px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                 <span className="text-2xl text-white">🔍</span>
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  Verification Checks Requested
+                  TFG Verification Checks Requested
                 </h2>
-                <p className="text-blue-100 text-sm">
-                  The following checks will be performed as part of your background verification
+                <p className="text-pink-100 text-sm">
+                  The following checks will be performed as part of your background verification by TFG
                 </p>
               </div>
             </div>
@@ -316,10 +316,10 @@ export default function ConsentClient() {
           <div className="p-6">
             <div className="grid gap-4">
               {data.verificationChecks.map((c, i) => (
-                <div key={i} className="bg-gradient-to-r from-gray-50 to-blue-50 border border-blue-200 rounded-xl p-4 hover:shadow-md transition-all duration-200">
+                <div key={i} className="bg-gradient-to-r from-gray-50 to-pink-50 border border-pink-200 rounded-xl p-4 hover:shadow-md transition-all duration-200">
                   <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                      <span className="text-blue-600 font-bold text-sm">{i + 1}</span>
+                    <div className="w-10 h-10 bg-pink-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                      <span className="text-[#ff004f] font-bold text-sm">{i + 1}</span>
                     </div>
                     <div className="flex-1">
                       <h3 className="font-bold text-gray-900 text-lg mb-1">
@@ -355,17 +355,17 @@ export default function ConsentClient() {
 
         {/* ENHANCED CONSENT DECLARATION */}
         <div className="bg-white border-2 border-amber-200 rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-6 py-4">
+          <div className="bg-gradient-to-r from-[#ff004f] to-orange-500 px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                 <span className="text-2xl text-white">📜</span>
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  Declaration & Consent Agreement
+                  TFG Declaration & Consent Agreement
                 </h2>
-                <p className="text-amber-100 text-sm">
-                  Please read carefully before providing your consent
+                <p className="text-pink-100 text-sm">
+                  Please read carefully before providing your consent to TFG AI powered IT solutions
                 </p>
               </div>
             </div>
@@ -373,13 +373,13 @@ export default function ConsentClient() {
           
           <div className="p-6 space-y-6">
             {/* Purpose Section */}
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5">
+            <div className="bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 rounded-xl p-5">
               <div className="flex items-start gap-3">
                 <span className="text-2xl">🎯</span>
                 <div>
-                  <h3 className="font-bold text-blue-900 mb-2">Purpose of Verification</h3>
-                  <p className="text-blue-800 leading-relaxed">
-                    <strong>{data.organizationName}</strong> is requesting your consent to collect, verify, and
+                  <h3 className="font-bold text-pink-900 mb-2">Purpose of Verification</h3>
+                  <p className="text-pink-800 leading-relaxed">
+                    <strong>{data.organizationName}</strong> is requesting your consent to allow <strong>TFG AI powered IT solutions</strong> to collect, verify, and
                     validate your personal, identity, employment, education, and other
                     relevant information required for <strong>Background Verification (BGV)</strong> purposes.
                   </p>
@@ -394,7 +394,7 @@ export default function ConsentClient() {
                 <div>
                   <h3 className="font-bold text-purple-900 mb-3">Authorization Granted</h3>
                   <p className="text-purple-800 mb-3">
-                    By giving consent, you authorize <strong>{data.organizationName}</strong> and its verification partners to:
+                    By giving consent, you authorize <strong>{data.organizationName}</strong> and <strong>TFG AI powered IT solutions</strong> to:
                   </p>
                   <div className="grid gap-3">
                     {[
@@ -463,7 +463,7 @@ export default function ConsentClient() {
             <button
               disabled={submitting}
               onClick={() => submit(true)}
-              className="group relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white p-4 rounded-xl text-lg font-bold flex items-center justify-center gap-3 disabled:opacity-70 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+              className="group relative overflow-hidden bg-gradient-to-r from-[#ff004f] to-pink-600 hover:from-[#e6003d] hover:to-pink-700 text-white p-4 rounded-xl text-lg font-bold flex items-center justify-center gap-3 disabled:opacity-70 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <div className="relative flex items-center gap-3">
@@ -479,7 +479,7 @@ export default function ConsentClient() {
                     </div>
                     <div className="text-left">
                       <div>I Agree & Give Consent</div>
-                      <div className="text-sm text-green-100 font-normal">Proceed with verification</div>
+                      <div className="text-sm text-pink-100 font-normal">Proceed with TFG verification</div>
                     </div>
                   </>
                 )}
