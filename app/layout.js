@@ -3,13 +3,13 @@ import "./globals.css";
 import { AuthProvider } from "./context/AuthContext";
 
 export const metadata = {
-  title: "Maihoo ",
+  title: "TFG Reports",
   description: "Background Verification Platform",
 
   icons: {
-    icon: "/logos/maihooMain.png", // favicon
-    shortcut: "/logos/maihooMain.png",
-    apple: "/logos/maihooMain.png", // iOS home screen (optional)
+    icon: "/logos/tfgLogo.jpeg", // favicon
+    shortcut: "/logos/tfgLogo.jpeg",
+    apple: "/logos/tfgLogo.jpeg", // iOS home screen (optional)
   },
 };
 

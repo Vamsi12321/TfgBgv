@@ -1492,7 +1492,7 @@ export default function OrgBGVRequestsPage() {
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-amber-800">
-                  ⏳ Maihoo needs to approve this check
+                  ⏳ TFG needs to approve this check
                 </p>
                 <p className="text-xs text-amber-700 mt-1">
                   This verification requires manual review and approval

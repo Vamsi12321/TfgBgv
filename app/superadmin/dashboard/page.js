@@ -1,19 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -32,6 +19,53 @@ import StatsCard from "../../components/StatsCard";
 import PageHeader from "../../components/PageHeader";
 import Button from "../../components/ui/Button";
 import { useSuperAdminState } from "../../context/SuperAdminStateContext";
+
+// Simple chart components to replace recharts temporarily
+const SimpleBarChart = ({ data, colors }) => (
+  <div className="h-[260px] sm:h-[300px] flex items-end justify-center gap-4 p-4">
+    {Object.entries(data).map(([key, value], index) => (
+      <div key={key} className="flex flex-col items-center gap-2">
+        <div
+          className="w-16 rounded-t-lg transition-all duration-500"
+          style={{
+            height: `${Math.max((value / Math.max(...Object.values(data))) * 200, 20)}px`,
+            backgroundColor: colors[index] || '#0066cc'
+          }}
+        />
+        <span className="text-xs font-medium text-gray-600 capitalize">{key}</span>
+        <span className="text-sm font-bold text-gray-800">{value}</span>
+      </div>
+    ))}
+  </div>
+);
+
+const SimplePieChart = ({ data, colors }) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  
+  return (
+    <div className="h-[260px] sm:h-[300px] flex items-center justify-center">
+      <div className="relative">
+        <div className="w-40 h-40 rounded-full border-8 border-gray-200 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-800">{total}</div>
+            <div className="text-sm text-gray-600">Total</div>
+          </div>
+        </div>
+        <div className="absolute inset-0 flex flex-col justify-center space-y-2 ml-48">
+          {data.map((item, index) => (
+            <div key={item.name} className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded-full"
+                style={{ backgroundColor: colors[index] }}
+              />
+              <span className="text-sm font-medium">{item.name}: {item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 
@@ -70,7 +104,7 @@ function SearchableDropdown({ orgs, selectedOrg, setSelectedOrg }) {
                 placeholder="Search organization..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-full text-sm bg-white shadow-sm focus:ring-2 focus:ring-[#ff004f] text-black"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-full text-sm bg-white shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
               />
               <svg
                 className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2"
@@ -343,7 +377,7 @@ export default function SuperAdminDashboard() {
   if (loading && !stats)
     return (
       <div className="flex flex-col justify-center items-center h-screen">
-        <div className="animate-spin h-16 w-16 border-4 border-[#ff004f] border-t-transparent rounded-full" />
+        <div className="animate-spin h-16 w-16 border-4 border-blue-500 border-t-transparent rounded-full" />
         <p className="mt-6 text-gray-600">Loading dashboard...</p>
       </div>
     );
@@ -369,7 +403,7 @@ export default function SuperAdminDashboard() {
             value: userRole === "SUPER_ADMIN_HELPER"
               ? stats?.accessibleOrganizations || 0
               : stats?.totalOrganizations || 0,
-            color: "#ff004f",
+            color: "#3b82f6",
             icon: Building2,
           },
         ]
@@ -442,14 +476,14 @@ export default function SuperAdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 relative">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative">
       {/* Loading Overlay when switching organizations */}
       {loading && stats && (
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl p-8 shadow-2xl flex flex-col items-center gap-4">
-              <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+              <Loader2 className="animate-spin text-blue-600" size={48} />
               <div className="text-center">
                 <h3 className="text-lg font-bold text-gray-900 mb-1">Loading Dashboard</h3>
                 <p className="text-sm text-gray-600">Fetching organization data...</p>
@@ -464,7 +498,7 @@ export default function SuperAdminDashboard() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <LayoutDashboard size={24} className="text-[#ff004f]" />
+              <LayoutDashboard size={24} className="text-blue-600" />
               Dashboard
             </h1>
             <p className="text-gray-600 text-sm mt-1">Monitor verification activities</p>
@@ -474,7 +508,7 @@ export default function SuperAdminDashboard() {
             <button 
               onClick={() => setNavigating(true)}
               disabled={navigating}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {navigating ? (
                 <>
@@ -494,8 +528,8 @@ export default function SuperAdminDashboard() {
         {/* SUPERB ORG DROPDOWN */}
         <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-8">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
-              <Building2 size={20} className="text-[#ff004f]" />
+            <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
+              <Building2 size={20} className="text-blue-600" />
             </div>
             <label className="text-base font-bold text-gray-800">
               Select Organization
@@ -532,7 +566,7 @@ export default function SuperAdminDashboard() {
           {/* BAR CHART - ENHANCED */}
           <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-6 shadow-2xl border-2 border-gray-100 hover:shadow-3xl transition-shadow">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f] to-[#ff3366] flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
                 <TrendingUp size={24} className="text-white" />
               </div>
               <div>
@@ -544,60 +578,17 @@ export default function SuperAdminDashboard() {
             </div>
 
             <div className="bg-white rounded-xl p-4 shadow-inner">
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={barData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
-                  <defs>
-                    {barData.map((e, i) => (
-                      <linearGradient
-                        key={i}
-                        id={`barGrad${i}`}
-                        x1="0"
-                        x2="0"
-                        y1="0"
-                        y2="1"
-                      >
-                        <stop offset="0%" stopColor={e.color} stopOpacity={1} />
-                        <stop offset="100%" stopColor={e.color} stopOpacity={0.6} />
-                      </linearGradient>
-                    ))}
-                  </defs>
-
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                  <XAxis 
-                    dataKey="stage" 
-                    tick={{ fill: "#374151", fontWeight: 600, fontSize: 13 }}
-                    axisLine={{ stroke: "#d1d5db" }}
-                  />
-                  <YAxis 
-                    tick={{ fill: "#6b7280", fontSize: 12 }}
-                    axisLine={{ stroke: "#d1d5db" }}
-                  />
-
-                  <Tooltip
-                    contentStyle={{
-                      background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
-                      borderRadius: 12,
-                      border: "2px solid #e5e7eb",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      fontWeight: 600,
-                    }}
-                    cursor={{ fill: "rgba(255, 0, 79, 0.05)" }}
-                  />
-
-                  <Bar dataKey="value" radius={[16, 16, 0, 0]} maxBarSize={80}>
-                    {barData.map((e, i) => (
-                      <Cell key={i} fill={`url(#barGrad${i})`} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <SimpleBarChart 
+                data={barData.reduce((acc, item) => ({ ...acc, [item.stage]: item.value }), {})}
+                colors={barData.map(item => item.color)}
+              />
             </div>
           </div>
 
           {/* PIE CHART - ENHANCED */}
           <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl p-6 shadow-2xl border-2 border-gray-100 hover:shadow-3xl transition-shadow">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f] to-[#ff3366] flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
                 <Activity size={24} className="text-white" />
               </div>
               <div>
@@ -609,68 +600,10 @@ export default function SuperAdminDashboard() {
             </div>
 
             <div className="bg-white rounded-xl p-4 shadow-inner">
-              <ResponsiveContainer width="100%" height={320}>
-                <PieChart>
-                  <defs>
-                    {pieData.map((e, i) => (
-                      <linearGradient
-                        key={i}
-                        id={`pieGrad${i}`}
-                        x1="0"
-                        x2="1"
-                        y1="0"
-                        y2="1"
-                      >
-                        <stop offset="0%" stopColor={e.color} stopOpacity={1} />
-                        <stop offset="100%" stopColor={e.color} stopOpacity={0.7} />
-                      </linearGradient>
-                    ))}
-                  </defs>
-                  
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={75}
-                    outerRadius={115}
-                    paddingAngle={4}
-                    dataKey="value"
-                    label={({ name, value, percent }) => 
-                      value > 0 ? `${value} (${(percent * 100).toFixed(0)}%)` : ""
-                    }
-                    labelLine={{ stroke: "#9ca3af", strokeWidth: 2 }}
-                  >
-                    {pieData.map((e, i) => (
-                      <Cell
-                        key={i}
-                        fill={`url(#pieGrad${i})`}
-                        stroke="#fff"
-                        strokeWidth={3}
-                      />
-                    ))}
-                  </Pie>
-
-                  <Tooltip
-                    contentStyle={{
-                      background: "linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)",
-                      borderRadius: 12,
-                      border: "2px solid #e5e7eb",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      fontWeight: 600,
-                    }}
-                  />
-                  <Legend 
-                    verticalAlign="bottom" 
-                    height={36}
-                    iconType="circle"
-                    wrapperStyle={{ 
-                      paddingTop: "20px",
-                      fontWeight: 600,
-                      fontSize: "13px"
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+              <SimplePieChart 
+                data={pieData}
+                colors={pieData.map(item => item.color)}
+              />
             </div>
           </div>
         </div>
@@ -678,8 +611,8 @@ export default function SuperAdminDashboard() {
         {/* SUPERB ACTIVITY LOG */}
         <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-gray-100">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 flex items-center justify-center shadow-sm">
-              <Activity size={24} className="text-[#ff004f]" />
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/10 to-indigo-600/10 flex items-center justify-center shadow-sm">
+              <Activity size={24} className="text-blue-600" />
             </div>
             <h2 className="text-lg font-bold text-gray-900">
               Recent Activity

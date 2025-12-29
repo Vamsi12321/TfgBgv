@@ -204,7 +204,7 @@ export default function OrganizationsPage() {
       : `/logos/${url}`;
 
   return (
-    <div className="text-gray-900 bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8 overflow-x-hidden w-full max-w-full">
+    <div className="text-gray-900 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen p-4 sm:p-6 lg:p-8 overflow-x-hidden w-full max-w-full">
       {/* ----------------------------------------------------
            ENHANCED MODAL WITH ANIMATIONS
         ---------------------------------------------------- */}
@@ -257,7 +257,7 @@ export default function OrganizationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Building2 size={24} className="text-[#ff004f]" />
+            <Building2 size={24} className="text-blue-600" />
             Organizations
           </h1>
           <p className="text-gray-600 text-sm mt-1">
@@ -271,7 +271,7 @@ export default function OrganizationsPage() {
           className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg ${
             loading || actionLoading
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#ff004f] hover:bg-[#e60047]"
+              : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
           }`}
         >
           <PlusCircle size={18} />
@@ -284,8 +284,8 @@ export default function OrganizationsPage() {
       ---------------------------------------------------- */}
       <div className="bg-gradient-to-br from-white via-gray-50 to-white p-4 sm:p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-8">
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
-            <Search size={20} className="text-[#ff004f]" />
+          <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
+            <Search size={20} className="text-blue-600" />
           </div>
           <h3 className="text-base sm:text-lg font-bold text-gray-800">
             Search & Filter
@@ -304,7 +304,7 @@ export default function OrganizationsPage() {
               className="w-full px-4 py-3 
                  rounded-xl border-2 border-gray-200 
                  bg-white shadow-sm 
-                 focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f]
+                 focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                  text-gray-800 placeholder-gray-500 font-medium
                  transition-all text-sm sm:text-base"
             />
@@ -312,12 +312,12 @@ export default function OrganizationsPage() {
 
           <button
             onClick={() => setSortAsc(!sortAsc)}
-            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-xl border-2 border-gray-200 bg-white shadow-sm text-gray-700 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 hover:border-[#ff004f] transition-all font-medium whitespace-nowrap flex-shrink-0"
+            className="flex items-center justify-center gap-2 px-4 sm:px-5 py-3 rounded-xl border-2 border-gray-200 bg-white shadow-sm text-gray-700 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-indigo-600/10 hover:border-blue-500 transition-all font-medium whitespace-nowrap flex-shrink-0"
           >
             {sortAsc ? (
-              <SortAsc size={18} className="text-[#ff004f]" />
+              <SortAsc size={18} className="text-blue-600" />
             ) : (
-              <SortDesc size={18} className="text-[#ff004f]" />
+              <SortDesc size={18} className="text-blue-600" />
             )}
             <span className="text-sm font-semibold">
               {sortAsc ? "A → Z" : "Z → A"}
@@ -331,7 +331,7 @@ export default function OrganizationsPage() {
       ---------------------------------------------------- */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-16 text-gray-600">
-          <Loader2 className="animate-spin mb-3 text-[#ff004f]" size={32} />
+          <Loader2 className="animate-spin mb-3 text-blue-600" size={32} />
           <p className="font-semibold">Loading organizations...</p>
         </div>
       ) : (
@@ -424,7 +424,7 @@ export default function OrganizationsPage() {
                             onClick={() =>
                               setDrawer({ show: true, org, mode: "view" })
                             }
-                            className="text-gray-700 hover:text-[#ff004f] transition"
+                            className="text-gray-700 hover:text-blue-600 transition"
                           >
                             <Info size={18} />
                           </button>
@@ -437,7 +437,7 @@ export default function OrganizationsPage() {
                                 mode: "edit",
                               })
                             }
-                            className="text-[#ff004f] hover:text-[#d90044] transition"
+                            className="text-blue-600 hover:text-blue-700 transition"
                           >
                             <Edit2 size={18} />
                           </button>
@@ -467,7 +467,7 @@ export default function OrganizationsPage() {
               filteredOrgs.map((org) => (
                 <div
                   key={org._id}
-                  className="bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-2xl p-4 sm:p-5 border-2 border-gray-200 hover:border-[#ff004f] hover:shadow-xl transition-all"
+                  className="bg-gradient-to-br from-white to-gray-50 shadow-lg rounded-2xl p-4 sm:p-5 border-2 border-gray-200 hover:border-blue-500 hover:shadow-xl transition-all"
                 >
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
@@ -547,7 +547,7 @@ export default function OrganizationsPage() {
                       onClick={() =>
                         setDrawer({ show: true, org, mode: "edit" })
                       }
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white rounded-lg hover:shadow-lg transition-all font-medium"
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:shadow-lg transition-all font-medium"
                     >
                       <Edit2 size={16} />
                       <span className="text-sm">Edit</span>
@@ -838,7 +838,7 @@ function OrganizationDrawer({
         `}
       >
         {/* Enhanced Header */}
-        <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] flex-shrink-0">
+        <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-blue-500 to-indigo-600 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
               <Building2 size={20} className="text-white" />
@@ -916,7 +916,7 @@ function OrganizationDrawer({
                 className={`border rounded-lg p-2 w-full ${
                   errors[key]
                     ? "border-red-500 bg-red-50"
-                    : "focus:ring-2 focus:ring-[#ff004f]"
+                    : "focus:ring-2 focus:ring-blue-500"
                 } ${isView ? "bg-gray-100" : ""}`}
               />
 
@@ -969,7 +969,7 @@ function OrganizationDrawer({
                     type="checkbox"
                     checked
                     onChange={() => toggleService(s.serviceName)}
-                    className="accent-[#ff004f]"
+                    className="accent-blue-600"
                   />
                 )}
 
@@ -1026,7 +1026,7 @@ function OrganizationDrawer({
                             services: [...prev.services, ...newServices]
                           }));
                         }}
-                        className="px-3 py-1 text-xs bg-[#ff004f] text-white rounded-md hover:bg-[#e60047] transition-colors flex items-center gap-1"
+                        className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
                       >
                         <CheckCircle size={12} />
                         Select All
@@ -1039,7 +1039,7 @@ function OrganizationDrawer({
                     <input
                       type="checkbox"
                       onChange={() => toggleService(s)}
-                      className="accent-[#ff004f]"
+                      className="accent-blue-600"
                     />
                     <span className="capitalize">{s}</span>
                   </label>
@@ -1114,7 +1114,7 @@ function OrganizationDrawer({
                   className={`border rounded-lg p-2 w-full ${
                     errors.totalAllowed
                       ? "border-red-500 bg-red-50"
-                      : "focus:ring-2 focus:ring-[#ff004f]"
+                      : "focus:ring-2 focus:ring-blue-500"
                   } ${isView ? "bg-gray-100" : ""}`}
                   placeholder="Enter 1-20"
                 />
@@ -1154,7 +1154,7 @@ function OrganizationDrawer({
               <button
                 onClick={handleSave}
                 disabled={actionLoading}
-                className="flex-1 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-3 rounded-xl hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {actionLoading ? (
                   <span className="flex items-center justify-center gap-2">

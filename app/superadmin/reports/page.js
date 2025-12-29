@@ -134,7 +134,7 @@ async function createPage(contentElements, pdf, pdfWidth, pdfHeight, pageNumber,
   
   // Add watermark
   const watermark = document.createElement('img');
-  watermark.src = '/logos/maihooMain.png';
+  watermark.src = '/logos/tfgLogo.jpeg';
   watermark.alt = 'watermark';
   watermark.style.position = 'absolute';
   watermark.style.top = '300px';
@@ -200,7 +200,7 @@ function createReportHeader() {
   header.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
       <div style="flex-shrink: 0; margin-top: 5px;">
-        <img src="/logos/maihooMain.png" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" />
+        <img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" />
       </div>
       <div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;">
         <h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">Verification Report</h1>
@@ -208,8 +208,8 @@ function createReportHeader() {
       </div>
       <div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;">
         <p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p>
-        <p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p>
-        <p style="margin: 0;">🌐 maihootech.co.in</p>
+        <p style="margin: 0 0 5px 0;">✉ info@tfgai.in</p>
+        <p style="margin: 0;">🌐 tfgai.in</p>
       </div>
     </div>
   `;
@@ -334,12 +334,12 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
 
     indexDiv.innerHTML = 
       '<div style="width: 860px; min-height: 1120px; padding: 40px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; color: #000; position: relative; overflow: hidden;">' +
-      '<img src="/logos/maihooMain.png" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; pointer-events: none; z-index: 1;" />' +
+      '<img src="/logos/tfgLogo.jpeg" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; pointer-events: none; z-index: 1;" />' +
       '<div style="position: relative; z-index: 2;">' +
       '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
-      '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/maihooMain.png" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
+      '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
       '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Summary</p></div>' +
-      '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p><p style="margin: 0;">🌐 maihootech.co.in</p></div>' +
+      '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@tfgai.in</p><p style="margin: 0;">🌐 tfgai.in</p></div>' +
       '</div>' +
       '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
       '<table style="width: 100%; border-collapse: collapse;">' +
@@ -362,7 +362,7 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
       '<p style="margin: 5px 0;">Total Verifications: ' + allChecks.length + '</p>' +
       '<p style="margin: 5px 0;">Completed: ' + allChecks.filter((c) => c.status === "COMPLETED").length + '</p>' +
       '</div><div style="margin-top: 120px; padding-top: 15px; border-top: 2px solid #272626ff; font-size: 12px; color: #dc3545; text-align: center; font-weight: 600; line-height: 1.4;">' +
-      '<p style="margin: 0;">Maihoo Technologies Private Limited, Vaishnavi\'s Cynosure, 2-48/5/6, 8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032</p>' +
+      '<p style="margin: 0;">TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
       '</div></div></div></div>';
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -516,9 +516,9 @@ export default function SuperAdminReportsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-[#ff004f]/10 to-[#ff004f]/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-[#ff004f]/8 to-[#ff004f]/3 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-[#ff004f]/5 to-[#ff004f]/2 rounded-full blur-3xl animate-pulse delay-500"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-500/10 to-blue-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-500/8 to-blue-500/3 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-blue-500/5 to-blue-500/2 rounded-full blur-3xl animate-pulse delay-500"></div>
       </div>
 
       <div className="relative z-10 p-6">
@@ -546,7 +546,7 @@ export default function SuperAdminReportsPage() {
                 className={`ml-4 p-3 rounded-xl transition-all duration-300 ${
                   loading || !selectedOrg
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-[#ff004f] to-red-500 text-white hover:from-[#e60047] hover:to-red-600 shadow-lg hover:shadow-xl hover:scale-105"
+                    : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:shadow-xl hover:scale-105"
                 }`}
                 title="Refresh Reports & Verifications"
               >
@@ -611,7 +611,7 @@ export default function SuperAdminReportsPage() {
 
             <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-[#ff004f] to-red-500 rounded-lg">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
                   <XCircle size={20} className="text-white" />
                 </div>
                 <div>
@@ -635,14 +635,14 @@ export default function SuperAdminReportsPage() {
 
         {/* AI VALIDATION NOTICE - Enhanced */}
         <div className="relative mb-8 group">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#ff004f] via-red-400 to-red-500 rounded-3xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-blue-400 to-indigo-500 rounded-3xl blur-lg opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
           <div className="relative bg-white/80 backdrop-blur-sm border border-white/50 rounded-3xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300">
             <div className="flex items-start gap-4">
-              <div className="p-3 bg-gradient-to-br from-[#ff004f] to-red-500 rounded-2xl shadow-lg flex-shrink-0 animate-pulse">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg flex-shrink-0 animate-pulse">
                 <Brain size={24} className="text-white" />
               </div>
               <div className="flex-1">
-                <h3 className="text-xl font-bold bg-gradient-to-r from-[#ff004f] to-red-600 bg-clip-text text-transparent mb-2">
+                <h3 className="text-xl font-bold bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent mb-2">
                   🤖 AI-Powered Validation Reports
                 </h3>
                 <p className="text-slate-700 mb-4 leading-relaxed">
@@ -1420,7 +1420,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
     >
       {/* ================= WATERMARK ================= */}
       <img
-        src="/logos/maihooMain.png"
+        src="/logos/tfgLogo.jpeg"
         alt="watermark"
         style={{
           position: "absolute",
@@ -1453,7 +1453,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
           {/* Left logo */}
           <div style={{ flexShrink: 0, marginTop: "5px" }}>
             <img
-              src="/logos/maihooMain.png"
+              src="/logos/tfgLogo.jpeg"
               alt="logo"
               style={{
                 maxHeight: "180px",
@@ -1809,7 +1809,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             lineHeight: "1.4",
           }}
         >
-          Maihoo Technologies Private Limited, Vaishnavi's Cynosure, 2-48/5/6, 8th Floor, Opp RTCC, Telecom Nagar Extension, Gachibowli-500032
+          TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081
         </p>
       </div>
     </div>

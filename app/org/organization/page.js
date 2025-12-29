@@ -169,7 +169,7 @@ export default function OrganizationProfilePage() {
   if (loading)
     return (
       <div className="flex flex-col items-center justify-center min-h-screen text-gray-700">
-        <Loader2 className="animate-spin text-[#ff004f] mb-3" size={36} />
+        <Loader2 className="animate-spin text-blue-600 mb-3" size={36} />
         <p className="font-semibold">Fetching organization details...</p>
       </div>
     );
@@ -202,7 +202,7 @@ export default function OrganizationProfilePage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="bg-[#ff004f] text-white px-5 py-2 rounded-lg hover:bg-[#e60047] font-medium flex items-center gap-2 disabled:opacity-50"
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 font-medium flex items-center gap-2 disabled:opacity-50"
               >
                 {saving ? (
                   <>
@@ -225,7 +225,7 @@ export default function OrganizationProfilePage() {
           ) : (
             <button
               onClick={() => setEditMode(true)}
-              className="bg-[#ff004f] text-white px-5 py-2 rounded-lg hover:bg-[#e60047] font-medium flex items-center gap-2"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 font-medium flex items-center gap-2"
             >
               <Edit2 size={18} /> Edit
             </button>
@@ -247,7 +247,7 @@ export default function OrganizationProfilePage() {
 
           {editMode && (
             <>
-              <label className="mt-4 cursor-pointer flex items-center gap-2 text-[#ff004f] font-medium hover:underline">
+              <label className="mt-4 cursor-pointer flex items-center gap-2 text-blue-600 font-medium hover:underline">
                 <UploadCloud size={18} />
                 Upload Logo
                 <input
@@ -334,7 +334,7 @@ export default function OrganizationProfilePage() {
         {/* SERVICES */}
         {/* SERVICES */}
         <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold text-[#ff004f] mb-3">
+          <h3 className="text-lg font-semibold text-blue-600 mb-3">
             Services Offered
           </h3>
 
@@ -364,7 +364,7 @@ export default function OrganizationProfilePage() {
 
         {/* CREDENTIALS */}
         <div className="border-t pt-4">
-          <h3 className="text-lg font-semibold text-[#ff004f] mb-3">
+          <h3 className="text-lg font-semibold text-blue-600 mb-3">
             Organization Credentials
           </h3>
 
@@ -428,7 +428,7 @@ function InputField({ label, value, editable, onChange, icon, error }) {
           disabled={!editable}
           className={`border rounded-md w-full p-2 text-gray-800 ${
             editable
-              ? "focus:ring-2 focus:ring-[#ff004f]"
+              ? "focus:ring-2 focus:ring-blue-500"
               : "bg-gray-100 cursor-not-allowed"
           }`}
         />
@@ -466,7 +466,7 @@ function Modal({ type, message, onClose }) {
         <div className="flex justify-center">
           <button
             onClick={onClose}
-            className="bg-[#ff004f] text-white px-6 py-2 rounded-md hover:bg-[#e60047] font-medium"
+            className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-6 py-2 rounded-md hover:from-blue-600 hover:to-indigo-700 font-medium"
           >
             Close
           </button>

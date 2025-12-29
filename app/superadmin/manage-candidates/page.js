@@ -742,13 +742,13 @@ export default function ManageCandidatesPage() {
   /* UI START */
   /* -------------------------------------------- */
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 text-gray-900 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-6 h-6 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               Manage Candidates
@@ -773,7 +773,7 @@ export default function ManageCandidatesPage() {
             disabled={!selectedOrg}
             className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg ${
       selectedOrg
-        ? "bg-[#ff004f] hover:bg-[#e60047]"
+        ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
         : "bg-gray-400 cursor-not-allowed"
     }`}
           >
@@ -785,8 +785,8 @@ export default function ManageCandidatesPage() {
         {/* SUPERB ORGANIZATION SELECT */}
         <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 mb-6">
           <div className="flex items-center gap-2 mb-3">
-            <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
-              <svg className="w-5 h-5 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
@@ -799,7 +799,7 @@ export default function ManageCandidatesPage() {
           <div className="relative">
             <div
               onClick={() => setShowOrgDropdown(!showOrgDropdown)}
-              className="w-full border-2 border-gray-200 rounded-xl p-4 bg-white cursor-pointer flex justify-between items-center shadow-sm hover:border-[#ff004f]/50 transition-all"
+              className="w-full border-2 border-gray-200 rounded-xl p-4 bg-white cursor-pointer flex justify-between items-center shadow-sm hover:border-blue-500/50 transition-all"
             >
               <span className="text-gray-800 font-medium">
                 {selectedOrg
@@ -811,13 +811,13 @@ export default function ManageCandidatesPage() {
             </div>
 
             {showOrgDropdown && (
-              <div className="absolute left-0 right-0 bg-white border-2 border-[#ff004f]/20 rounded-xl shadow-2xl mt-2 z-30 max-h-80 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+              <div className="absolute left-0 right-0 bg-white border-2 border-blue-500/20 rounded-xl shadow-2xl mt-2 z-30 max-h-80 overflow-hidden animate-in slide-in-from-top-2 duration-200">
                 {/* Search box */}
-                <div className="p-3 border-b-2 border-gray-100 bg-gradient-to-r from-[#ff004f]/5 to-[#ff3366]/5 sticky top-0">
+                <div className="p-3 border-b-2 border-gray-100 bg-gradient-to-r from-blue-500/5 to-indigo-600/5 sticky top-0">
                   <input
                     type="text"
                     placeholder="🔍 Search organization..."
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all"
+                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                     value={orgSearch}
                     onChange={(e) => setOrgSearch(e.target.value)}
                   />
@@ -839,7 +839,7 @@ export default function ManageCandidatesPage() {
                           setShowOrgDropdown(false);
                           setOrgSearch("");
                         }}
-                        className="px-4 py-3 cursor-pointer hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 text-sm font-medium transition-all border-b border-gray-50 last:border-0"
+                        className="px-4 py-3 cursor-pointer hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-indigo-600/10 text-sm font-medium transition-all border-b border-gray-50 last:border-0"
                       >
                         🏢 {o.organizationName}
                       </div>
@@ -868,7 +868,7 @@ export default function ManageCandidatesPage() {
               placeholder="🔍 Search by name, email, phone, Aadhaar, or PAN..."
               value={candidateSearch}
               onChange={(e) => setCandidateSearch(e.target.value)}
-              className="w-full border-2 border-gray-200 rounded-xl p-4 bg-white text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all shadow-sm"
+              className="w-full border-2 border-gray-200 rounded-xl p-4 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
             />
           </div>
         )}
@@ -877,7 +877,7 @@ export default function ManageCandidatesPage() {
         <div className="bg-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 text-gray-900">
           {loading ? (
             <div className="text-center py-16">
-              <Loader2 className="animate-spin mx-auto text-[#ff004f] mb-4" size={40} />
+              <Loader2 className="animate-spin mx-auto text-blue-600 mb-4" size={40} />
               <p className="text-gray-600 font-medium">Loading candidates...</p>
             </div>
           ) : candidates.length === 0 ? (
@@ -922,7 +922,7 @@ export default function ManageCandidatesPage() {
                           idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                         }`}
                       >
-                        <td className="p-4 font-semibold text-gray-800 group-hover:text-[#ff004f] transition-colors">
+                        <td className="p-4 font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
                           {c.firstName} {c.lastName}
                         </td>
                         <td className="p-4 text-gray-600">{c.phone}</td>
@@ -979,7 +979,7 @@ export default function ManageCandidatesPage() {
                     className="border-2 border-gray-100 rounded-2xl p-5 shadow-lg bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all transform hover:scale-[1.02]"
                   >
                     <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-gray-100">
-                      <div className="p-3 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-xl shadow-md">
+                      <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md">
                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
@@ -1252,7 +1252,7 @@ function Modal({ title, children, onClose }) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg text-gray-900 overflow-hidden"
       >
         {/* Enhanced Header with Gradient */}
-        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] px-6 py-4 relative sticky top-0 z-10">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 relative sticky top-0 z-10">
           <button 
             onClick={onClose} 
             className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-lg p-1 transition-all"
@@ -1625,7 +1625,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, onValidat
       )}
 
       {/* FULL NAME */}
-      <h3 className="font-semibold text-lg mb-3 text-[#ff004f]">
+      <h3 className="font-semibold text-lg mb-3 text-blue-600">
         Personal Details
       </h3>
 
@@ -2565,7 +2565,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, onValidat
           className={`w-full py-3.5 rounded-xl text-white font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
             saving
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:shadow-2xl hover:shadow-[#ff004f]/30"
+              : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:shadow-2xl hover:shadow-blue-500/30"
           }`}
         >
           {saving ? (

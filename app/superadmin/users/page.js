@@ -104,7 +104,7 @@ function ConfirmModal({ confirm, onYes, onNo }) {
   return (
     <div className="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center px-4 text-black">
       <div className="bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
-        <h2 className="text-lg font-semibold mb-3 text-[#ff004f]">
+        <h2 className="text-lg font-semibold mb-3 text-blue-600">
           Confirm Action
         </h2>
 
@@ -125,7 +125,7 @@ function ConfirmModal({ confirm, onYes, onNo }) {
               </button>
               <button
                 onClick={handleYes}
-                className="px-4 py-2 rounded-lg bg-[#ff004f] text-white hover:bg-[#e60047]"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700"
               >
                 Yes, Confirm
               </button>
@@ -133,7 +133,7 @@ function ConfirmModal({ confirm, onYes, onNo }) {
           </>
         ) : (
           <div className="flex flex-col items-center py-6">
-            <Loader2 className="animate-spin text-[#ff004f] mb-3" size={32} />
+            <Loader2 className="animate-spin text-blue-600 mb-3" size={32} />
             <p className="text-sm font-medium text-gray-700">
               Saving… Please wait
             </p>
@@ -392,7 +392,7 @@ export default function UsersPage() {
   }, [showModal]);
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4 sm:p-6 lg:p-8 text-black overflow-x-hidden">
+    <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen p-4 sm:p-6 lg:p-8 text-black overflow-x-hidden">
       {/* SUCCESS & ERROR MODALS */}
       <MessageModal modal={modal} onClose={closeModal} />
 
@@ -403,7 +403,7 @@ export default function UsersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <User size={24} className="text-[#ff004f]" />
+            <User size={24} className="text-blue-600" />
             Users & Roles
           </h1>
           <p className="text-gray-600 text-sm mt-1">Manage user accounts and permissions</p>
@@ -414,7 +414,7 @@ export default function UsersPage() {
             setEditUser(null);
             setShowModal(true);
           }}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047]"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
         >
           <PlusCircle size={18} />
           <span>Add User</span>
@@ -424,8 +424,8 @@ export default function UsersPage() {
       {/* -------- SUPERB ENHANCED FILTERS -------- */}
       <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border border-gray-200 mb-8">
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
-            <svg className="w-5 h-5 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
           </div>
@@ -445,21 +445,21 @@ export default function UsersPage() {
               value={searchUsername}
               onChange={(e) => setSearchUsername(e.target.value)}
               className="border-2 border-gray-200 px-4 py-3 rounded-xl bg-white text-sm w-full shadow-sm 
-    focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all hover:border-[#ff004f]/50"
+    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-blue-500/50"
             />
           </div>
 
           {/* 🔥 Improved Role Dropdown */}
           <div>
             <label className="text-sm font-semibold text-gray-700 mb-2 block flex items-center gap-2">
-              <span className="w-2 h-2 bg-[#ff004f] rounded-full"></span>
+              <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
               Filter by Role
             </label>
             <select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
               className="border-2 border-gray-200 px-4 py-3 rounded-xl bg-white text-sm w-full shadow-sm 
-    focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all hover:border-[#ff004f]/50"
+    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-blue-500/50"
             >
               <option value="All">🌐 All Roles</option>
               <option value="HELPER">👤 Organization Helper</option>
@@ -481,7 +481,7 @@ export default function UsersPage() {
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="border-2 border-gray-200 px-4 py-3 rounded-xl bg-white text-sm w-full shadow-sm 
-    focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all hover:border-[#ff004f]/50"
+    focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all hover:border-blue-500/50"
             >
               <option value="All">🌐 All Status</option>
               <option value="Active">✅ Active</option>
@@ -498,7 +498,7 @@ export default function UsersPage() {
 
             <div
               className="border-2 border-gray-200 px-4 py-3 rounded-xl bg-white shadow-sm cursor-pointer
-          flex justify-between items-center hover:border-[#ff004f]/50 transition-all"
+          flex justify-between items-center hover:border-blue-500/50 transition-all"
               onClick={() => setShowOrgFilterMenu(!showOrgFilterMenu)}
             >
               <span className="text-sm font-medium text-gray-700 truncate">
@@ -511,16 +511,16 @@ export default function UsersPage() {
             {/* Dropdown */}
             {showOrgFilterMenu && (
               <div
-                className="absolute left-0 right-0 bg-white border-2 border-[#ff004f]/20 rounded-xl shadow-2xl 
+                className="absolute left-0 right-0 bg-white border-2 border-blue-500/20 rounded-xl shadow-2xl 
           mt-2 z-30 max-h-80 overflow-hidden animate-in slide-in-from-top-2 duration-200"
               >
                 {/* Search Box */}
-                <div className="p-3 sticky top-0 bg-gradient-to-r from-[#ff004f]/5 to-[#ff3366]/5 border-b-2 border-gray-100">
+                <div className="p-3 sticky top-0 bg-gradient-to-r from-blue-500/5 to-blue-600/5 border-b-2 border-gray-100">
                   <input
                     type="text"
                     placeholder="🔍 Search organization..."
                     className="w-full border-2 border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:ring-2 
-                focus:ring-[#ff004f] focus:border-[#ff004f] transition-all"
+                focus:ring-blue-500 focus:border-blue-500 transition-all"
                     value={orgSearchFilter}
                     onChange={(e) => setOrgSearchFilter(e.target.value)}
                   />
@@ -529,7 +529,7 @@ export default function UsersPage() {
                 <div className="max-h-64 overflow-y-auto">
                   {/* All */}
                   <div
-                    className="px-4 py-3 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 cursor-pointer text-sm font-medium transition-all border-b border-gray-100"
+                    className="px-4 py-3 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-blue-600/10 cursor-pointer text-sm font-medium transition-all border-b border-gray-100"
                     onClick={() => {
                       setFilterOrgId("All");
                       setShowOrgFilterMenu(false);
@@ -549,7 +549,7 @@ export default function UsersPage() {
                     .map((org) => (
                       <div
                         key={org.organizationId}
-                        className="px-4 py-3 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 cursor-pointer text-sm transition-all border-b border-gray-50 last:border-0"
+                        className="px-4 py-3 hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-blue-600/10 cursor-pointer text-sm transition-all border-b border-gray-50 last:border-0"
                         onClick={() => {
                           setFilterOrgId(org.organizationId);
                           setShowOrgFilterMenu(false);
@@ -568,7 +568,7 @@ export default function UsersPage() {
 
       {/* ------------------ LOADING ------------------ */}
       {loading && users.length === 0 ? (
-        <div className="flex justify-center items-center h-64 text-[#ff004f]">
+        <div className="flex justify-center items-center h-64 text-blue-600">
           <Loader2 className="animate-spin" size={28} /> Loading...
         </div>
       ) : (
@@ -599,12 +599,12 @@ export default function UsersPage() {
       currentUserRole !== "SUPER_ADMIN" &&
       currentUserRole !== "SUPER_SPOC"
         ? "bg-gray-50/50 cursor-not-allowed hover:bg-gray-100/50"
-        : "hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] cursor-pointer hover:shadow-md"
+        : "hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-indigo-50/80 cursor-pointer hover:shadow-md"
     }
     ${idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"}
   `}
                     >
-                      <td className="p-4 font-semibold text-gray-800 group-hover:text-[#ff004f] transition-colors">
+                      <td className="p-4 font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
                         {u.userName}
                       </td>
                       <td className="p-4 text-gray-600">{u.email}</td>
@@ -675,7 +675,7 @@ export default function UsersPage() {
                                   setEditUser(u);
                                   setShowModal(true);
                                 }}
-                                className="p-2.5 rounded-lg hover:bg-gradient-to-r hover:from-[#ff004f] hover:to-[#ff3366] text-[#ff004f] hover:text-white transition-all transform hover:scale-110 shadow-sm hover:shadow-lg"
+                                className="p-2.5 rounded-lg hover:bg-gradient-to-r hover:from-blue-500 hover:to-indigo-600 text-blue-600 hover:text-white transition-all transform hover:scale-110 shadow-sm hover:shadow-lg"
                                 title="Edit User"
                               >
                                 <Edit size={18} />
@@ -722,7 +722,7 @@ export default function UsersPage() {
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="bg-gradient-to-br from-[#ff004f] to-[#ff3366] p-3 rounded-xl shadow-md">
+                      <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl shadow-md">
                         <User className="text-white" size={22} />
                       </div>
 
@@ -740,7 +740,7 @@ export default function UsersPage() {
                           setEditUser(u);
                           setShowModal(true);
                         }}
-                        className="p-2.5 text-white bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:from-[#e60047] hover:to-[#e6005f] rounded-lg transition-all transform hover:scale-110 shadow-md"
+                        className="p-2.5 text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-lg transition-all transform hover:scale-110 shadow-md"
                       >
                         <Edit size={18} />
                       </button>
@@ -1023,7 +1023,7 @@ function AddEditUserModal({
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4 overflow-hidden animate-in fade-in duration-200">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl relative overflow-hidden text-black animate-in slide-in-from-bottom-4 duration-300">
         {/* Enhanced Header with Gradient */}
-        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] px-6 py-4 relative">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 relative">
           <button
             onClick={() => {
               if (hasChanges) setConfirmClose(true);
@@ -1083,7 +1083,7 @@ function AddEditUserModal({
                 className={`border p-3 rounded-lg text-sm w-full focus:ring-2 ${
                   errors.userName
                     ? "border-red-500 focus:ring-red-500"
-                    : "focus:ring-[#ff004f]"
+                    : "focus:ring-blue-500"
                 }`}
               />
               {errors.userName && (
@@ -1105,7 +1105,7 @@ function AddEditUserModal({
                 className={`border p-3 rounded-lg text-sm w-full focus:ring-2 ${
                   errors.email
                     ? "border-red-500 focus:ring-red-500"
-                    : "focus:ring-[#ff004f]"
+                    : "focus:ring-blue-500"
                 }`}
               />
               {errors.email && (
@@ -1132,7 +1132,7 @@ function AddEditUserModal({
                 className={`border p-3 rounded-lg text-sm w-full focus:ring-2 ${
                   errors.phoneNumber
                     ? "border-red-500 focus:ring-red-500"
-                    : "focus:ring-[#ff004f]"
+                    : "focus:ring-blue-500"
                 }`}
               />
               {errors.phoneNumber && (
@@ -1162,7 +1162,7 @@ function AddEditUserModal({
                   permissions: rolePermissionPresets[newRole] || [],
                 });
               }}
-              className="border px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-[#ff004f]"
+              className="border px-3 py-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
             >
               <option value="HELPER">Organization Helper</option>
               <option value="ORG_HR">Organization HR</option>
@@ -1237,7 +1237,7 @@ function AddEditUserModal({
                       <input
                         type="text"
                         placeholder="Search organization..."
-                        className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#ff004f]"
+                        className="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
                         value={orgSearchModal}
                         onChange={(e) => setOrgSearchModal(e.target.value)}
                       />
@@ -1302,7 +1302,7 @@ function AddEditUserModal({
                       checked={form.accessibleOrganizations.includes(
                         org.organizationId
                       )}
-                      className="accent-[#ff004f]"
+                      className="accent-blue-500"
                       onChange={() => {
                         const exists = form.accessibleOrganizations.includes(
                           org.organizationId
@@ -1347,7 +1347,7 @@ function AddEditUserModal({
                     type="checkbox"
                     disabled={isHelper || isLockedRole}
                     checked={form.permissions.includes(perm.key)}
-                    className="accent-[#ff004f]"
+                    className="accent-blue-500"
                     onChange={() => togglePermission(perm.key)}
                   />
                   {perm.label}
@@ -1382,7 +1382,7 @@ function AddEditUserModal({
                 ${
                   saving
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:shadow-2xl hover:shadow-[#ff004f]/30"
+                    : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:shadow-2xl hover:shadow-blue-500/30"
                 }
                 ${isLockedRole ? "cursor-not-allowed opacity-50" : ""}
               `}
@@ -1406,7 +1406,7 @@ function AddEditUserModal({
       {confirmClose && (
         <div className="fixed inset-0 bg-black/40 z-[999] flex items-center justify-center px-4">
           <div className="bg-white p-6 rounded-xl w-full max-w-sm shadow-lg text-center">
-            <h2 className="text-lg font-semibold text-[#ff004f] mb-3">
+            <h2 className="text-lg font-semibold text-blue-600 mb-3">
               Unsaved Changes
             </h2>
             <p className="text-sm mb-4">
@@ -1427,7 +1427,7 @@ function AddEditUserModal({
                   setConfirmClose(false);
                   onClose();
                 }}
-                className="px-4 py-2 rounded-lg bg-[#ff004f] text-white hover:bg-[#e60047]"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700"
               >
                 Yes, Close Anyway
               </button>

@@ -862,7 +862,7 @@ export default function ManageCandidatesPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <svg className="w-6 h-6 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               Manage Candidates
@@ -875,7 +875,7 @@ export default function ManageCandidatesPage() {
               setNewCandidate(createEmptyCandidate());
               setShowAddModal(true);
             }}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047]"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
           >
             <PlusCircle size={18} />
             Add Candidate
@@ -899,7 +899,7 @@ export default function ManageCandidatesPage() {
             placeholder="🔍 Search by name, email, phone, Aadhaar, or PAN..."
             value={candidateSearch}
             onChange={(e) => setCandidateSearch(e.target.value)}
-            className="w-full border-2 border-gray-200 rounded-xl p-4 bg-white text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all shadow-sm"
+            className="w-full border-2 border-gray-200 rounded-xl p-4 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm"
           />
         </div>
 
@@ -907,7 +907,7 @@ export default function ManageCandidatesPage() {
         <div className="bg-white p-6 rounded-2xl shadow-xl border-2 border-gray-100 text-gray-900">
           {loading ? (
             <div className="text-center py-16">
-              <Loader2 className="animate-spin mx-auto text-[#ff004f] mb-4" size={40} />
+              <Loader2 className="animate-spin mx-auto text-blue-600 mb-4" size={40} />
               <p className="text-gray-600 font-medium">Loading candidates...</p>
             </div>
           ) : candidates.length === 0 ? (
@@ -952,7 +952,7 @@ export default function ManageCandidatesPage() {
                           idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                         }`}
                       >
-                        <td className="p-4 font-semibold text-gray-800 group-hover:text-[#ff004f] transition-colors">
+                        <td className="p-4 font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
                           {c.firstName} {c.lastName}
                         </td>
                         <td className="p-4 text-gray-600">{c.phone}</td>
@@ -1009,7 +1009,7 @@ export default function ManageCandidatesPage() {
                     className="border-2 border-gray-100 rounded-2xl p-5 shadow-lg bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all transform hover:scale-[1.02]"
                   >
                     <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-gray-100">
-                      <div className="p-3 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-xl shadow-md">
+                      <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md">
                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
@@ -1336,7 +1336,7 @@ function Modal({ title, children, onClose }) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg text-gray-900 overflow-hidden"
       >
         {/* Enhanced Header with Gradient */}
-        <div className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] px-6 py-4 relative sticky top-0 z-10">
+        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-4 relative sticky top-0 z-10">
           <button 
             onClick={onClose} 
             className="absolute top-4 right-4 text-white hover:bg-white/20 rounded-lg p-1 transition-all"
@@ -1709,7 +1709,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, onValidat
       )}
 
       {/* FULL NAME */}
-      <h3 className="font-semibold text-lg mb-3 text-[#ff004f]">
+      <h3 className="font-semibold text-lg mb-3 text-blue-600">
         Personal Details
       </h3>
 
@@ -2861,7 +2861,7 @@ function CandidateForm({ data, onChange, onSubmit, saving, submitText, onValidat
           className={`w-full py-3.5 rounded-xl text-white font-bold shadow-lg transition-all transform hover:scale-105 flex items-center justify-center gap-2 ${
             saving
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-gradient-to-r from-[#ff004f] to-[#ff3366] hover:shadow-2xl hover:shadow-[#ff004f]/30"
+              : "bg-gradient-to-r from-blue-500 to-indigo-600 hover:shadow-2xl hover:shadow-blue-500/30"
           }`}
         >
           {saving ? (

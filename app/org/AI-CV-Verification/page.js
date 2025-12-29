@@ -122,7 +122,7 @@ function CertificateBase({ id, candidate, orgName, ai, analysis }) {
     >
       {/* ================= WATERMARK ================= */}
       <img
-        src="/logos/maihooMain.png"
+        src="/logos/tfgLogo.jpeg"
         alt="watermark"
         style={{
           position: "absolute",
@@ -151,7 +151,7 @@ function CertificateBase({ id, candidate, orgName, ai, analysis }) {
         >
           <div style={{ flexShrink: 0, marginTop: "5px" }}>
             <img
-              src="/logos/maihooMain.png"
+              src="/logos/tfgLogo.jpeg"
               alt="logo"
               style={{
                 maxHeight: "180px",

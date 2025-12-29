@@ -85,20 +85,20 @@ export default function OrgAdminLayout({ children }) {
   /* ---------- BADGE STYLING (CONSISTENT & COMPACT) ---------- */
   const AIBadgeInactive = () => (
     <span
-      className="ml-auto px-2 py-1 text-[10px] font-bold rounded-full 
-      bg-pink-50 text-[#ff004f] border border-pink-200 inline-flex items-center gap-1 whitespace-nowrap flex-shrink-0"
+      className="ml-auto px-3 py-1.5 text-xs font-bold rounded-full 
+      bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 border border-blue-200 inline-flex items-center gap-1.5 whitespace-nowrap flex-shrink-0 shadow-sm"
     >
-      <Sparkles size={11} className="text-[#ff004f]" />
+      <Sparkles size={12} className="text-blue-600" />
       AI
     </span>
   );
 
   const AIBadgeActive = () => (
     <span
-      className="ml-auto px-2 py-1 text-[10px] font-bold rounded-full 
-      bg-white text-[#ff004f] inline-flex items-center gap-1 shadow-sm whitespace-nowrap flex-shrink-0"
+      className="ml-auto px-3 py-1.5 text-xs font-bold rounded-full 
+      bg-gradient-to-r from-blue-500 to-indigo-600 text-white inline-flex items-center gap-1.5 shadow-lg whitespace-nowrap flex-shrink-0"
     >
-      <Sparkles size={11} className="text-[#ff004f]" />
+      <Sparkles size={12} className="text-white animate-pulse" />
       AI
     </span>
   );
@@ -221,8 +221,8 @@ export default function OrgAdminLayout({ children }) {
                     className={`flex items-center gap-3 px-4 py-2.5 mb-0.5 rounded-xl transition-all whitespace-nowrap text-sm group
                       ${
                         isActive
-                          ? "bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white font-bold shadow-lg scale-[1.02]"
-                          : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-50 hover:text-[#ff004f] font-semibold hover:scale-[1.01]"
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-bold shadow-xl scale-[1.02] border-l-4 border-blue-300"
+                          : "text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:text-blue-700 font-semibold hover:scale-[1.01] hover:shadow-md"
                       }`}
                   >
                     {Icon && <Icon size={20} className="flex-shrink-0" />}
@@ -267,15 +267,15 @@ export default function OrgAdminLayout({ children }) {
           >
             <div className="flex items-center gap-4">
               <button
-                className="md:hidden text-gray-700 hover:text-[#ff004f] transition-colors p-2 hover:bg-gray-100 rounded-lg"
+                className="md:hidden text-gray-700 hover:text-blue-600 transition-colors p-2 hover:bg-blue-50 rounded-lg"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
               >
                 {isSidebarOpen ? <X size={26} /> : <Menu size={26} />}
               </button>
 
               <div className="flex items-center gap-4">
-                <div className="hidden sm:flex items-center justify-center w-10 h-10 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-xl shadow-lg">
-                  <Building size={20} className="text-white" strokeWidth={2} />
+                <div className="hidden sm:flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-xl">
+                  <Building size={24} className="text-white" strokeWidth={2} />
                 </div>
                 <div>
                   <h1 className="text-base sm:text-lg font-bold text-gray-800 leading-tight">
@@ -284,7 +284,7 @@ export default function OrgAdminLayout({ children }) {
                     </span>
                     <br className="sm:hidden" />
                     Welcome back,{" "}
-                    <span className="bg-gradient-to-r from-[#ff004f] to-[#ff3366] bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-bold">
                       {displayName.split(" ")[0]}
                     </span>
                     ! 👋
@@ -302,7 +302,7 @@ export default function OrgAdminLayout({ children }) {
                 onClick={() => setProfileMenuOpen((prev) => !prev)}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-gray-100 transition-all"
               >
-                <div className="w-9 h-9 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-full flex items-center justify-center shadow-md">
+                <div className="w-9 h-9 bg-gradient-to-br from-[#0066cc] to-[#0080ff] rounded-full flex items-center justify-center shadow-md">
                   <UserCircle2 size={20} className="text-white" />
                 </div>
                 <span className="hidden sm:block text-sm font-semibold text-gray-700">
@@ -317,7 +317,7 @@ export default function OrgAdminLayout({ children }) {
                     <p className="text-gray-500 text-xs mt-0.5">
                       {user?.email}
                     </p>
-                    <span className="inline-block mt-2 px-2 py-1 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white text-xs font-bold rounded-full">
+                    <span className="inline-block mt-2 px-2 py-1 bg-gradient-to-r from-[#0066cc] to-[#0080ff] text-white text-xs font-bold rounded-full">
                       {user?.role || "Admin"}
                     </span>
                   </div>
@@ -327,7 +327,7 @@ export default function OrgAdminLayout({ children }) {
                       window.location.href = "/org/manage-profile";
                       setProfileMenuOpen(false);
                     }}
-                    className="block w-full text-left px-4 py-2.5 hover:bg-gradient-to-r hover:from-[#ff004f]/10 hover:to-[#ff3366]/10 text-gray-700 hover:text-[#ff004f] transition-all font-medium"
+                    className="block w-full text-left px-4 py-2.5 hover:bg-gradient-to-r hover:from-[#0066cc]/10 hover:to-[#0080ff]/10 text-gray-700 hover:text-[#0066cc] transition-all font-medium"
                   >
                     ⚙️ Manage Profile
                   </button>
@@ -338,8 +338,8 @@ export default function OrgAdminLayout({ children }) {
 
           {/* Logout Loading Screen */}
           {loggingOut && (
-            <div className="fixed inset-0 bg-gradient-to-br from-pink-50 via-white to-gray-100 backdrop-blur-sm flex flex-col items-center justify-center z-[9999]">
-              <div className="animate-spin h-16 w-16 rounded-full border-4 border-[#ff004f] border-t-transparent mb-6"></div>
+            <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-white to-gray-100 backdrop-blur-sm flex flex-col items-center justify-center z-[9999]">
+              <div className="animate-spin h-16 w-16 rounded-full border-4 border-[#0066cc] border-t-transparent mb-6"></div>
               <h3 className="text-xl font-semibold text-gray-700 animate-pulse">
                 Logging out…
               </h3>

@@ -422,7 +422,7 @@ export default function OrgLogsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <FileBarChart size={24} className="text-[#ff004f]" />
+              <FileBarChart size={24} className="text-blue-600" />
               Activity Logs
             </h1>
             <p className="text-gray-600 text-sm mt-1">Track system activities and user actions</p>
@@ -430,7 +430,7 @@ export default function OrgLogsPage() {
 
           <button
             onClick={downloadVisibleCSV}
-            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047]"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
           >
             <Download size={18} />
             Download
@@ -440,8 +440,8 @@ export default function OrgLogsPage() {
         {/* SUPERB FILTER PANEL */}
         <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-gray-100">
           <div className="flex items-center gap-2 mb-4">
-            <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
-              <svg className="w-5 h-5 text-[#ff004f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
             </div>
@@ -459,7 +459,7 @@ export default function OrgLogsPage() {
                 onChange={(e) =>
                   setFilters({ ...filters, role: e.target.value })
                 }
-                className="border border-gray-300 rounded-md w-full p-2 text-sm focus:ring-2 focus:ring-[#ff004f] transition md:p-2.5 text-[13px] md:text-sm"
+                className="border border-gray-300 rounded-md w-full p-2 text-sm focus:ring-2 focus:ring-blue-500 transition md:p-2.5 text-[13px] md:text-sm"
               >
                 <option value="">All Roles</option>
                 <option value="ORG_HR">Org HR</option>
@@ -555,12 +555,12 @@ export default function OrgLogsPage() {
                       <tr
                         key={log._id}
                         onClick={() => openDrawer(log)}
-                        className={`transition-all cursor-pointer group hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] hover:shadow-md ${
+                        className={`transition-all cursor-pointer group hover:bg-gradient-to-r hover:from-blue-50/80 hover:to-indigo-50/80 hover:shadow-md ${
                           idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                         }`}
                       >
                         <td className="px-4 py-4 font-semibold text-gray-700">{idx}</td>
-                        <td className="px-4 py-4 flex items-center gap-3 group-hover:text-[#ff004f] transition-colors">
+                        <td className="px-4 py-4 flex items-center gap-3 group-hover:text-blue-600 transition-colors">
                           {getIcon(log.action)}
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-gray-900 truncate">
@@ -596,7 +596,7 @@ export default function OrgLogsPage() {
           <div className="md:hidden space-y-4 px-0">
             {loadingInitial ? (
               <div className="text-center py-8 text-gray-600">
-                <Loader2 className="animate-spin inline mr-2 text-[#ff004f]" size={32} />
+                <Loader2 className="animate-spin inline mr-2 text-blue-600" size={32} />
                 <p className="mt-2">Loading logs...</p>
               </div>
             ) : visibleLogs.length === 0 ? (
@@ -679,7 +679,7 @@ export default function OrgLogsPage() {
                       onClick={() => setPage(p)}
                       className={`px-4 py-2 rounded-md text-sm font-medium ${
                         page === p
-                          ? "bg-[#ff004f] text-white shadow"
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow"
                           : "border bg-white text-gray-700"
                       }`}
                     >
@@ -721,7 +721,7 @@ export default function OrgLogsPage() {
               ✕ Close
             </button>
 
-            <h2 className="text-xl font-bold text-[#ff004f] mb-4">
+            <h2 className="text-xl font-bold text-blue-600 mb-4">
               Log Details
             </h2>
 

@@ -170,7 +170,7 @@ async function createPage(contentElements, pdf, pdfWidth, pdfHeight, pageNumber,
   
   // Add watermark
   const watermark = document.createElement('img');
-  watermark.src = '/logos/maihooMain.png';
+  watermark.src = '/logos/tfgLogo.jpeg';
   watermark.alt = 'watermark';
   watermark.style.position = 'absolute';
   watermark.style.top = '300px';
@@ -236,7 +236,7 @@ function createReportHeader() {
   header.innerHTML = `
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
       <div style="flex-shrink: 0; margin-top: 5px;">
-        <img src="/logos/maihooMain.png" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" />
+        <img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" />
       </div>
       <div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;">
         <h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1>
@@ -309,10 +309,10 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
 
     indexDiv.innerHTML = 
       '<div style="width: 860px; min-height: 1120px; padding: 40px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; color: #000; position: relative; overflow: hidden;">' +
-      '<img src="/logos/maihooMain.png" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; pointer-events: none; z-index: 1;" />' +
+      '<img src="/logos/tfgLogo.jpeg" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; pointer-events: none; z-index: 1;" />' +
       '<div style="position: relative; z-index: 2;">' +
       '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
-      '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/maihooMain.png" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
+      '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
       '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Summary</p></div>' +
       '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@maihootech.co.in</p><p style="margin: 0;">🌐 maihootech.co.in</p></div>' +
       '</div>' +
@@ -1272,7 +1272,7 @@ function CertificateBase({ id, candidate, orgName, checks }) {
       }}
     >
       <img
-        src="/logos/maihooMain.png"
+        src="/logos/tfgLogo.jpeg"
         alt="watermark"
         style={{
           position: "absolute",
@@ -1299,7 +1299,7 @@ function CertificateBase({ id, candidate, orgName, checks }) {
         >
           <div style={{ flexShrink: 0, marginTop: "5px" }}>
             <img
-              src="/logos/maihooMain.png"
+              src="/logos/tfgLogo.jpeg"
               alt="logo"
               style={{
                 maxHeight: "180px",

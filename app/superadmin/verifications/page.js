@@ -198,12 +198,12 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
      RENDER
   =====================================================================*/
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8 text-gray-900">
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <CheckCheck size={24} className="text-[#ff004f]" />
+            <CheckCheck size={24} className="text-blue-600" />
             Verifications Summary
           </h1>
           <p className="text-gray-600 text-sm mt-1">
@@ -213,7 +213,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
 
         <button
           onClick={fetchData}
-          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-[#ff004f] hover:bg-[#e60047]"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
         >
           <RefreshCw size={18} /> Refresh
         </button>
@@ -319,9 +319,9 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
       {/* SUPERB FILTERS */}
       <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-gray-100">
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
+          <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
             <svg
-              className="w-5 h-5 text-[#ff004f]"
+              className="w-5 h-5 text-blue-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -362,7 +362,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
                   <input
                     value={orgSearch}
                     onChange={(e) => setOrgSearch(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-1 focus:ring-[#ff004f]"
+                    className="w-full px-3 py-2 text-sm bg-white rounded-lg shadow-sm border border-gray-200 focus:ring-1 focus:ring-blue-500"
                     placeholder="Search..."
                   />
                 </div>
@@ -449,7 +449,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
         {loading ? (
           <div className="p-16 text-center">
             <Loader2
-              className="animate-spin mx-auto text-[#ff004f] mb-4"
+              className="animate-spin mx-auto text-blue-600 mb-4"
               size={40}
             />
             <p className="text-gray-600 font-medium text-lg">
@@ -495,7 +495,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
                     }`}
                     onClick={() => openCandidateDetails(c)}
                   >
-                    <td className="px-4 py-4 font-semibold text-gray-800 group-hover:text-[#ff004f] transition-colors">
+                    <td className="px-4 py-4 font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
                       {c.candidateName}
                     </td>
                     <td className="px-4 py-4 text-gray-600">
@@ -559,7 +559,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
                 onClick={() => openCandidateDetails(c)}
               >
                 <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-gray-100">
-                  <div className="p-3 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-xl shadow-md">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md">
                     <svg
                       className="w-6 h-6 text-white"
                       fill="none"
@@ -638,7 +638,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
           <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+            <Loader2 className="animate-spin text-blue-600" size={48} />
           </div>
         </>
       )}
@@ -653,7 +653,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
 
           <div className="fixed right-0 top-0 w-full sm:w-[450px] bg-white h-full z-50 shadow-2xl overflow-hidden animate-in slide-in-from-right duration-300">
             {/* Enhanced Drawer Header */}
-            <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-[#ff004f] to-[#ff3366] sticky top-0 z-50">
+            <div className="flex justify-between items-center px-6 py-5 bg-gradient-to-r from-blue-500 to-indigo-600 sticky top-0 z-50">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                   <UserCircle2 size={20} className="text-white" />
@@ -753,7 +753,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
 
                   <div className="h-3 w-full bg-gray-200 rounded-full">
                     <div
-                      className="h-3 rounded-full bg-[#ff004f]"
+                      className="h-3 rounded-full bg-blue-600"
                       style={{
                         width: `${
                           selectedCandidate.progress?.completionPercentage ||
@@ -774,7 +774,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
 
                 {/* Stages Section */}
                 <div>
-                  <h3 className="font-semibold text-xl text-[#ff004f] mb-3">
+                  <h3 className="font-semibold text-xl text-blue-600 mb-3">
                     Verification Stages
                   </h3>
 
@@ -817,7 +817,7 @@ authenticityScore: full?.aiCvValidation?.authenticity_score
                 <div className="flex justify-end pt-4">
                   <button
                     onClick={() => setSelectedCandidate(null)}
-                    className="px-5 py-2 bg-[#ff004f] text-white rounded-lg shadow hover:bg-[#e60047] transition"
+                    className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
                   >
                     Close
                   </button>

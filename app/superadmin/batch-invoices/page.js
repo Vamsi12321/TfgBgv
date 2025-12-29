@@ -739,11 +739,11 @@ function InvoiceContent({ invoice, formatDate, formatCurrency, expanded, setExpa
         </div>
         <div className="text-right">
           <img
-            src="/logos/maihooMain.png"
+            src="/logos/tfgLogo.jpeg"
             alt="Logo"
             className="h-16 mb-2"
           />
-          <p className="text-sm font-semibold text-black">Maihoo Technologies</p>
+          <p className="text-sm font-semibold text-black">TFG Reports</p>
           <p className="text-xs text-black">Gachibowli, Hyderabad</p>
         </div>
       </div>

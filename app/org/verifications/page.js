@@ -316,8 +316,8 @@ export default function OrgVerificationsPage() {
       {/* Enhanced Filters */}
       <div className="bg-gradient-to-br from-white via-gray-50 to-white rounded-2xl shadow-xl p-6 mb-8 border-2 border-gray-100">
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
-            <Filter size={20} className="text-[#ff004f]" />
+          <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
+            <Filter size={20} className="text-blue-600" />
           </div>
           <h3 className="text-lg font-bold text-gray-800">
             Filter Verifications
@@ -545,7 +545,7 @@ export default function OrgVerificationsPage() {
         <>
           <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
           <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <Loader2 className="animate-spin text-[#ff004f]" size={48} />
+            <Loader2 className="animate-spin text-blue-600" size={48} />
           </div>
         </>
       )}

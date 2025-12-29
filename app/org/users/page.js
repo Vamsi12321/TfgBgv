@@ -176,7 +176,7 @@ export default function OrgUsersPage() {
         </h1>
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center justify-center gap-2 bg-[#ff004f] text-white px-5 py-2 rounded-lg hover:bg-[#e60047] shadow-md w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2 rounded-lg hover:from-blue-600 hover:to-indigo-700 shadow-md w-full sm:w-auto"
         >
           <UserPlus size={18} /> Add User
         </button>
@@ -185,8 +185,8 @@ export default function OrgUsersPage() {
       {/* Enhanced Filter */}
       <div className="bg-gradient-to-br from-white via-gray-50 to-white p-6 rounded-2xl shadow-xl border-2 border-gray-100">
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 bg-gradient-to-br from-[#ff004f]/10 to-[#ff3366]/10 rounded-lg">
-            <Users size={20} className="text-[#ff004f]" />
+          <div className="p-2 bg-gradient-to-br from-blue-500/10 to-indigo-600/10 rounded-lg">
+            <Users size={20} className="text-blue-600" />
           </div>
           <h3 className="text-lg font-bold text-gray-800">Filter Users</h3>
         </div>
@@ -196,11 +196,11 @@ export default function OrgUsersPage() {
             placeholder="🔍 Search username or email..."
             value={searchUsername}
             onChange={(e) => setSearchUsername(e.target.value)}
-            className="w-full sm:flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 bg-white text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition"
+            className="w-full sm:flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           />
 
           <select
-            className="w-full sm:w-auto border-2 border-gray-200 rounded-xl px-4 py-3 bg-white text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition"
+            className="w-full sm:w-auto border-2 border-gray-200 rounded-xl px-4 py-3 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             value={filterRole}
             onChange={(e) => setFilterRole(e.target.value)}
           >
@@ -210,7 +210,7 @@ export default function OrgUsersPage() {
           </select>
 
           <select
-            className="w-full sm:w-auto border-2 border-gray-200 rounded-xl px-4 py-3 bg-white text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition"
+            className="w-full sm:w-auto border-2 border-gray-200 rounded-xl px-4 py-3 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -222,7 +222,7 @@ export default function OrgUsersPage() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64 text-[#ff004f]">
+        <div className="flex justify-center items-center h-64 text-blue-600">
           <Loader2 className="animate-spin" size={24} /> Loading...
         </div>
       ) : (
@@ -270,7 +270,7 @@ export default function OrgUsersPage() {
                             setEditUser(u);
                             setShowModal(true);
                           }}
-                          className="text-[#ff004f] hover:text-[#cc0040]"
+                          className="text-blue-600 hover:text-blue-800"
                         >
                           <Edit size={18} />
                         </button>
@@ -334,7 +334,7 @@ export default function OrgUsersPage() {
                       setEditUser(u);
                       setShowModal(true);
                     }}
-                    className="text-[#ff004f] hover:text-[#cc0040]"
+                    className="text-blue-600 hover:text-blue-800"
                   >
                     <Edit size={18} />
                   </button>
@@ -459,7 +459,7 @@ function AddEditUserModal({ onClose, onSave, editData }) {
             <X size={20} />
           </button>
 
-          <h2 className="text-lg font-semibold mb-4 text-[#ff004f]">
+          <h2 className="text-lg font-semibold mb-4 text-blue-600">
             {isEdit ? "Edit User" : "Add New User"}
           </h2>
 
@@ -578,7 +578,7 @@ function AddEditUserModal({ onClose, onSave, editData }) {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded text-white bg-[#ff004f] hover:bg-[#e60047]"
+                className="px-4 py-2 rounded text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
               >
                 {isEdit ? "Save Changes" : "Add User"}
               </button>

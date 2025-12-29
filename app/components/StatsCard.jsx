@@ -14,17 +14,21 @@ export default function StatsCard({
   subtitle,
 }) {
   return (
-    <div className="group relative bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg border-2 border-gray-100 hover:shadow-xl hover:scale-105 hover:border-gray-200 transition-all duration-300 overflow-hidden">
-      {/* Gradient Background Effect */}
+    <div className="group relative bg-gradient-to-br from-white via-blue-50/30 to-indigo-50/50 backdrop-blur-sm rounded-2xl p-6 shadow-2xl border border-blue-100 hover:shadow-2xl hover:scale-105 hover:border-indigo-200 transition-all duration-300 overflow-hidden">
+      {/* Enhanced Gradient Background Effect */}
       <div
-        className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-5 group-hover:opacity-15 transition-opacity duration-500"
-        style={{ backgroundColor: color }}
+        className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-25 transition-opacity duration-500"
+        style={{ 
+          background: `linear-gradient(135deg, ${color}40, ${color}20)` 
+        }}
       />
 
-      {/* Accent Line */}
+      {/* Enhanced Accent Line */}
       <div
-        className="absolute top-0 left-0 w-1.5 h-full transition-all duration-300 group-hover:w-2"
-        style={{ backgroundColor: color }}
+        className="absolute top-0 left-0 w-2 h-full rounded-r-full transition-all duration-300 group-hover:w-3 shadow-lg"
+        style={{ 
+          background: `linear-gradient(to bottom, ${color}, ${color}80)` 
+        }}
       />
 
       <div className="relative z-10">
@@ -37,10 +41,13 @@ export default function StatsCard({
 
           {Icon && (
             <div
-              className="p-3 rounded-xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-md"
-              style={{ backgroundColor: `${color}20` }}
+              className="p-3 rounded-2xl transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 shadow-lg"
+              style={{ 
+                background: `linear-gradient(135deg, ${color}20, ${color}10)`,
+                border: `1px solid ${color}30`
+              }}
             >
-              <Icon size={20} style={{ color }} strokeWidth={2.5} />
+              <Icon size={22} style={{ color }} strokeWidth={2.5} />
             </div>
           )}
         </div>
@@ -62,11 +69,11 @@ export default function StatsCard({
         </div>
       </div>
 
-      {/* Hover Effect Border */}
+      {/* Enhanced Hover Effect Border */}
       <div
         className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
         style={{
-          boxShadow: `inset 0 0 0 1px ${color}20`,
+          boxShadow: `inset 0 0 0 2px ${color}30, 0 0 20px ${color}20`,
         }}
       />
     </div>

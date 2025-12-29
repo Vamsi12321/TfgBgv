@@ -11,12 +11,13 @@ export default function Badge({
   className = "",
 }) {
   const variants = {
-    default: "bg-gray-100 text-gray-700",
-    primary: "bg-[#ff004f]/10 text-[#ff004f]",
-    success: "bg-green-100 text-green-700",
-    warning: "bg-yellow-100 text-yellow-700",
-    danger: "bg-red-100 text-red-700",
-    info: "bg-blue-100 text-blue-700",
+    default: "bg-gray-100 text-gray-700 border border-gray-200",
+    primary: "bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-200",
+    success: "bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200",
+    warning: "bg-gradient-to-r from-yellow-100 to-orange-100 text-yellow-800 border border-yellow-200",
+    danger: "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-200",
+    info: "bg-gradient-to-r from-cyan-100 to-blue-100 text-cyan-800 border border-cyan-200",
+    gradient: "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg",
   };
 
   const sizes = {

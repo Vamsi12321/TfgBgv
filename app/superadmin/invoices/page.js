@@ -791,9 +791,9 @@ function InvoiceContent({
           </p>
         </div>
         <div className="text-right">
-          <img src="/logos/maihooMain.png" alt="Logo" className="h-16 mb-2" />
+          <img src="/logos/tfgLogo.jpeg" alt="Logo" className="h-16 mb-2" />
           <p className="text-sm font-semibold text-black">
-            Maihoo Technologies
+            TFG Reports
           </p>
           <p className="text-xs text-black">Gachibowli, Hyderabad</p>
         </div>

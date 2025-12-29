@@ -3,19 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
-import {
   Loader2,
   AlertCircle,
   ArrowRight,
@@ -32,6 +19,53 @@ import StatsCard from "../../components/StatsCard";
 import PageHeader from "../../components/PageHeader";
 import Button from "../../components/ui/Button";
 import { useOrgState } from "../../context/OrgStateContext";
+
+// Simple chart components to replace recharts temporarily
+const SimpleBarChart = ({ data, colors }) => (
+  <div className="h-[260px] sm:h-[300px] flex items-end justify-center gap-4 p-4">
+    {Object.entries(data).map(([key, value], index) => (
+      <div key={key} className="flex flex-col items-center gap-2">
+        <div
+          className="w-16 rounded-t-lg transition-all duration-500"
+          style={{
+            height: `${Math.max((value / Math.max(...Object.values(data))) * 200, 20)}px`,
+            backgroundColor: colors[index] || '#0066cc'
+          }}
+        />
+        <span className="text-xs font-medium text-gray-600 capitalize">{key}</span>
+        <span className="text-sm font-bold text-gray-800">{value}</span>
+      </div>
+    ))}
+  </div>
+);
+
+const SimplePieChart = ({ data, colors }) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0);
+  
+  return (
+    <div className="h-[260px] sm:h-[300px] flex items-center justify-center">
+      <div className="relative">
+        <div className="w-40 h-40 rounded-full border-8 border-gray-200 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-gray-800">{total}</div>
+            <div className="text-sm text-gray-600">Total</div>
+          </div>
+        </div>
+        <div className="absolute inset-0 flex flex-col justify-center space-y-2 ml-48">
+          {data.map((item, index) => (
+            <div key={item.name} className="flex items-center gap-2">
+              <div
+                className="w-4 h-4 rounded-full"
+                style={{ backgroundColor: colors[index] }}
+              />
+              <span className="text-sm font-medium">{item.name}: {item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
 
 
@@ -126,12 +160,14 @@ export default function OrgAdminDashboard() {
   --------------------------------------------------- */
   if (loading)
     return (
-      <div className="flex flex-col justify-center items-center h-screen">
+      <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         <div className="relative">
-          <div className="animate-spin rounded-full h-14 w-14 border-4 border-[#ff004f] border-t-transparent"></div>
-          <div className="absolute inset-0 rounded-full bg-[#ff004f]/20 animate-ping"></div>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 shadow-lg"></div>
+          <div className="absolute inset-0 animate-ping rounded-full h-16 w-16 border-4 border-blue-400 opacity-20"></div>
+          <div className="absolute inset-2 animate-pulse rounded-full h-12 w-12 bg-gradient-to-br from-blue-400 to-indigo-500 opacity-30"></div>
         </div>
-        <p className="mt-6 text-gray-600 font-medium">Loading dashboard...</p>
+        <p className="mt-8 text-gray-700 font-semibold text-lg animate-pulse">Loading dashboard...</p>
+        <div className="mt-2 w-32 h-1 bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 rounded-full animate-pulse"></div>
       </div>
     );
 
@@ -474,13 +510,13 @@ export default function OrgAdminDashboard() {
      UI STARTS HERE
   --------------------------------------------------- */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-3 sm:p-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-3 sm:p-4">
       <PageHeader
         title={role === "ORG_HR" ? "HR Dashboard" : "Verifications Overview"}
         subtitle="Monitor and manage your verification activities in real-time"
         action={
           <Link href="/org/verifications">
-            <Button variant="primary" icon={ArrowRight} iconPosition="right">
+            <Button variant="gradient" icon={ArrowRight} iconPosition="right">
               View All Verifications
             </Button>
           </Link>
@@ -504,80 +540,75 @@ export default function OrgAdminDashboard() {
       {/* CHARTS ROW */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
         {/* STAGE BAR CHART */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
-            <div className="w-10 h-10 bg-gradient-to-br from-[#ff004f] to-[#ff3366] rounded-lg flex items-center justify-center shadow-md">
-              <TrendingUp size={20} className="text-white" />
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-blue-100 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-blue-100">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <TrendingUp size={22} className="text-white" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900">
-              Stage Breakdown
-            </h2>
+            <div>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                Stage Breakdown
+              </h2>
+              <p className="text-sm text-gray-600">Verification progress by stage</p>
+            </div>
           </div>
 
           <div className="h-[260px] sm:h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stageData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="stage" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="primary" fill="#3b82f6" radius={6} />
-                <Bar dataKey="secondary" fill="#f59e0b" radius={6} />
-                <Bar dataKey="final" fill="#22c55e" radius={6} />
-              </BarChart>
-            </ResponsiveContainer>
+            <SimpleBarChart 
+              data={{
+                primary: stats?.stageBreakdown?.primary || 0,
+                secondary: stats?.stageBreakdown?.secondary || 0,
+                final: stats?.stageBreakdown?.final || 0,
+              }}
+              colors={['#3b82f6', '#f59e0b', '#22c55e']}
+            />
           </div>
         </div>
 
         {/* PIE CHART */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
-              <Activity size={20} className="text-white" />
+        <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-purple-100 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-purple-100">
+            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 via-pink-500 to-red-500 rounded-2xl flex items-center justify-center shadow-lg">
+              <Activity size={22} className="text-white" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900">
-              Status Overview
-            </h2>
+            <div>
+              <h2 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                Status Overview
+              </h2>
+              <p className="text-sm text-gray-600">Current verification status</p>
+            </div>
           </div>
 
           <div className="h-[260px] sm:h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={90}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  <Cell fill="#22c55e" />
-                  <Cell fill="#f59e0b" />
-                  <Cell fill="#ef4444" />
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            <SimplePieChart 
+              data={pieData}
+              colors={['#22c55e', '#f59e0b', '#ef4444']}
+            />
           </div>
         </div>
       </div>
 
       {/* RECENT ACTIVITY */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-gray-100 hover:shadow-xl transition-all duration-300">
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-gray-100">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
-            <Activity size={20} className="text-white" />
+      <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-indigo-100 hover:shadow-2xl transition-all duration-300">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-indigo-100">
+          <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 via-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <Activity size={22} className="text-white" />
           </div>
-          <h2 className="text-lg font-bold text-gray-900">
-            Recent Activity
-          </h2>
+          <div>
+            <h2 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent">
+              Recent Activity
+            </h2>
+            <p className="text-sm text-gray-600">Latest verification activities</p>
+          </div>
         </div>
 
         {activityLoading ? (
           <div className="flex flex-col items-center justify-center py-12">
-            <div className="w-12 h-12 border-4 border-[#ff004f] border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-600 font-medium text-sm">Loading activities...</p>
+            <div className="relative">
+              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-t-indigo-400 rounded-full animate-spin animation-delay-150"></div>
+            </div>
+            <p className="text-gray-600 font-medium text-sm mt-4">Loading activities...</p>
           </div>
         ) : (
           (() => {
@@ -612,27 +643,29 @@ export default function OrgAdminDashboard() {
 function ActivityGroup({ title, logs }) {
   return (
     <div>
-      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-        <div className="h-px flex-1 bg-gray-200"></div>
+      <h3 className="text-xs font-bold bg-gradient-to-r from-gray-600 to-gray-800 bg-clip-text text-transparent uppercase tracking-wider mb-4 flex items-center gap-3">
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
         {title}
-        <div className="h-px flex-1 bg-gray-200"></div>
+        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
       </h3>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {logs.map((a, i) => (
           <div
             key={i}
-            className="flex justify-between items-start bg-gradient-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 p-4 rounded-xl transition-all duration-300 border border-gray-100 hover:border-gray-200 hover:shadow-md"
+            className="flex justify-between items-start bg-gradient-to-r from-white/80 via-blue-50/50 to-indigo-50/50 backdrop-blur-sm hover:from-blue-50/80 hover:via-indigo-50/60 hover:to-purple-50/60 p-4 rounded-2xl transition-all duration-300 border border-blue-100/50 hover:border-indigo-200 hover:shadow-lg hover:scale-[1.01]"
           >
             <div className="flex items-start gap-3">
-              <span className={`text-base ${a.iconColor} flex-shrink-0`}>{a.icon}</span>
+              <div className={`text-lg ${a.iconColor} flex-shrink-0 p-2 bg-white/60 rounded-xl shadow-sm`}>
+                {a.icon}
+              </div>
 
               <p className="text-sm text-gray-700 leading-relaxed font-medium">
                 {a.actionText}
               </p>
             </div>
 
-            <span className="text-gray-500 text-[11px]">{a.time}</span>
+            <span className="text-gray-500 text-xs font-medium bg-white/60 px-2 py-1 rounded-lg">{a.time}</span>
           </div>
         ))}
       </div>

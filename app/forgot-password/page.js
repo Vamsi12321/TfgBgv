@@ -49,7 +49,7 @@ export default function ForgotPasswordPage() {
         {/* Header */}
         <div className="mb-8 text-center">
           <Image
-            src="/logos/maihoo.png"
+            src="/logos/tfgLogo.jpeg"
             width={120}
             height={40}
             alt="Maihoo"

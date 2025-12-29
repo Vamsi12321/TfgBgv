@@ -731,7 +731,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
     >
       {/* WATERMARK */}
       <img
-        src="/logos/maihooMain.png"
+        src="/logos/tfgLogo.jpeg"
         alt="watermark"
         style={{
           position: "absolute",
@@ -759,7 +759,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
           }}
         >
           <img
-            src="/logos/maihooMain.png"
+            src="/logos/tfgLogo.jpeg"
             alt="logo"
             style={{
               maxHeight: "180px",

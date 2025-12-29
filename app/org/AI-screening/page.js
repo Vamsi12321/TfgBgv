@@ -215,7 +215,7 @@ function CertificateComponent({ id, result, type, timestamp }) {
     >
       {/* Watermark */}
       <img
-        src="/logos/maihooMain.png"
+        src="/logos/tfgLogo.jpeg"
         alt="watermark"
         style={{
           position: "absolute",
@@ -245,7 +245,7 @@ function CertificateComponent({ id, result, type, timestamp }) {
         >
           <div style={{ flexShrink: 0, marginTop: "5px" }}>
             <img
-              src="/logos/maihooMain.png"
+              src="/logos/tfgLogo.jpeg"
               alt="logo"
               style={{
                 maxHeight: "180px",
@@ -1083,12 +1083,12 @@ export default function OrgAIResumeScreeningPage() {
     
     return `
       <div id="cert-${index}" style="width: 794px; min-height: 1123px; padding: 10px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; position: relative; color: #000; overflow: hidden;">
-        <img src="/logos/maihooMain.png" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; z-index: 1; pointer-events: none;" />
+        <img src="/logos/tfgLogo.jpeg" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; z-index: 1; pointer-events: none;" />
         
         <div style="position: relative; z-index: 2; margin-top: -10px;">
           <div style="display: flex; align-items: flex-start; gap: 35px; margin-bottom: 25px; margin-top: 0;">
             <div style="flex-shrink: 0; margin-top: 5px;">
-              <img src="/logos/maihooMain.png" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" />
+              <img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" />
             </div>
             <div style="display: flex; flex-direction: column; justify-content: flex-start; gap: 2px; margin-top: 55px;">
               <h1 style="font-size: 26px; font-weight: 900; margin: 0; line-height: 1; font-family: Arial Black, Arial, sans-serif;">AI Resume Screening</h1>
