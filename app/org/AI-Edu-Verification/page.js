@@ -1220,7 +1220,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
             fontWeight: 600,
           }}
         >
-          Maihoo Technologies Pvt Ltd, Vaishnavi's Cynosure, Gachibowli - 500032
+          TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081
         </p>
       </div>
     </div>

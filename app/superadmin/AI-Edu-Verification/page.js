@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -196,7 +196,7 @@ export default function SuperAdminAIEducationValidationPage() {
 
       setVerificationId(ver._id);
 
-      // If a check already exists → load results
+      // If a check already exists ? load results
       const allChecks = [
         ...(ver.stages?.primary || []),
         ...(ver.stages?.secondary || []),
@@ -269,8 +269,8 @@ export default function SuperAdminAIEducationValidationPage() {
 
       const data = await res.json();
 
-      // 🔥 DO NOT CALL loadResults here
-      // 🔥 Because backend returns CORRECT analysis already
+      // ?? DO NOT CALL loadResults here
+      // ?? Because backend returns CORRECT analysis already
       setAnalysis({ analysis: data.analysis });
 
       setSuccessModal({
@@ -722,7 +722,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
       style={{
         width: "794px",
         minHeight: "1123px",
-        padding: "10px 50px 80px 50px", // ⬅ Increased bottom padding for footer visibility
+        padding: "10px 50px 80px 50px", // ? Increased bottom padding for footer visibility
         background: "#fff",
         fontFamily: "Arial, sans-serif",
         color: "#000",
@@ -810,7 +810,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
 
           <p style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <b>Status:</b>
-            <span style={{ color: "#5cb85c", fontWeight: "bold" }}>✓ Completed</span>
+            <span style={{ color: "#5cb85c", fontWeight: "bold" }}>? Completed</span>
           </p>
         </div>
 
@@ -846,7 +846,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
   <div style={{ marginBottom: "35px" }}>
     {positives.map((item, i) => (
       <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-        <span style={{ fontSize: "18px" }}>✓</span>
+        <span style={{ fontSize: "18px" }}>?</span>
         <span>{item}</span>
       </div>
     ))}
@@ -886,7 +886,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
 {redflags.length > 0 &&
   redflags.map((rf, i) => (
     <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-      <span style={{ color: "#d9534f", fontSize: "18px" }}>•</span>
+      <span style={{ color: "#d9534f", fontSize: "18px" }}></span>
       <span>{rf.issue || rf.description}</span>
     </div>
   ))}
@@ -918,7 +918,7 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
             fontWeight: 600,
           }}
         >
-          Maihoo Technologies Pvt Ltd, Vaishnavi’s Cynosure, Gachibowli - 500032
+          TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081
         </p>
       </div>
     </div>
@@ -943,12 +943,12 @@ function ResultsSection({
   // FIX: use ONLY the nested analysis object
   let ai;
 
-  // CASE 1: results endpoint → aiAnalysis
+  // CASE 1: results endpoint ? aiAnalysis
   if (analysis?.aiAnalysis && typeof analysis.aiAnalysis === "object") {
     ai = analysis.aiAnalysis;
   }
 
-  // CASE 2: validation endpoint → analysis
+  // CASE 2: validation endpoint ? analysis
   else if (analysis?.analysis && typeof analysis.analysis === "object") {
     ai = analysis.analysis;
   }
@@ -1276,7 +1276,7 @@ function CollapsibleSection({
               key={index}
               className="flex items-start gap-3 text-sm text-black bg-white p-3 rounded-lg border border-gray-200"
             >
-              <span className="mt-0.5 font-bold">•</span>
+              <span className="mt-0.5 font-bold"></span>
               <span className="flex-1">{item}</span>
             </li>
           ))}
@@ -1285,3 +1285,4 @@ function CollapsibleSection({
     </div>
   );
 }
+
