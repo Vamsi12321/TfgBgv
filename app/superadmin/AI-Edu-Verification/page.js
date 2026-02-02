@@ -919,6 +919,8 @@ function EducationCertificateBase({ id, candidate, orgName, ai }) {
           }}
         >
           TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081
+          <br />
+          📞 8886099008 | ✉ naresh@tfgorg.com | 🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style={{ color: "#dc3545", textDecoration: "underline" }}>LinkedIn</a> | 🌐 <a href="https://www.tfgorg.com" target="_blank" style={{ color: "#dc3545", textDecoration: "underline" }}>www.tfgorg.com</a>
         </p>
       </div>
     </div>

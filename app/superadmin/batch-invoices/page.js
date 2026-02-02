@@ -744,7 +744,10 @@ function InvoiceContent({ invoice, formatDate, formatCurrency, expanded, setExpa
             className="h-16 mb-2"
           />
           <p className="text-sm font-semibold text-black">TFG Reports</p>
-          <p className="text-xs text-black">Gachibowli, Hyderabad</p>
+          <p className="text-xs text-black">T-Hub, Hyderabad</p>
+          <p className="text-xs text-black">📞 8886099008</p>
+          <p className="text-xs text-black">✉ naresh@tfgorg.com</p>
+          <p className="text-xs text-black">🌐 <a href="https://www.tfgorg.com" target="_blank" className="text-black underline">www.tfgorg.com</a></p>
         </div>
       </div>
 

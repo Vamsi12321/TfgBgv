@@ -217,7 +217,7 @@ export default function HomePage() {
         '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
         '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
         '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">TFG Enterprise Gold Certificate</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Certificate</p></div>' +
-        '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@tfgai.in</p><p style="margin: 0;">🌐 tfgai.in</p></div>' +
+        '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 8886099008</p><p style="margin: 0 0 5px 0;">✉ naresh@tfgorg.com</p><p style="margin: 0 0 5px 0;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #0066cc; text-decoration: underline;">LinkedIn</a></p><p style="margin: 0;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #0066cc; text-decoration: underline;">www.tfgorg.com</a></p></div>' +
         '</div>' +
         '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
         '<table style="width: 100%; border-collapse: collapse;">' +
@@ -243,7 +243,9 @@ export default function HomePage() {
         '<p style="margin: 5px 0;">Completed: ' + sampleChecks.filter((c) => c.status === "COMPLETED").length + '</p>' +
         '<p style="margin: 5px 0;">Certificate ID: TFG-SAMPLE-DEMO</p>' +
         '</div><div style="margin-top: 120px; padding-top: 15px; border-top: 2px solid #272626ff; font-size: 12px; color: #dc3545; text-align: center; font-weight: 600; line-height: 1.4;">' +
-        '<p style="margin: 0;">TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
+        '<div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;"><img src="/logos/T-Hub.jpg" alt="T-Hub Address" style="width: 24px; height: 24px; margin-right: 8px; object-fit: contain;" /><span>TFG AI powered IT solutions</span></div>' +
+        '<p style="margin: 0;">T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
+        '<div style="margin-top: 8px; font-size: 11px;"><span>📞 8886099008 | ✉ naresh@tfgorg.com | 🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #dc3545; text-decoration: underline;">LinkedIn</a> | 🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #dc3545; text-decoration: underline;">www.tfgorg.com</a></span></div>' +
         '</div></div></div></div>';
 
       // Wait for images to load and proper rendering
@@ -327,7 +329,7 @@ export default function HomePage() {
           '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
           '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
           '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">TFG Enterprise Service Certificate</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">' + serviceName + ' Verification Report</p></div>' +
-          '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@tfgai.in</p><p style="margin: 0;">🌐 tfgai.in</p></div>' +
+          '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 8886099008</p><p style="margin: 0 0 5px 0;">✉ naresh@tfgorg.com</p><p style="margin: 0 0 5px 0;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #0066cc; text-decoration: underline;">LinkedIn</a></p><p style="margin: 0;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #0066cc; text-decoration: underline;">www.tfgorg.com</a></p></div>' +
           '</div>' +
           '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
           '<table style="width: 100%; border-collapse: collapse;">' +
@@ -351,7 +353,9 @@ export default function HomePage() {
           '<p style="margin: 5px 0;">Service ID: ' + check.checkName + '</p>' +
           '<p style="margin: 5px 0;">Certificate ID: TFG-SAMPLE-' + check.stage.toUpperCase() + '-' + i + '</p>' +
           '</div><div style="margin-top: 120px; padding-top: 15px; border-top: 2px solid #272626ff; font-size: 12px; color: #dc3545; text-align: center; font-weight: 600; line-height: 1.4;">' +
-          '<p style="margin: 0;">TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
+          '<div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;"><img src="/logos/T-Hub.jpg" alt="T-Hub Address" style="width: 24px; height: 24px; margin-right: 8px; object-fit: contain;" /><span>TFG AI powered IT solutions</span></div>' +
+          '<p style="margin: 0;">T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
+          '<div style="margin-top: 8px; font-size: 11px;"><span>📞 8886099008 | ✉ naresh@tfgorg.com | 🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #dc3545; text-decoration: underline;">LinkedIn</a> | 🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #dc3545; text-decoration: underline;">www.tfgorg.com</a></span></div>' +
           '</div></div></div></div>';
 
         // Wait for proper rendering
@@ -488,6 +492,7 @@ export default function HomePage() {
               <a href="#services" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Services</a>
               <a href="#platform" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Platform</a>
               <a href="#reports" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Reports</a>
+              <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">LinkedIn</a>
             </div>
 
             {/* CTA Button */}
@@ -1521,6 +1526,36 @@ export default function HomePage() {
               <p className="text-gray-400 text-sm leading-relaxed">
                 Transforming hiring with AI-powered background verification and comprehensive BGV services for modern enterprises.
               </p>
+              <div className="space-y-2 text-sm text-gray-400">
+                <div className="flex items-center space-x-2">
+                  <span>📞</span>
+                  <span>8886099008</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span>✉</span>
+                  <span>naresh@tfgorg.com</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span>🔗</span>
+                  <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" className="text-blue-400 hover:text-blue-300 transition-colors">LinkedIn</a>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span>🌐</span>
+                  <a href="https://www.tfgorg.com" target="_blank" className="text-blue-400 hover:text-blue-300 transition-colors">www.tfgorg.com</a>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-xl border border-blue-200 shadow-md hover:shadow-lg transition-all duration-300">
+                <div className="relative">
+                  <img src="/logos/T-Hub.jpg" alt="T-Hub Address" className="w-12 h-12 object-contain rounded-lg shadow-sm border border-gray-200" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
+                    <MapPin className="w-2 h-2 text-white" />
+                  </div>
+                </div>
+                <div>
+                  <span className="text-sm font-semibold text-gray-800">T-Hub, Hyderabad</span>
+                  <p className="text-xs text-gray-600">Innovation Hub</p>
+                </div>
+              </div>
               <div className="flex space-x-4">
                 <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">
                   <Globe className="w-4 h-4" />

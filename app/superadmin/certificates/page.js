@@ -512,7 +512,7 @@ export default function CertificatesPage() {
         '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
         '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
         '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">TFG Enterprise ' + template.name + '</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Certificate</p></div>' +
-        '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@tfgai.in</p><p style="margin: 0;">🌐 tfgai.in</p></div>' +
+        '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 8886099008</p><p style="margin: 0 0 5px 0;">✉ naresh@tfgorg.com</p><p style="margin: 0 0 5px 0;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #0066cc; text-decoration: underline;">LinkedIn</a></p><p style="margin: 0;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #0066cc; text-decoration: underline;">www.tfgorg.com</a></p></div>' +
         '</div>' +
         '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
         '<table style="width: 100%; border-collapse: collapse;">' +
@@ -805,9 +805,10 @@ export default function CertificatesPage() {
           </div>
           
           <div style="text-align: right; font-size: 12px; color: #000000;">
-            <p style="margin: 0; color: #000000;">📞 +91-8235-279-810</p>
-            <p style="margin: 5px 0 0 0; color: #000000;">✉️ info@tfgai.in</p>
-            <p style="margin: 5px 0 0 0; color: #000000;">🌐 tfgai.in</p>
+            <p style="margin: 0; color: #000000;">📞 8886099008</p>
+            <p style="margin: 5px 0 0 0; color: #000000;">✉️ naresh@tfgorg.com</p>
+            <p style="margin: 5px 0 0 0; color: #000000;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #000000; text-decoration: underline;">LinkedIn</a></p>
+            <p style="margin: 5px 0 0 0; color: #000000;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #000000; text-decoration: underline;">www.tfgorg.com</a></p>
           </div>
         </div>
 
@@ -1253,9 +1254,10 @@ export default function CertificatesPage() {
           </div>
           
           <div style="text-align: right; font-size: 12px; color: #000000;">
-            <p style="margin: 0; color: #000000;">📞 +91-8235-279-810</p>
-            <p style="margin: 5px 0 0 0; color: #000000;">✉️ info@tfgai.in</p>
-            <p style="margin: 5px 0 0 0; color: #000000;">🌐 tfgai.in</p>
+            <p style="margin: 0; color: #000000;">📞 8886099008</p>
+            <p style="margin: 5px 0 0 0; color: #000000;">✉️ naresh@tfgorg.com</p>
+            <p style="margin: 5px 0 0 0; color: #000000;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #000000; text-decoration: underline;">LinkedIn</a></p>
+            <p style="margin: 5px 0 0 0; color: #000000;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #000000; text-decoration: underline;">www.tfgorg.com</a></p>
           </div>
         </div>
 

@@ -11,6 +11,7 @@ import {
   XCircle,
   Brain,
   RefreshCcw,
+  Globe,
 } from "lucide-react";
 
 import { jsPDF } from "jspdf";
@@ -207,9 +208,10 @@ function createReportHeader() {
         <p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Background Verification Certificate</p>
       </div>
       <div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;">
-        <p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p>
-        <p style="margin: 0 0 5px 0;">✉ info@tfgai.in</p>
-        <p style="margin: 0;">🌐 tfgai.in</p>
+        <p style="margin: 0 0 5px 0; font-weight: bold;">📞 8886099008</p>
+        <p style="margin: 0 0 5px 0;">✉ naresh@tfgorg.com</p>
+        <p style="margin: 0 0 5px 0;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #0066cc; text-decoration: underline;">LinkedIn</a></p>
+        <p style="margin: 0;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #0066cc; text-decoration: underline;">www.tfgorg.com</a></p>
       </div>
     </div>
   `;
@@ -277,7 +279,7 @@ async function downloadSingleCert(id, fileName, setDownloading, attachments = []
 /* ----------------------------------------------- */
 /* PDF MERGED FINAL — WITH INDEX PAGE (MATCHING CERTIFICATE STYLE) */
 /* ----------------------------------------------- */
-async function mergeAllCertificates(ids, fileName, setDownloading, candidate, verification) {
+async function mergeAllCertificates(ids, fileName, setDownloading, candidate, verification, translations) {
   try {
     setDownloading(true);
     let pdf;
@@ -338,31 +340,34 @@ async function mergeAllCertificates(ids, fileName, setDownloading, candidate, ve
       '<div style="position: relative; z-index: 2;">' +
       '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
       '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
-      '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Summary</p></div>' +
-      '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 +91-8235-279-810</p><p style="margin: 0 0 5px 0;">✉ info@tfgai.in</p><p style="margin: 0;">🌐 tfgai.in</p></div>' +
+      '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">All Verification Reports</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">' + translations.comprehensiveReport + '</p></div>' +
+      '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 8886099008</p><p style="margin: 0 0 5px 0;">✉ naresh@tfgorg.com</p><p style="margin: 0 0 5px 0;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #0066cc; text-decoration: underline;">LinkedIn</a></p><p style="margin: 0;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #0066cc; text-decoration: underline;">www.tfgorg.com</a></p></div>' +
       '</div>' +
-      '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
+      '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">' + translations.candidateInfo + '</h2>' +
       '<table style="width: 100%; border-collapse: collapse;">' +
-      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">Name:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + candidate.firstName + ' ' + candidate.lastName + '</td></tr>' +
-      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Email:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.email || "N/A") + '</td></tr>' +
-      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Phone:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.phone || "N/A") + '</td></tr>' +
-      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Organization:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.organizationName || "N/A") + '</td></tr>' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">' + translations.name + ':</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + candidate.firstName + ' ' + candidate.lastName + '</td></tr>' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">' + translations.email + ':</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.email || "N/A") + '</td></tr>' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">' + translations.phone + ':</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.phone || "N/A") + '</td></tr>' +
+      '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">' + translations.organization + ':</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + (candidate.organizationName || "N/A") + '</td></tr>' +
       '</table></div>' +
-      '<div style="margin-bottom: 30px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Verification Summary</h2>' +
+      '<div style="margin-bottom: 30px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">' + translations.verificationSummary + '</h2>' +
       '<table style="width: 100%; border-collapse: collapse; border: 2px solid #e0e0e0;">' +
       '<thead><tr style="background: #f0f0f0;">' +
-      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">BGV Check</th>' +
-      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">Service</th>' +
-      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd;">Status</th>' +
+      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">' + translations.bgvCheck + '</th>' +
+      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">' + translations.service + '</th>' +
+      '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd;">' + translations.status + '</th>' +
       '</tr></thead>' +
       '<tbody>' + tableRows + '</tbody>' +
       '</table></div>' +
       '<div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;"><div style="font-size: 11px; color: #666; margin-bottom: 15px;">' +
-      '<p style="margin: 5px 0;">Generated on: ' + new Date().toLocaleString() + '</p>' +
-      '<p style="margin: 5px 0;">Total Verifications: ' + allChecks.length + '</p>' +
-      '<p style="margin: 5px 0;">Completed: ' + allChecks.filter((c) => c.status === "COMPLETED").length + '</p>' +
+      '<p style="margin: 5px 0;">' + translations.generatedOn + ': ' + new Date().toLocaleString() + '</p>' +
+      '<p style="margin: 5px 0;">' + translations.totalVerifications + ': ' + allChecks.length + '</p>' +
+      '<p style="margin: 5px 0;">' + translations.completed + ': ' + allChecks.filter((c) => c.status === "COMPLETED").length + '</p>' +
       '</div><div style="margin-top: 120px; padding-top: 15px; border-top: 2px solid #272626ff; font-size: 12px; color: #dc3545; text-align: center; font-weight: 600; line-height: 1.4;">' +
-      '<p style="margin: 0;">TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
+      '<p style="margin: 0;">' + (translations.language === "ja" 
+        ? "TFG AI搭載ITソリューション, T-Hub 4階 Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081"
+        : "TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081"
+      ) + '</p>' +
       '</div></div></div></div>';
 
     await new Promise((resolve) => setTimeout(resolve, 500));
@@ -441,6 +446,239 @@ export default function SuperAdminReportsPage() {
 
   const [orgSearch, setOrgSearch] = useState("");
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
+  const [language, setLanguage] = useState("en"); // Language toggle state
+
+  // Translations
+  const translations = {
+    en: {
+      title: "SuperAdmin Reports",
+      subtitle: "Comprehensive verification reports & analytics across all organizations",
+      selectOrg: "Select Organization",
+      refreshReports: "Refresh Reports & Verifications",
+      downloadReport: "Download Report",
+      candidateName: "Candidate Name",
+      organization: "Organization",
+      verificationStatus: "Verification Status",
+      completedChecks: "Completed Checks",
+      pendingChecks: "Pending Checks",
+      totalChecks: "Total Checks",
+      noReportsTitle: "No Reports Available",
+      fetchingReports: "Fetching Reports",
+      aiValidationReports: "🤖 AI-Powered Validation Reports",
+      comprehensiveReport: "Comprehensive Background Verification Summary",
+      candidateInfo: "Candidate Information",
+      verificationSummary: "Verification Summary",
+      serviceDetails: "Service Verification Details",
+      generatedOn: "Generated on",
+      certificateId: "Certificate ID",
+      name: "Name",
+      email: "Email",
+      phone: "Phone",
+      organization: "Organization",
+      bgvCheck: "BGV Check",
+      service: "Service",
+      status: "Status",
+      totalVerifications: "Total Verifications",
+      completed: "Completed",
+      verified: "✓ Verified",
+      pending: "⏳ Pending",
+      inProgress: "🔄 In Progress",
+      failed: "❌ Failed",
+      notStarted: "⚪ Not Started",
+      downloadCompleteReport: "Download Complete Report Package",
+      downloadReport: "Download Report",
+      downloading: "Downloading...",
+      generatingReport: "Generating Report...",
+      noVerifications: "No verifications initiated",
+      pleaseInitiate: "Please initiate verification process first",
+      accessLevel: "Access Level",
+      allOrganizations: "All Organizations",
+      organization: "Organization",
+      searchOrganization: "🔍 Search organization...",
+      selectOrganization: "Select Organization",
+      totalCandidates: "Total Candidates",
+      withIssues: "With Issues",
+      services: "services",
+      completedStatus: "completed",
+      failedStatus: "failed",
+      availableOnAIPage: "Available on AI Verification Page",
+      pleaseWait: "Please wait while we gather your data...",
+      issues: "Issues",
+      idLabel: "ID:",
+      orgLabel: "Org:",
+      // Certificate translations
+      verificationReport: "Verification Report",
+      candidateName: "Candidate Name",
+      candidateId: "Candidate ID",
+      verificationId: "Verification ID",
+      service: "Service",
+      verificationTimestamp: "Verification Timestamp",
+      noRemarksAvailable: "No remarks available",
+      creditReportDocument: "Credit Report Document",
+      viewCreditReport: "View Credit Report (PDF)",
+      documentsForVerification: "Documents for Verification",
+      documentsSubmittedText: "The following document(s) were submitted for verification based on details provided by the candidate.",
+      verificationProof: "Verification Proof",
+      verificationCompletedText: "Verification was completed through independent verification. The following proof document(s) were obtained as confirmation.",
+      attachmentsText: "Please find the proof of this verification as attachments:",
+      document: "Document",
+      attachment: "Attachment",
+      proof: "Proof",
+      // Detailed certificate content translations
+      nameLabel: "Name",
+      mobileLabel: "Mobile",
+      panLabel: "PAN",
+      creditScoreLabel: "Credit Score",
+      clientIdLabel: "Client ID",
+      totalRecordsFound: "Total Records Found",
+      matchingRecords: "Matching Records",
+      recordLabel: "Record",
+      caseLabel: "Case",
+      petitionerLabel: "Petitioner",
+      respondentLabel: "Respondent",
+      courtLabel: "Court",
+      filingDateLabel: "Filing Date",
+      statusLabel: "Status",
+      codeLabel: "Code",
+      uanLabel: "UAN",
+      employmentHistoryLabel: "Employment History",
+      noEmploymentRecords: "No employment records found",
+      recordsFound: "records found",
+      andMoreRecords: "and",
+      moreRecords: "more records",
+      moreFields: "more fields",
+      noCasesFound: "No cases found for candidate - Verification successful",
+      // Empty state messages
+      noReportsMessage: "There are no verification reports to display at the moment. Reports will appear here once candidates complete their verification process.",
+      reportsAutoRefresh: "Reports will automatically refresh when available",
+      // AI validation section
+      aiValidationDescription: (
+        <>
+          Advanced AI validation reports for <strong className="text-purple-600">CV Analysis</strong> and{" "}
+          <strong className="text-pink-600">Education Verification</strong> are available on their dedicated pages with enhanced analytics and insights.
+        </>
+      ),
+      cvAnalysis: "CV Analysis",
+      educationVerification: "Education Verification",
+      noReportsForOrg: "There are no verification reports for the selected organization. Reports will appear here once candidates complete their verification process.",
+      selectOrgMessage: "Please select an organization to view verification reports and analytics."
+    },
+    ja: {
+      title: "スーパー管理者レポート",
+      subtitle: "全組織にわたる包括的な検証レポートと分析",
+      selectOrg: "組織を選択",
+      refreshReports: "レポートと検証を更新",
+      downloadReport: "レポートをダウンロード",
+      candidateName: "候補者名",
+      organization: "組織",
+      verificationStatus: "検証ステータス",
+      completedChecks: "完了したチェック",
+      pendingChecks: "保留中のチェック",
+      totalChecks: "総チェック数",
+      noReportsTitle: "利用可能なレポートがありません",
+      fetchingReports: "レポートを取得中",
+      aiValidationReports: "🤖 AI搭載検証レポート",
+      comprehensiveReport: "包括的な身元調査要約",
+      candidateInfo: "候補者情報",
+      verificationSummary: "検証要約",
+      serviceDetails: "サービス検証詳細",
+      generatedOn: "生成日",
+      certificateId: "証明書ID",
+      name: "名前",
+      email: "メール",
+      phone: "電話",
+      organization: "組織",
+      bgvCheck: "BGVチェック",
+      service: "サービス",
+      status: "ステータス",
+      totalVerifications: "総検証数",
+      completed: "完了",
+      verified: "✓ 検証済み",
+      pending: "⏳ 保留中",
+      inProgress: "🔄 進行中",
+      failed: "❌ 失敗",
+      notStarted: "⚪ 未開始",
+      downloadCompleteReport: "完全なレポートパッケージをダウンロード",
+      downloadReport: "レポートをダウンロード",
+      downloading: "ダウンロード中...",
+      generatingReport: "レポート生成中...",
+      noVerifications: "検証が開始されていません",
+      pleaseInitiate: "まず検証プロセスを開始してください",
+      accessLevel: "アクセスレベル",
+      allOrganizations: "すべての組織",
+      organization: "組織",
+      searchOrganization: "🔍 組織を検索...",
+      selectOrganization: "組織を選択",
+      totalCandidates: "総候補者数",
+      withIssues: "問題あり",
+      services: "サービス",
+      completedStatus: "完了",
+      failedStatus: "失敗",
+      availableOnAIPage: "AI検証ページで利用可能",
+      pleaseWait: "データを収集中です。しばらくお待ちください...",
+      issues: "問題",
+      idLabel: "ID:",
+      orgLabel: "組織:",
+      // Certificate translations
+      verificationReport: "検証レポート",
+      candidateName: "候補者名",
+      candidateId: "候補者ID",
+      verificationId: "検証ID",
+      service: "サービス",
+      verificationTimestamp: "検証タイムスタンプ",
+      noRemarksAvailable: "利用可能な備考がありません",
+      creditReportDocument: "信用報告書",
+      viewCreditReport: "信用報告書を表示（PDF）",
+      documentsForVerification: "検証用書類",
+      documentsSubmittedText: "候補者が提供した詳細に基づいて、以下の書類が検証のために提出されました。",
+      verificationProof: "検証証明",
+      verificationCompletedText: "独立した検証により検証が完了しました。確認として以下の証明書類が取得されました。",
+      attachmentsText: "この検証の証明を添付ファイルとしてご確認ください：",
+      document: "書類",
+      attachment: "添付ファイル",
+      proof: "証明",
+      // Detailed certificate content translations
+      nameLabel: "名前",
+      mobileLabel: "携帯電話",
+      panLabel: "PAN",
+      creditScoreLabel: "信用スコア",
+      clientIdLabel: "クライアントID",
+      totalRecordsFound: "見つかった総記録数",
+      matchingRecords: "一致する記録",
+      recordLabel: "記録",
+      caseLabel: "事件",
+      petitionerLabel: "申立人",
+      respondentLabel: "被申立人",
+      courtLabel: "裁判所",
+      filingDateLabel: "提出日",
+      statusLabel: "ステータス",
+      codeLabel: "コード",
+      uanLabel: "UAN",
+      employmentHistoryLabel: "雇用履歴",
+      noEmploymentRecords: "雇用記録が見つかりません",
+      recordsFound: "件の記録が見つかりました",
+      andMoreRecords: "さらに",
+      moreRecords: "件の記録があります",
+      moreFields: "個のフィールドがあります",
+      noCasesFound: "候補者の事件は見つかりませんでした - 検証成功",
+      // Empty state messages
+      noReportsMessage: "現在表示する検証レポートがありません。候補者が検証プロセスを完了すると、ここにレポートが表示されます。",
+      reportsAutoRefresh: "レポートは利用可能になると自動的に更新されます",
+      // AI validation section
+      aiValidationDescription: (
+        <>
+          <strong className="text-purple-600">CV分析</strong>と{" "}
+          <strong className="text-pink-600">教育検証</strong>の高度なAI検証レポートは、強化された分析と洞察を備えた専用ページで利用できます。
+        </>
+      ),
+      cvAnalysis: "CV分析",
+      educationVerification: "教育検証",
+      noReportsForOrg: "選択された組織の検証レポートがありません。候補者が検証プロセスを完了すると、ここにレポートが表示されます。",
+      selectOrgMessage: "検証レポートと分析を表示するには組織を選択してください。"
+    }
+  };
+
+  const t = { ...translations[language], language }; // Translation helper with language info
 
   /* Fetch Orgs */
   useEffect(() => {
@@ -529,10 +767,10 @@ export default function SuperAdminReportsPage() {
               <FileText size={24} className="text-black" />
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">
-                  SuperAdmin Reports
+                  {t.title}
                 </h1>
                 <p className="text-gray-600 text-sm md:text-base">
-                  Comprehensive verification reports & analytics across all organizations
+                  {t.subtitle}
                 </p>
               </div>
               {/* Refresh Button */}
@@ -548,7 +786,7 @@ export default function SuperAdminReportsPage() {
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 shadow-lg hover:shadow-xl hover:scale-105"
                 }`}
-                title="Refresh Reports & Verifications"
+                title={t.refreshReports}
               >
                 {loading ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
@@ -558,11 +796,29 @@ export default function SuperAdminReportsPage() {
               </button>
             </div>
 
-            <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-2xl border border-white/50 shadow-lg">
-              <Building2 size={20} className="text-black" />
-              <div>
-                <p className="text-xs text-slate-500 font-medium">Access Level</p>
-                <p className="font-bold text-slate-800">All Organizations</p>
+            <div className="flex items-center gap-4">
+              {/* Language Toggle */}
+              <div className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/50 shadow-lg">
+                <Globe size={16} className="text-gray-600" />
+                <button
+                  onClick={() => setLanguage(language === "en" ? "ja" : "en")}
+                  className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  <span className={`px-2 py-1 rounded ${language === "en" ? "bg-blue-100 text-blue-700" : "text-gray-500"}`}>
+                    EN
+                  </span>
+                  <span className={`px-2 py-1 rounded ${language === "ja" ? "bg-blue-100 text-blue-700" : "text-gray-500"}`}>
+                    日本語
+                  </span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-3 bg-white/80 backdrop-blur-sm px-6 py-3 rounded-2xl border border-white/50 shadow-lg">
+                <Building2 size={20} className="text-black" />
+                <div>
+                  <p className="text-xs text-slate-500 font-medium">{t.accessLevel}</p>
+                  <p className="font-bold text-slate-800">{t.allOrganizations}</p>
+                </div>
               </div>
             </div>
           </div>
@@ -576,7 +832,7 @@ export default function SuperAdminReportsPage() {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-slate-800">{candidates.length}</p>
-                  <p className="text-xs text-slate-600 font-medium">Total Candidates</p>
+                  <p className="text-xs text-slate-600 font-medium">{t.totalCandidates}</p>
                 </div>
               </div>
             </div>
@@ -590,7 +846,7 @@ export default function SuperAdminReportsPage() {
                   <p className="text-2xl font-bold text-slate-800">
                     {candidates.filter(c => c.verification?.overallStatus === "COMPLETED").length}
                   </p>
-                  <p className="text-xs text-slate-600 font-medium">Completed</p>
+                  <p className="text-xs text-slate-600 font-medium">{t.completed}</p>
                 </div>
               </div>
             </div>
@@ -604,7 +860,7 @@ export default function SuperAdminReportsPage() {
                   <p className="text-2xl font-bold text-slate-800">
                     {candidates.filter(c => c.verification?.overallStatus === "IN_PROGRESS").length}
                   </p>
-                  <p className="text-xs text-slate-600 font-medium">In Progress</p>
+                  <p className="text-xs text-slate-600 font-medium">{t.inProgress}</p>
                 </div>
               </div>
             </div>
@@ -626,7 +882,7 @@ export default function SuperAdminReportsPage() {
                       return allChecks.some(chk => chk.status === "FAILED");
                     }).length}
                   </p>
-                  <p className="text-xs text-slate-600 font-medium">With Issues</p>
+                  <p className="text-xs text-slate-600 font-medium">{t.withIssues}</p>
                 </div>
               </div>
             </div>
@@ -646,8 +902,7 @@ export default function SuperAdminReportsPage() {
                   🤖 AI-Powered Validation Reports
                 </h3>
                 <p className="text-slate-700 mb-4 leading-relaxed">
-                  Advanced AI validation reports for <strong className="text-purple-600">CV Analysis</strong> and{" "}
-                  <strong className="text-pink-600">Education Verification</strong> are available on their dedicated pages with enhanced analytics and insights.
+                  {t.aiValidationDescription}
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <div className="flex items-center gap-2 bg-gradient-to-r from-purple-100 to-purple-200 text-purple-800 px-4 py-2 rounded-full text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105">
@@ -672,7 +927,7 @@ export default function SuperAdminReportsPage() {
             <div className="flex items-center gap-3 mb-4">
               <Building2 size={20} className="text-black" />
               <label className="text-lg font-bold bg-gradient-to-r from-[#ff004f] to-red-600 bg-clip-text text-transparent">
-                Select Organization
+                {t.selectOrganization}
               </label>
             </div>
             
@@ -685,7 +940,7 @@ export default function SuperAdminReportsPage() {
                   {selectedOrg
                     ? "🏢 " + organizations.find((o) => o._id === selectedOrg)
                         ?.organizationName
-                    : "🌐 Select Organization"}
+                    : "🌐 " + t.selectOrganization}
                 </span>
 
                 <div className={`transition-transform duration-300 ${showOrgDropdown ? "rotate-180" : ""}`}>
@@ -699,7 +954,7 @@ export default function SuperAdminReportsPage() {
                     <input
                       value={orgSearch}
                       onChange={(e) => setOrgSearch(e.target.value)}
-                      placeholder="🔍 Search organization..."
+                      placeholder={t.searchOrganization}
                       className="w-full p-3 border-2 border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-[#ff004f] focus:border-[#ff004f] transition-all bg-white text-black placeholder-gray-500"
                     />
                   </div>
@@ -742,9 +997,9 @@ export default function SuperAdminReportsPage() {
             </div>
             <div className="mt-6 text-center">
               <p className="text-xl font-semibold bg-gradient-to-r from-[#ff004f] to-red-600 bg-clip-text text-transparent">
-                Fetching Reports
+                {t.fetchingReports}
               </p>
-              <p className="text-slate-600 mt-1">Please wait while we gather your data...</p>
+              <p className="text-slate-600 mt-1">{t.pleaseWait}</p>
             </div>
           </div>
         )}
@@ -798,21 +1053,21 @@ export default function SuperAdminReportsPage() {
                           {failedChecks > 0 && (
                             <div className="flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded-lg text-xs font-semibold">
                               <XCircle size={12} />
-                              {failedChecks} Issues
+                              {failedChecks} {t.issues}
                             </div>
                           )}
                         </div>
                         
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <span className="font-medium">ID:</span>
+                            <span className="font-medium">{t.idLabel}</span>
                             <code className="bg-slate-100 px-2 py-1 rounded text-xs font-mono">
                               {c._id.slice(-8)}
                             </code>
                           </div>
                           
                           <div className="flex items-center gap-2 text-sm text-slate-600">
-                            <span className="font-medium">Org:</span>
+                            <span className="font-medium">{t.orgLabel}</span>
                             <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
                               {c.organizationName || 'N/A'}
                             </span>
@@ -876,6 +1131,7 @@ export default function SuperAdminReportsPage() {
                             orgName={c.organizationName}
                             check={chk}
                             stage="primary"
+                            t={t}
                           />
                         ))}
                         {secondaryChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) => (
@@ -886,6 +1142,7 @@ export default function SuperAdminReportsPage() {
                             orgName={c.organizationName}
                             check={chk}
                             stage="secondary"
+                            t={t}
                           />
                         ))}
                         {finalChecks.filter(chk => !isAIValidationCheck(chk.check)).map((chk) => (
@@ -896,6 +1153,7 @@ export default function SuperAdminReportsPage() {
                             orgName={c.organizationName}
                             check={chk}
                             stage="final"
+                            t={t}
                           />
                         ))}
                       </div>
@@ -909,6 +1167,7 @@ export default function SuperAdminReportsPage() {
                           stage="primary"
                           downloading={downloading}
                           setDownloading={setDownloading}
+                          t={t}
                         />
                       )}
 
@@ -920,6 +1179,7 @@ export default function SuperAdminReportsPage() {
                           stage="secondary"
                           downloading={downloading}
                           setDownloading={setDownloading}
+                          t={t}
                         />
                       )}
 
@@ -931,6 +1191,7 @@ export default function SuperAdminReportsPage() {
                           stage="final"
                           downloading={downloading}
                           setDownloading={setDownloading}
+                          t={t}
                         />
                       )}
 
@@ -942,7 +1203,7 @@ export default function SuperAdminReportsPage() {
                           onClick={() => {
                             // Check if candidate has any verifications initiated
                             if (totalChecks === 0) {
-                              alert(`No verifications initiated for ${c.firstName} ${c.lastName} yet. Please initiate verification process first.`);
+                              alert(`${t.noVerifications} for ${c.firstName} ${c.lastName} yet. ${t.pleaseInitiate}`);
                               return;
                             }
 
@@ -963,7 +1224,8 @@ export default function SuperAdminReportsPage() {
                               `${c.firstName}-${c.lastName}-verification-report.pdf`,
                               setDownloading,
                               c,
-                              v
+                              v,
+                              t // Pass translations
                             );
                           }}
                           className={`relative w-full bg-gradient-to-r from-[#ff004f] via-red-500 to-red-600 text-white rounded-2xl shadow-lg py-3 px-6 font-semibold text-base flex justify-center items-center gap-3 transition-all duration-300 hover:shadow-xl hover:scale-105 ${
@@ -974,12 +1236,12 @@ export default function SuperAdminReportsPage() {
                             {downloading ? (
                               <>
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                <span>Generating Report...</span>
+                                <span>{t.generatingReport}</span>
                               </>
                             ) : (
                               <>
                                 <Download size={18} />
-                                <span>Download Complete Report Package</span>
+                                <span>{t.downloadCompleteReport}</span>
                               </>
                             )}
                           </div>
@@ -1007,18 +1269,18 @@ export default function SuperAdminReportsPage() {
               <div className="absolute top-8 left-1/2 transform -translate-x-1/2 w-40 h-40 bg-gradient-to-br from-[#ff004f]/10 to-[#ff004f]/5 rounded-full blur-2xl animate-pulse"></div>
             </div>
             <h3 className="text-3xl font-bold bg-gradient-to-r from-slate-700 to-slate-900 bg-clip-text text-transparent mb-4">
-              No Reports Available
+              {t.noReportsTitle}
             </h3>
             <p className="text-slate-600 max-w-lg mx-auto text-lg leading-relaxed">
               {selectedOrg 
-                ? "There are no verification reports for the selected organization. Reports will appear here once candidates complete their verification process."
-                : "Please select an organization to view verification reports and analytics."
+                ? t.noReportsForOrg
+                : t.selectOrgMessage
               }
             </p>
             <div className="mt-8 flex justify-center">
               <div className="bg-gradient-to-r from-[#ff004f]/10 to-[#ff004f]/5 px-6 py-3 rounded-2xl border border-slate-200">
                 <p className="text-sm text-slate-500 font-medium">
-                  🔄 Reports will automatically refresh when available
+                  🔄 {t.reportsAutoRefresh}
                 </p>
               </div>
             </div>
@@ -1033,7 +1295,7 @@ export default function SuperAdminReportsPage() {
 /* -------------------------------------------------------------
    SERVICE CERTIFICATE TEMPLATE
 ------------------------------------------------------------- */
-function ServiceCertificate({ id, candidate, orgName, check, stage }) {
+function ServiceCertificate({ id, candidate, orgName, check, stage, t }) {
   const checks = [{ ...check, stage }];
   const title = `${stage.toUpperCase()} - ${formatServiceName(
     check.check
@@ -1046,6 +1308,7 @@ function ServiceCertificate({ id, candidate, orgName, check, stage }) {
       candidate={candidate}
       orgName={orgName}
       checks={checks}
+      t={t}
     />
   );
 }
@@ -1053,7 +1316,7 @@ function ServiceCertificate({ id, candidate, orgName, check, stage }) {
 /* -------------------------------------------------------------
    STAGE SECTION COMPONENT
 ------------------------------------------------------------- */
-function StageSection({ title, checks, candidate, stage, downloading, setDownloading }) {
+function StageSection({ title, checks, candidate, stage, downloading, setDownloading, t }) {
   const [open, setOpen] = useState(false);
 
   const stageConfig = {
@@ -1107,16 +1370,16 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
               </h3>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-sm text-slate-600 font-medium">
-                  {checks.length} services
+                  {checks.length} {t.services}
                 </span>
                 {completedCount > 0 && (
                   <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
-                    ✅ {completedCount} completed
+                    ✅ {completedCount} {t.completedStatus}
                   </span>
                 )}
                 {failedCount > 0 && (
                   <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-semibold">
-                    ❌ {failedCount} failed
+                    ❌ {failedCount} {t.failedStatus}
                   </span>
                 )}
               </div>
@@ -1173,9 +1436,9 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
                           failed ? "text-red-600" :
                           "text-yellow-600"
                         }`}>
-                          {done ? "✅ Completed" :
-                           failed ? "❌ Failed" :
-                           "⏳ Pending"}
+                          {done ? t.verified :
+                           failed ? t.failed :
+                           t.pending}
                         </p>
                       </div>
                     </div>
@@ -1184,7 +1447,7 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
                       <div className="p-3 bg-gradient-to-r from-purple-100 to-pink-100 border border-purple-200 rounded-xl">
                         <p className="text-xs text-purple-900 font-semibold flex items-center gap-2">
                           <Brain size={14} />
-                          <span>Available on AI Verification Page</span>
+                          <span>{t.availableOnAIPage}</span>
                         </p>
                       </div>
                     ) : (
@@ -1213,12 +1476,12 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
                         {downloading ? (
                           <>
                             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                            <span>Downloading...</span>
+                            <span>{t.downloading}</span>
                           </>
                         ) : (
                           <>
                             <Download size={16} />
-                            <span>Download Report</span>
+                            <span>{t.downloadReport}</span>
                           </>
                         )}
                       </button>
@@ -1238,9 +1501,10 @@ function StageSection({ title, checks, candidate, stage, downloading, setDownloa
    ENHANCED CERTIFICATE TEMPLATE WITH CONTENT TRUNCATION
 ------------------------------------------------------------- */
 
-function CertificateBase({ id, title, candidate, orgName, checks }) {
+function CertificateBase({ id, title, candidate, orgName, checks, t }) {
   const verification = candidate.verification;
   const serviceName = formatServiceName(checks[0]?.check || "");
+  const language = t.language || "en"; // Get language from translations object
 
   // Helper function to truncate long text
   const truncateText = (text, maxLength = 500) => {
@@ -1257,7 +1521,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
   const checkName = checks[0]?.check;
 
   if (!remarks) {
-    bulletItems = ["No remarks available"];
+    bulletItems = [t.noRemarksAvailable];
   } else if (typeof remarks === "string") {
     bulletItems = [truncateText(remarks)];
   } else if (Array.isArray(remarks)) {
@@ -1266,11 +1530,11 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
     // Special handling for credit reports
     if (checkName === "credit_report" && remarks.credit_report_link_permanent) {
       creditReportLink = remarks.credit_report_link_permanent;
-      bulletItems.push(`Name: ${remarks.name || 'N/A'}`);
-      bulletItems.push(`Mobile: ${remarks.mobile || 'N/A'}`);
-      bulletItems.push(`PAN: ${remarks.pan || 'N/A'}`);
-      bulletItems.push(`Credit Score: ${remarks.credit_score || 'N/A'}`);
-      bulletItems.push(`Client ID: ${remarks.client_id || 'N/A'}`);
+      bulletItems.push(`${t.nameLabel}: ${remarks.name || 'N/A'}`);
+      bulletItems.push(`${t.mobileLabel}: ${remarks.mobile || 'N/A'}`);
+      bulletItems.push(`${t.panLabel}: ${remarks.pan || 'N/A'}`);
+      bulletItems.push(`${t.creditScoreLabel}: ${remarks.credit_score || 'N/A'}`);
+      bulletItems.push(`${t.clientIdLabel}: ${remarks.client_id || 'N/A'}`);
       // Credit report link will be handled separately in the attachments section
     }
     // Special handling for court records - filter by exact name match
@@ -1290,54 +1554,54 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
                petitioner === candidateNameReversed || respondent === candidateNameReversed;
       });
 
-      bulletItems.push(`Name: ${remarks.name || 'N/A'}`);
-      bulletItems.push(`Client ID: ${remarks.client_id || 'N/A'}`);
-      bulletItems.push(`Total Records Found: ${remarks.result.length}`);
-      bulletItems.push(`Matching Records: ${matchingRecords.length}`);
+      bulletItems.push(`${t.nameLabel}: ${remarks.name || 'N/A'}`);
+      bulletItems.push(`${t.clientIdLabel}: ${remarks.client_id || 'N/A'}`);
+      bulletItems.push(`${t.totalRecordsFound}: ${remarks.result.length}`);
+      bulletItems.push(`${t.matchingRecords}: ${matchingRecords.length}`);
       
       if (matchingRecords.length > 0) {
         matchingRecords.slice(0, 3).forEach((record, index) => {
-          bulletItems.push(`Record ${index + 1}:`);
-          bulletItems.push(`  Case: ${record.case_name || 'N/A'}`);
-          bulletItems.push(`  Petitioner: ${record.petitioner || 'N/A'}`);
-          bulletItems.push(`  Respondent: ${record.respondent || 'N/A'}`);
-          bulletItems.push(`  Status: ${record.case_status || 'N/A'}`);
-          bulletItems.push(`  Court: ${record.court_name || 'N/A'}`);
-          bulletItems.push(`  Filing Date: ${record.filing_date || 'N/A'}`);
+          bulletItems.push(`${t.recordLabel} ${index + 1}:`);
+          bulletItems.push(`  ${t.caseLabel}: ${record.case_name || 'N/A'}`);
+          bulletItems.push(`  ${t.petitionerLabel}: ${record.petitioner || 'N/A'}`);
+          bulletItems.push(`  ${t.respondentLabel}: ${record.respondent || 'N/A'}`);
+          bulletItems.push(`  ${t.statusLabel}: ${record.case_status || 'N/A'}`);
+          bulletItems.push(`  ${t.courtLabel}: ${record.court_name || 'N/A'}`);
+          bulletItems.push(`  ${t.filingDateLabel}: ${record.filing_date || 'N/A'}`);
         });
         
         if (matchingRecords.length > 3) {
-          bulletItems.push(`... and ${matchingRecords.length - 3} more matching records`);
+          bulletItems.push(`... ${t.andMoreRecords} ${matchingRecords.length - 3} ${t.moreRecords}`);
         }
       } else {
-        bulletItems.push("No cases found for candidate - Verification successful");
+        bulletItems.push(t.noCasesFound);
       }
     }
     // Enhanced handling for employment history and other complex structures
     else if (remarks.message && remarks.message_code) {
       // Handle employment history verification format
-      bulletItems.push(`Status: ${truncateText(remarks.message)}`);
-      bulletItems.push(`Code: ${remarks.message_code}`);
+      bulletItems.push(`${t.statusLabel}: ${truncateText(remarks.message)}`);
+      bulletItems.push(`${t.codeLabel}: ${remarks.message_code}`);
       
       if (remarks.data) {
-        bulletItems.push(`Client ID: ${remarks.data.client_id || 'N/A'}`);
+        bulletItems.push(`${t.clientIdLabel}: ${remarks.data.client_id || 'N/A'}`);
         
         if (remarks.data.uan) {
-          bulletItems.push(`UAN: ${remarks.data.uan}`);
+          bulletItems.push(`${t.uanLabel}: ${remarks.data.uan}`);
         }
         
         if (remarks.data.employment_history) {
           if (Array.isArray(remarks.data.employment_history) && remarks.data.employment_history.length === 0) {
-            bulletItems.push(`Employment History: No employment records found`);
+            bulletItems.push(`${t.employmentHistoryLabel}: ${t.noEmploymentRecords}`);
           } else if (Array.isArray(remarks.data.employment_history)) {
-            bulletItems.push(`Employment History: ${remarks.data.employment_history.length} records found`);
+            bulletItems.push(`${t.employmentHistoryLabel}: ${remarks.data.employment_history.length} ${t.recordsFound}`);
             // Limit employment history records to prevent overflow
             const maxRecords = 3;
             remarks.data.employment_history.slice(0, maxRecords).forEach((emp, index) => {
-              bulletItems.push(`  Record ${index + 1}: ${truncateText(JSON.stringify(emp), 200)}`);
+              bulletItems.push(`  ${t.recordLabel} ${index + 1}: ${truncateText(JSON.stringify(emp), 200)}`);
             });
             if (remarks.data.employment_history.length > maxRecords) {
-              bulletItems.push(`  ... and ${remarks.data.employment_history.length - maxRecords} more records`);
+              bulletItems.push(`  ... ${t.andMoreRecords} ${remarks.data.employment_history.length - maxRecords} ${t.moreRecords}`);
             }
           }
         }
@@ -1372,7 +1636,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
       });
       
       if (entries.length > maxEntries) {
-        bulletItems.push(`... and ${entries.length - maxEntries} more fields`);
+        bulletItems.push(`... ${t.andMoreRecords} ${entries.length - maxEntries} ${t.moreFields}`);
       }
     }
   } else {
@@ -1496,7 +1760,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
                 fontFamily: "Arial Black, Arial, sans-serif",
               }}
             >
-              Verification Report
+              {t.verificationReport}
             </h2>
           </div>
         </div>
@@ -1512,13 +1776,13 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             marginBottom: "30px",
           }}
         >
-          <p><strong>Candidate Name:</strong> {candidate.firstName} {candidate.lastName}</p>
-          <p><strong>Candidate ID:</strong> {candidate._id}</p>
-          <p><strong>Verification ID:</strong> {verification?._id || "—"}</p>
-          <p><strong>Organization:</strong> {orgName}</p>
-          <p><strong>Service:</strong> {serviceName}</p>
+          <p><strong>{t.candidateName}:</strong> {candidate.firstName} {candidate.lastName}</p>
+          <p><strong>{t.candidateId}:</strong> {candidate._id}</p>
+          <p><strong>{t.verificationId}:</strong> {verification?._id || "—"}</p>
+          <p><strong>{t.organization}:</strong> {orgName}</p>
+          <p><strong>{t.service}:</strong> {serviceName}</p>
           <p>
-            <strong>Verification Timestamp:</strong>{" "}
+            <strong>{t.verificationTimestamp}:</strong>{" "}
             {new Date().toLocaleString()}
           </p>
 
@@ -1528,21 +1792,21 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
 
   let icon = "○";
   let color = "#9ca3af"; // gray
-  let text = "Pending";
+  let text = t.pending;
 
   if (status === "COMPLETED") {
     icon = "✓";
     color = "#22c55e"; // green
-    text = "Completed";
+    text = t.verified;
   } else if (status === "FAILED") {
     icon = "✗";
     color = "#ef4444"; // red
-    text = "Failed";
+    text = t.failed;
   }
 
   return (
     <p style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-      <strong>Status:</strong>
+      <strong>{t.status}:</strong>
       <span style={{ fontWeight: "bold", fontSize: "16px", color }}>
         {icon} {text}
       </span>
@@ -1622,7 +1886,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
         {creditReportLink && (
           <div style={{ marginBottom: "30px" }}>
             <p style={{ fontSize: "14px", color: "#000", fontWeight: "bold", marginBottom: "15px" }}>
-              Credit Report Document
+              {t.creditReportDocument}
             </p>
             <div
               style={{
@@ -1644,7 +1908,7 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
                   cursor: "pointer"
                 }}
               >
-                View Credit Report (PDF)
+                {t.viewCreditReport}
               </a>
             </div>
           </div>
@@ -1659,13 +1923,13 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             {shouldShowCandidateDocuments && (
               <div style={{ marginBottom: "30px" }}>
                 <p style={{ fontSize: "14px", color: "#000", fontWeight: "bold", marginBottom: "15px" }}>
-                  Documents for Verification
+                  {t.documentsForVerification}
                 </p>
                 <p style={{ fontSize: "13px", color: "#666", marginBottom: "15px" }}>
-                  The following document(s) were submitted for verification based on details provided by the candidate.
+                  {t.documentsSubmittedText}
                 </p>
                 {candidateDocuments.map((url, idx) => {
-                  const fileName = url.split('/').pop() || `Document ${idx + 1}`;
+                  const fileName = url.split('/').pop() || `${t.document} ${idx + 1}`;
                   return (
                     <div
                       key={idx}
@@ -1699,13 +1963,13 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             {/* Verification Proof Section - Always show for manual verifications */}
             <div style={{ marginBottom: "30px" }}>
               <p style={{ fontSize: "14px", color: "#000", fontWeight: "bold", marginBottom: "15px" }}>
-                Verification Proof
+                {t.verificationProof}
               </p>
               <p style={{ fontSize: "13px", color: "#666", marginBottom: "15px" }}>
-                Verification was completed through independent verification. The following proof document(s) were obtained as confirmation.
+                {t.verificationCompletedText}
               </p>
               {proofFiles.map((proofFile, idx) => {
-                const fileName = proofFile.filename || `Proof ${idx + 1}`;
+                const fileName = proofFile.filename || `${t.proof} ${idx + 1}`;
                 const fileUrl = proofFile.s3_url;
                 return (
                   <div
@@ -1744,10 +2008,10 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
         {!isManualVerification && hasAttachments && (
           <div style={{ marginBottom: "30px" }}>
             <p style={{ fontSize: "14px", color: "#000", fontWeight: "bold", marginBottom: "15px" }}>
-              Please find the proof of this verification as attachments:
+              {t.attachmentsText}
             </p>
             {attachments.map((url, idx) => {
-              const fileName = url.split('/').pop() || `Attachment ${idx + 1}`;
+              const fileName = url.split('/').pop() || `${t.attachment} ${idx + 1}`;
               return (
                 <div
                   key={idx}
@@ -1809,7 +2073,10 @@ function CertificateBase({ id, title, candidate, orgName, checks }) {
             lineHeight: "1.4",
           }}
         >
-          TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081
+          {language === "ja" 
+            ? "TFG AI搭載ITソリューション, T-Hub 4階 Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081"
+            : "TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081"
+          }
         </p>
       </div>
     </div>
