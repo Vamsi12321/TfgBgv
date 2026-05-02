@@ -919,11 +919,23 @@ export default function ManageCandidatesPage() {
                       <tr
                         key={c._id}
                         className={`transition-all group hover:bg-gradient-to-r hover:from-[#fff5f8] hover:to-[#fff0f5] hover:shadow-md ${
-                          idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
+                          c.status === "incomplete"
+                            ? "bg-amber-50/60 border-l-4 border-l-amber-400"
+                            : idx % 2 === 0 ? "bg-white" : "bg-gray-50/30"
                         }`}
                       >
                         <td className="p-4 font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">
-                          {c.firstName} {c.lastName}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {c.firstName} {c.lastName}
+                            {c.status === "incomplete" && (
+                              <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 border border-amber-300 text-xs font-bold px-2 py-0.5 rounded-full">
+                                ⚠️ Incomplete
+                              </span>
+                            )}
+                          </div>
+                          {c.status === "incomplete" && c.resumeFilename && (
+                            <p className="text-xs text-gray-400 mt-0.5 font-normal">📄 {c.resumeFilename}</p>
+                          )}
                         </td>
                         <td className="p-4 text-gray-600">{c.phone}</td>
                         <td className="p-4 text-gray-600">{c.email}</td>
@@ -976,18 +988,30 @@ export default function ManageCandidatesPage() {
                 }).map((c) => (
                   <div
                     key={c._id}
-                    className="border-2 border-gray-100 rounded-2xl p-5 shadow-lg bg-gradient-to-br from-white to-gray-50 hover:shadow-2xl transition-all transform hover:scale-[1.02]"
+                    className={`border-2 rounded-2xl p-5 shadow-lg hover:shadow-2xl transition-all transform hover:scale-[1.02] ${
+                      c.status === "incomplete"
+                        ? "border-amber-300 bg-gradient-to-br from-amber-50 to-orange-50"
+                        : "border-gray-100 bg-gradient-to-br from-white to-gray-50"
+                    }`}
                   >
                     <div className="flex items-center gap-3 mb-4 pb-4 border-b-2 border-gray-100">
-                      <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-md">
+                      <div className={`p-3 rounded-xl shadow-md ${c.status === "incomplete" ? "bg-gradient-to-br from-amber-400 to-orange-500" : "bg-gradient-to-br from-blue-500 to-indigo-600"}`}>
                         <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <div className="font-bold text-lg text-gray-800">
+                        <div className="font-bold text-lg text-gray-800 flex items-center gap-2 flex-wrap">
                           {c.firstName} {c.lastName}
+                          {c.status === "incomplete" && (
+                            <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 border border-amber-300 text-xs font-bold px-2 py-0.5 rounded-full">
+                              ⚠️ Incomplete — Click Edit to complete
+                            </span>
+                          )}
                         </div>
+                        {c.status === "incomplete" && c.resumeFilename && (
+                          <p className="text-xs text-gray-400 mt-0.5">📄 {c.resumeFilename}</p>
+                        )}
                       </div>
                     </div>
 

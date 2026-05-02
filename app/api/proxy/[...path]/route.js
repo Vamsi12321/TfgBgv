@@ -47,6 +47,9 @@ async function proxyRequest(req, params) {
   headers.delete("content-length");
   headers.delete("accept-encoding"); // Important: let Next.js handle encoding
 
+  // Skip ngrok browser warning interstitial page when using ngrok tunnels
+  headers.set("ngrok-skip-browser-warning", "true");
+
   let body = null;
   let fetchHeaders = headers;
 

@@ -560,6 +560,92 @@ export default function AIResumeScreeningPage() {
   const [enhancedResults, setEnhancedResults] = useState(aiScreeningState.enhancedResults || []);
   const [expanded, setExpanded] = useState(null);
 
+  // Prefill / Add Candidate state
+  const [prefillOpen, setPrefillOpen] = useState({});
+  const [prefillForms, setPrefillForms] = useState({});
+  const [addedCandidates, setAddedCandidates] = useState({});
+
+  // Organizations for dropdown
+  const [organizations, setOrganizations] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/proxy/secure/getOrganizations", { credentials: "include" });
+        const data = await res.json();
+        if (res.ok) setOrganizations(data.organizations || []);
+      } catch (err) {
+        console.error("Failed to load organizations", err);
+      }
+    })();
+  }, []);
+
+  const openPrefill = (res) => {
+    const firstName = res.contact_information?.firstName || "";
+    const lastName = res.contact_information?.lastName || "";
+    setPrefillForms((prev) => ({
+      ...prev,
+      [res.filename]: {
+        firstName,
+        lastName,
+        email: res.contact_information?.email_addresses?.[0] || "",
+        phone: res.contact_information?.phone_numbers?.[0] || "",
+        organizationId: "", // superadmin must fill this
+      },
+    }));
+    setPrefillOpen((prev) => ({ ...prev, [res.filename]: true }));
+  };
+
+  const closePrefill = (filename) => {
+    setPrefillOpen((prev) => ({ ...prev, [filename]: false }));
+  };
+
+  const handlePrefillChange = (filename, field, value) => {
+    setPrefillForms((prev) => ({
+      ...prev,
+      [filename]: { ...prev[filename], [field]: value },
+    }));
+  };
+
+  const handleAddCandidate = async (filename) => {
+    const form = prefillForms[filename];
+    if (!form?.firstName && !form?.lastName && !form?.email && !form?.phone) return;
+    setAddedCandidates((prev) => ({ ...prev, [filename]: "loading" }));
+
+    try {
+      const body = new URLSearchParams();
+      if (form.firstName)       body.append("firstName",       form.firstName);
+      if (form.lastName)        body.append("lastName",        form.lastName);
+      if (form.email)           body.append("email",           form.email);
+      if (form.phone)           body.append("phone",           form.phone);
+      if (form.organizationId)  body.append("organizationId",  form.organizationId);
+      body.append("resumeFilename", filename);
+      body.append("source", "ai_screening");
+
+      const res = await fetch("/api/proxy/secure/createCandidateFromScreening", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString(),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 201 || res.ok) {
+        setAddedCandidates((prev) => ({ ...prev, [filename]: "added" }));
+        setPrefillOpen((prev) => ({ ...prev, [filename]: false }));
+      } else if (res.status === 409) {
+        setAddedCandidates((prev) => ({ ...prev, [filename]: "duplicate" }));
+      } else {
+        setAddedCandidates((prev) => ({ ...prev, [filename]: "error" }));
+        setErrorModal({ isOpen: true, message: "Failed to add candidate", details: data?.detail || "Unknown error" });
+      }
+    } catch (err) {
+      setAddedCandidates((prev) => ({ ...prev, [filename]: "error" }));
+      setErrorModal({ isOpen: true, message: "Failed to add candidate", details: err.message });
+    }
+  };
+
   // Loading states
   const [loading, setLoading] = useState(false);
   const [enhancedLoading, setEnhancedLoading] = useState(false);
@@ -1462,6 +1548,25 @@ export default function AIResumeScreeningPage() {
                   <Shield size={18} className="text-green-600" />
                   Contact Information Verified
                 </h4>
+
+                {/* Full Name */}
+                {(res.contact_information.firstName || res.contact_information.lastName) && (
+                  <div className="bg-white p-3 rounded-lg border border-green-200 mb-4 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {(res.contact_information.firstName || res.contact_information.lastName || "?").charAt(0)}
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-0.5">Extracted Name</p>
+                      <p className="font-bold text-gray-900 text-sm">
+                        {[res.contact_information.firstName, res.contact_information.lastName].filter(Boolean).join(" ")}
+                      </p>
+                    </div>
+                    <span className="ml-auto text-green-600 font-semibold text-xs flex items-center gap-1">
+                      <CheckCircle2 size={12} />
+                      AI Extracted
+                    </span>
+                  </div>
+                )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   {/* Contact Summary */}
@@ -1530,6 +1635,134 @@ export default function AIResumeScreeningPage() {
                     </div>
                   </div>
                 )}
+
+                {/* ── ADD AS CANDIDATE ── */}
+                <div className="mt-4 pt-4 border-t border-green-200">
+                  {addedCandidates[res.filename] === "added" ? (
+                    <div className="flex items-center gap-2 bg-green-100 text-green-700 px-4 py-3 rounded-xl font-semibold text-sm">
+                      <CheckCircle2 size={16} />
+                      Candidate added successfully!
+                    </div>
+                  ) : addedCandidates[res.filename] === "duplicate" ? (
+                    <div className="flex items-center gap-2 bg-yellow-100 text-yellow-700 px-4 py-3 rounded-xl font-semibold text-sm">
+                      <AlertCircle size={16} />
+                      Candidate with this email/phone already exists.
+                    </div>
+                  ) : prefillOpen[res.filename] ? (
+                    <div className="bg-white border-2 border-blue-200 rounded-xl p-4 space-y-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="font-bold text-blue-800 text-sm flex items-center gap-2">
+                          ✨ Pre-filled from Resume — Review &amp; Add
+                        </p>
+                        <button
+                          onClick={() => closePrefill(res.filename)}
+                          className="text-gray-400 hover:text-gray-600 transition"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+
+                      {/* Name row */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-xs text-gray-500 font-medium mb-1 block">First Name *</label>
+                          <input
+                            type="text"
+                            value={prefillForms[res.filename]?.firstName || ""}
+                            onChange={(e) => handlePrefillChange(res.filename, "firstName", e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                            placeholder="First name"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-xs text-gray-500 font-medium mb-1 block">Last Name</label>
+                          <input
+                            type="text"
+                            value={prefillForms[res.filename]?.lastName || ""}
+                            onChange={(e) => handlePrefillChange(res.filename, "lastName", e.target.value)}
+                            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                            placeholder="Last name"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium mb-1 block">Email *</label>
+                        <input
+                          type="email"
+                          value={prefillForms[res.filename]?.email || ""}
+                          onChange={(e) => handlePrefillChange(res.filename, "email", e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                          placeholder="email@example.com"
+                        />
+                      </div>
+
+                      {/* Phone */}
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium mb-1 block">Phone</label>
+                        <input
+                          type="text"
+                          value={prefillForms[res.filename]?.phone || ""}
+                          onChange={(e) => handlePrefillChange(res.filename, "phone", e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-black"
+                          placeholder="+91 9876543210"
+                        />
+                      </div>
+
+                      {/* Organization ID — required for superadmin */}
+                      <div>
+                        <label className="text-xs text-gray-500 font-medium mb-1 block">Organization <span className="text-red-500">*</span></label>
+                        <select
+                          value={prefillForms[res.filename]?.organizationId || ""}
+                          onChange={(e) => handlePrefillChange(res.filename, "organizationId", e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-black bg-white"
+                        >
+                          <option value="">— Select Organization —</option>
+                          {organizations.map((org) => (
+                            <option key={org._id} value={org._id}>
+                              {org.organizationName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <p className="text-xs text-gray-400 italic">
+                        ⚠️ Candidate will be added with <span className="font-semibold text-orange-500">Incomplete Profile</span> status. You can fill remaining fields from Manage Candidates.
+                      </p>
+
+                      <button
+                        onClick={() => handleAddCandidate(res.filename)}
+                        disabled={
+                          !prefillForms[res.filename]?.organizationId ||
+                          (!prefillForms[res.filename]?.firstName && !prefillForms[res.filename]?.email) ||
+                          addedCandidates[res.filename] === "loading"
+                        }
+                        className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-xl py-2.5 font-semibold text-sm flex items-center justify-center gap-2 hover:from-blue-600 hover:to-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {addedCandidates[res.filename] === "loading" ? (
+                          <>
+                            <Loader2 size={15} className="animate-spin" />
+                            Adding Candidate...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 size={15} />
+                            Add as Candidate
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => openPrefill(res)}
+                      className="w-full flex items-center justify-center gap-2 border-2 border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 rounded-xl py-2.5 text-sm font-semibold transition"
+                    >
+                      <span className="text-lg">＋</span>
+                      Add as Candidate (Pre-fill from Resume)
+                    </button>
+                  )}
+                </div>
               </div>
             )}
           </div>
