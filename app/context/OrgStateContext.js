@@ -71,6 +71,10 @@ export function OrgStateProvider({ children }) {
     niceToHave: "",
     results: [],
     enhancedResults: [],
+    expanded: null,
+    prefillOpen: {},
+    prefillForms: {},
+    addedCandidates: {},
   });
 
   // AI CV Verification state

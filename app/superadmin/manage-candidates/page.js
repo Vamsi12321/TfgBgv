@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { PlusCircle, X, Edit, Trash2, Loader2, Users, ChevronDown } from "lucide-react";
+import { PlusCircle, X, Edit, Trash2, Loader2, Users, ChevronDown, Upload, Download, FileSpreadsheet } from "lucide-react";
 import { motion } from "framer-motion";
 
 
@@ -120,6 +120,54 @@ export default function ManageCandidatesPage() {
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const [orgSearch, setOrgSearch] = useState("");
   const [candidateSearch, setCandidateSearch] = useState("");
+
+  // Bulk upload state
+  const [showBulkModal, setShowBulkModal] = useState(false);
+  const [bulkFile, setBulkFile] = useState(null);
+  const [bulkUploading, setBulkUploading] = useState(false);
+  const [bulkResult, setBulkResult] = useState(null);
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const res = await fetch("/api/proxy/secure/downloadCandidateTemplate", { credentials: "include" });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "candidate_template.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      showError("Failed to download template: " + err.message);
+    }
+  };
+
+  const handleBulkUpload = async () => {
+    if (!bulkFile) return;
+    setBulkUploading(true);
+    setBulkResult(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", bulkFile);
+      if (selectedOrg) formData.append("organizationId", selectedOrg);
+      const res = await fetch("/api/proxy/secure/bulkUploadCandidates", {
+        method: "POST",
+        credentials: "include",
+        body: formData,
+      });
+      const data = await res.json();
+      if (res.ok || res.status === 201) {
+        setBulkResult(data);
+        if (selectedOrg) await loadCandidates();
+      } else {
+        showError(data?.detail || "Bulk upload failed");
+      }
+    } catch (err) {
+      showError("Bulk upload failed: " + err.message);
+    } finally {
+      setBulkUploading(false);
+    }
+  };
 
   const [modal, setModal] = useState({
     show: false,
@@ -756,30 +804,32 @@ export default function ManageCandidatesPage() {
             <p className="text-gray-600 text-sm mt-1">Add and manage candidate records</p>
           </div>
 
-          <button
-            onClick={() => {
-              if (!selectedOrg) {
-                setModal({
-                  show: true,
-                  type: "error",
-                  message:
-                    "Please select an organization before adding a candidate.",
-                });
-                return;
-              }
-              setNewCandidate(normalizeCandidate({}));
-              setShowAddModal(true);
-            }}
-            disabled={!selectedOrg}
-            className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold w-full sm:w-auto shadow transition-all hover:shadow-lg ${
-      selectedOrg
-        ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
-        : "bg-gray-400 cursor-not-allowed"
-    }`}
-          >
-            <PlusCircle size={18} />
-            Add Candidate
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => { setBulkFile(null); setBulkResult(null); setShowBulkModal(true); }}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg text-white font-semibold bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 shadow transition-all text-sm"
+            >
+              <FileSpreadsheet size={16} />
+              Bulk Upload
+            </button>
+            <button
+              onClick={() => {
+                if (!selectedOrg) {
+                  setModal({ show: true, type: "error", message: "Please select an organization before adding a candidate." });
+                  return;
+                }
+                setNewCandidate(normalizeCandidate({}));
+                setShowAddModal(true);
+              }}
+              disabled={!selectedOrg}
+              className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-white font-semibold shadow transition-all hover:shadow-lg text-sm ${
+                selectedOrg ? "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700" : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              <PlusCircle size={16} />
+              Add Candidate
+            </button>
+          </div>
         </div>
 
         {/* SUPERB ORGANIZATION SELECT */}
@@ -1260,6 +1310,118 @@ export default function ManageCandidatesPage() {
           </motion.div>
         </div>
       )}
+
+      {/* BULK UPLOAD MODAL */}
+      {showBulkModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+          >
+            <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileSpreadsheet size={22} />
+                <div>
+                  <h2 className="text-lg font-bold">Bulk Upload Candidates</h2>
+                  <p className="text-green-100 text-xs">Upload up to 1000 candidates via CSV</p>
+                </div>
+              </div>
+              <button onClick={() => { setShowBulkModal(false); setBulkResult(null); setBulkFile(null); }}
+                className="text-white/80 hover:text-white transition">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Download template inside modal */}
+              <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold text-blue-800">Download Template</p>
+                  <p className="text-xs text-blue-600 mt-0.5">Get the CSV format with all required columns</p>
+                </div>
+                <button onClick={handleDownloadTemplate}
+                  className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition">
+                  <Download size={14} /> Download
+                </button>
+              </div>
+
+              {/* Org selector note for superadmin */}
+              {!selectedOrg && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-700 font-medium">
+                  ⚠️ Select an organization from the main page before uploading, or the upload will be rejected.
+                </div>
+              )}
+
+              {/* Upload CSV */}
+              <div>
+                <p className="text-sm font-semibold text-gray-700 mb-2">Upload Filled CSV</p>
+                <label className={`cursor-pointer flex items-center gap-3 border-2 border-dashed rounded-xl px-4 py-3 transition ${
+                  bulkFile ? "border-green-400 bg-green-50" : "border-gray-300 bg-gray-50 hover:border-green-400 hover:bg-green-50"
+                }`}>
+                  {bulkFile
+                    ? <FileSpreadsheet size={18} className="text-green-600 flex-shrink-0" />
+                    : <Upload size={18} className="text-gray-400 flex-shrink-0" />
+                  }
+                  <span className={`text-sm font-medium truncate ${bulkFile ? "text-green-700" : "text-gray-500"}`}>
+                    {bulkFile ? bulkFile.name : "Choose CSV file..."}
+                  </span>
+                  <input type="file" accept=".csv" className="hidden"
+                    onChange={(e) => { setBulkFile(e.target.files[0] || null); setBulkResult(null); }} />
+                </label>
+              </div>
+
+              {/* Result */}
+              {bulkResult && (
+                <div className="rounded-xl border overflow-hidden">
+                  <div className={`px-4 py-2.5 text-sm font-bold flex items-center gap-2 ${
+                    bulkResult.summary?.failed === 0 ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-800"
+                  }`}>
+                    {bulkResult.summary?.failed === 0 ? "✅" : "⚠️"}
+                    Upload Complete — {bulkResult.summary?.successful}/{bulkResult.summary?.totalRows} rows succeeded
+                  </div>
+                  <div className="p-3 space-y-1 max-h-40 overflow-y-auto bg-gray-50">
+                    {bulkResult.summary && (
+                      <div className="flex gap-4 text-xs mb-2">
+                        <span className="text-green-700 font-semibold">✓ {bulkResult.summary.successful} added</span>
+                        <span className="text-red-600 font-semibold">✗ {bulkResult.summary.failed} failed</span>
+                        <span className="text-gray-500">Total: {bulkResult.summary.totalRows}</span>
+                      </div>
+                    )}
+                    {bulkResult.failedRows?.map((row, i) => (
+                      <div key={i} className="text-xs text-red-600 bg-red-50 border border-red-100 rounded px-2 py-1">
+                        Row {row.row}: {row.error}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {!bulkResult ? (
+                <button
+                  onClick={handleBulkUpload}
+                  disabled={!bulkFile || bulkUploading}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {bulkUploading ? (
+                    <><Loader2 size={16} className="animate-spin" /> Uploading...</>
+                  ) : (
+                    <><Upload size={16} /> Upload Candidates</>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => { setBulkFile(null); setBulkResult(null); setShowBulkModal(false); }}
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition"
+                >
+                  Done
+                </button>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+
     </div>
   );
 }

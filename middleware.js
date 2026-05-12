@@ -24,6 +24,8 @@ export function middleware(req) {
 
   // Public paths
   if (path.startsWith("/candidate")) return NextResponse.next();
+  if (path.startsWith("/jobseeker")) return NextResponse.next();
+  if (path.startsWith("/api/proxy/jobseeker")) return NextResponse.next();
   if (path === "/favicon.ico") return NextResponse.next();
 
   const isPublic = path.startsWith("/login");

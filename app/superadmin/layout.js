@@ -30,6 +30,8 @@ import {
   ClipboardListIcon,
   GraduationCap,
   Award,
+  Briefcase,
+  CalendarCheck,
 } from "lucide-react";
 
 import { useAuth } from "../context/AuthContext";
@@ -101,6 +103,8 @@ export default function SuperAdminLayout({ children }) {
 
     // AI Services
     { name: "AI Screening", href: "/superadmin/AI-screening", icon: Brain },
+    { name: "Jobs Overview", href: "/superadmin/jobs", icon: Briefcase },
+    { name: "Interviews", href: "/superadmin/interviews", icon: CalendarCheck },
     {
       name: "AI CV Check",
       href: "/superadmin/AI-CV-Verification",

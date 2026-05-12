@@ -558,12 +558,12 @@ export default function AIResumeScreeningPage() {
   const [niceToHave, setNiceToHave] = useState(aiScreeningState.niceToHave || "");
   const [results, setResults] = useState(aiScreeningState.results || []);
   const [enhancedResults, setEnhancedResults] = useState(aiScreeningState.enhancedResults || []);
-  const [expanded, setExpanded] = useState(null);
+  const [expanded, setExpanded] = useState(aiScreeningState.expanded || null);
 
-  // Prefill / Add Candidate state
-  const [prefillOpen, setPrefillOpen] = useState({});
-  const [prefillForms, setPrefillForms] = useState({});
-  const [addedCandidates, setAddedCandidates] = useState({});
+  // Prefill / Add Candidate state — restored from context so results survive navigation
+  const [prefillOpen, setPrefillOpen] = useState(aiScreeningState.prefillOpen || {});
+  const [prefillForms, setPrefillForms] = useState(aiScreeningState.prefillForms || {});
+  const [addedCandidates, setAddedCandidates] = useState(aiScreeningState.addedCandidates || {});
 
   // Organizations for dropdown
   const [organizations, setOrganizations] = useState([]);
@@ -663,12 +663,12 @@ export default function AIResumeScreeningPage() {
   });
 
   // Use ref to always have latest values for cleanup
-  const stateRef = useRef({ topN, mustHave, niceToHave, results, enhancedResults });
+  const stateRef = useRef({ topN, mustHave, niceToHave, results, enhancedResults, prefillOpen, prefillForms, addedCandidates, expanded });
   
   // Update ref whenever state changes
   useEffect(() => {
-    stateRef.current = { topN, mustHave, niceToHave, results, enhancedResults };
-  }, [topN, mustHave, niceToHave, results, enhancedResults]);
+    stateRef.current = { topN, mustHave, niceToHave, results, enhancedResults, prefillOpen, prefillForms, addedCandidates, expanded };
+  }, [topN, mustHave, niceToHave, results, enhancedResults, prefillOpen, prefillForms, addedCandidates, expanded]);
 
   // Save state on unmount (when navigating away)
   useEffect(() => {
@@ -1816,9 +1816,9 @@ export default function AIResumeScreeningPage() {
       )}
 
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header */}
-          <div className="mb-6">
+          <div className="mb-2">
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
               <Sparkles size={24} className="text-[#ff004f]" />
               AI Resume Screening
@@ -1828,124 +1828,108 @@ export default function AIResumeScreeningPage() {
             </p>
           </div>
 
-          {/* Upload Section */}
-          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border space-y-6">
+          {/* ── INFO BANNER ── */}
+          <div className="flex items-start gap-3 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl px-4 py-3">
+            <span className="text-blue-500 mt-0.5 flex-shrink-0">💡</span>
+            <p className="text-sm text-blue-800 leading-relaxed">
+              <span className="font-bold">Pro tip:</span> After screening, each result card shows extracted contact info (name, email, phone).
+              Click <span className="font-semibold text-indigo-700">＋ Add as Candidate</span> to instantly pre-fill and add them to the system — no re-typing needed.
+            </p>
+          </div>
+
+          {/* Upload Section — compact */}
+          <div className="bg-white rounded-2xl shadow-md border p-4 space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold text-gray-900">Upload Files</h2>
+              <h2 className="text-base font-bold text-gray-800 flex items-center gap-2">
+                <Upload size={16} className="text-[#ff004f]" />
+                Upload Files
+              </h2>
               {(jdFile || resumeFiles.length > 0) && (
                 <button
                   onClick={clearAll}
-                  className="text-red-500 hover:text-red-700 text-sm font-semibold flex items-center gap-2 transition"
+                  className="text-red-500 hover:text-red-700 text-xs font-semibold flex items-center gap-1 transition"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={13} />
                   Clear All
                 </button>
               )}
             </div>
 
-            {/* JD Upload */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Job Description (PDF) <span className="text-red-500">*</span>
-              </label>
-              <label className="cursor-pointer flex items-center justify-center gap-3 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 p-6 rounded-xl hover:border-[#ff004f] hover:bg-gray-50 transition group">
-                <Upload
-                  size={24}
-                  className="text-gray-400 group-hover:text-[#ff004f] transition"
-                />
-                <span className="text-gray-600 group-hover:text-[#ff004f] font-medium transition">
-                  {jdFile ? jdFile.name : "Choose Job Description PDF"}
-                </span>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  className="hidden"
-                  onChange={handleJdUpload}
-                />
-              </label>
-              {jdFile && (
-                <div className="mt-2 flex items-center gap-2 text-green-600 text-sm">
-                  <CheckCircle2 size={16} />
-                  <span className="font-medium">{jdFile.name}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Resume Upload */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Resumes (PDF) <span className="text-red-500">*</span>
-              </label>
-              <label className="cursor-pointer flex items-center justify-center gap-3 bg-gradient-to-r from-gray-50 to-gray-100 border-2 border-dashed border-gray-300 p-6 rounded-xl hover:border-[#ff004f] hover:bg-gray-50 transition group">
-                <Upload
-                  size={24}
-                  className="text-gray-400 group-hover:text-[#ff004f] transition"
-                />
-                <span className="text-gray-600 group-hover:text-[#ff004f] font-medium transition">
-                  Choose Resume PDFs (Multiple)
-                </span>
-                <input
-                  type="file"
-                  multiple
-                  accept=".pdf,.doc,.docx"
-                  className="hidden"
-                  onChange={handleResumeUpload}
-                />
-              </label>
-
-              {/* File List */}
-              {resumeFiles.length > 0 && (
-                <div className="mt-4 space-y-2">
-                  <p className="text-sm font-semibold text-gray-700">
-                    {resumeFiles.length} Resume
-                    {resumeFiles.length > 1 ? "s" : ""} Uploaded
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {resumeFiles.map((f, i) => (
-                      <div
-                        key={i}
-                        className="flex justify-between items-center bg-gray-50 p-3 rounded-lg border hover:border-gray-300 transition"
-                      >
-                        <span className="text-sm text-gray-700 truncate flex-1">
-                          {f.name}
-                        </span>
-                        <button
-                          onClick={() => removeResume(f.name)}
-                          className="ml-2 text-red-500 hover:text-red-700 transition"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Configuration */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* JD + Resume side by side */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* JD Upload */}
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Top N Results
+                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                  Job Description (PDF) <span className="text-red-500">*</span>
                 </label>
+                <label className={`cursor-pointer flex items-center gap-2 border-2 border-dashed rounded-xl px-3 py-2.5 transition group ${
+                  jdFile ? "border-green-400 bg-green-50" : "border-gray-300 bg-gray-50 hover:border-[#ff004f] hover:bg-red-50"
+                }`}>
+                  {jdFile ? (
+                    <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />
+                  ) : (
+                    <Upload size={16} className="text-gray-400 group-hover:text-[#ff004f] flex-shrink-0 transition" />
+                  )}
+                  <span className={`text-xs font-medium truncate ${jdFile ? "text-green-700" : "text-gray-500 group-hover:text-[#ff004f]"}`}>
+                    {jdFile ? jdFile.name : "Choose Job Description PDF"}
+                  </span>
+                  <input type="file" accept=".pdf" className="hidden" onChange={handleJdUpload} />
+                </label>
+              </div>
+
+              {/* Resume Upload */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">
+                  Resumes (PDF / DOCX) <span className="text-red-500">*</span>
+                </label>
+                <label className={`cursor-pointer flex items-center gap-2 border-2 border-dashed rounded-xl px-3 py-2.5 transition group ${
+                  resumeFiles.length > 0 ? "border-green-400 bg-green-50" : "border-gray-300 bg-gray-50 hover:border-[#ff004f] hover:bg-red-50"
+                }`}>
+                  {resumeFiles.length > 0 ? (
+                    <CheckCircle2 size={16} className="text-green-500 flex-shrink-0" />
+                  ) : (
+                    <Upload size={16} className="text-gray-400 group-hover:text-[#ff004f] flex-shrink-0 transition" />
+                  )}
+                  <span className={`text-xs font-medium truncate ${resumeFiles.length > 0 ? "text-green-700" : "text-gray-500 group-hover:text-[#ff004f]"}`}>
+                    {resumeFiles.length > 0 ? `${resumeFiles.length} file${resumeFiles.length > 1 ? "s" : ""} selected` : "Choose Resumes (Multiple)"}
+                  </span>
+                  <input type="file" multiple accept=".pdf,.doc,.docx" className="hidden" onChange={handleResumeUpload} />
+                </label>
+              </div>
+            </div>
+
+            {/* Resume file chips */}
+            {resumeFiles.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {resumeFiles.map((f, i) => (
+                  <div key={i} className="flex items-center gap-1 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-1 text-xs text-gray-700">
+                    <FileText size={11} className="text-gray-400" />
+                    <span className="max-w-[140px] truncate">{f.name}</span>
+                    <button onClick={() => removeResume(f.name)} className="text-red-400 hover:text-red-600 ml-0.5 transition">
+                      <X size={11} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Config row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Top N</label>
                 <input
-                  type="number"
-                  min="1"
-                  max="50"
-                  className="w-full border-2 border-gray-300 p-3 rounded-xl focus:border-[#ff004f] focus:outline-none transition text-gray-900"
+                  type="number" min="1" max="50"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:border-[#ff004f] focus:outline-none transition text-gray-900"
                   value={topN}
                   onChange={(e) => setTopN(e.target.value)}
                 />
               </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-gray-700 mb-2">
-                  Must Have Requirements (comma separated)
-                </label>
+              <div className="col-span-1 md:col-span-3">
+                <label className="block text-xs font-semibold text-gray-600 mb-1">Must Have <span className="font-normal text-gray-400">(comma separated)</span></label>
                 <input
                   type="text"
-                  className="w-full border-2 border-gray-300 p-3 rounded-xl focus:border-[#ff004f] focus:outline-none transition text-gray-900 placeholder:text-gray-500"
-                  placeholder="e.g., Python 5+ years, AWS certification, Team leadership"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:border-[#ff004f] focus:outline-none transition text-gray-900 placeholder:text-gray-400"
+                  placeholder="e.g., Python 5+ years, AWS certification"
                   value={mustHave}
                   onChange={(e) => setMustHave(e.target.value)}
                 />
@@ -1953,12 +1937,10 @@ export default function AIResumeScreeningPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">
-                Nice to Have (comma separated)
-              </label>
+              <label className="block text-xs font-semibold text-gray-600 mb-1">Nice to Have <span className="font-normal text-gray-400">(comma separated)</span></label>
               <input
                 type="text"
-                className="w-full border-2 border-gray-300 p-3 rounded-xl focus:border-[#ff004f] focus:outline-none transition text-gray-900 placeholder:text-gray-500"
+                className="w-full border border-gray-300 px-3 py-2 rounded-lg text-sm focus:border-[#ff004f] focus:outline-none transition text-gray-900 placeholder:text-gray-400"
                 placeholder="e.g., Docker, Kubernetes, Microservices"
                 value={niceToHave}
                 onChange={(e) => setNiceToHave(e.target.value)}
@@ -1966,266 +1948,142 @@ export default function AIResumeScreeningPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+            <div className="grid grid-cols-2 gap-3 pt-1">
               <button
-                className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 font-bold text-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white py-2.5 rounded-xl shadow flex items-center justify-center gap-2 font-bold text-sm hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleBasic}
                 disabled={loading || enhancedLoading}
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={20} />
-                    Basic Screening
-                  </>
-                )}
+                {loading ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
+                {loading ? "Processing..." : "Basic Screening"}
               </button>
-
               <button
-                className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-4 rounded-xl shadow-lg flex items-center justify-center gap-3 font-bold text-lg hover:shadow-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-2.5 rounded-xl shadow flex items-center justify-center gap-2 font-bold text-sm hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleEnhanced}
                 disabled={loading || enhancedLoading}
               >
-                {enhancedLoading ? (
-                  <>
-                    <Loader2 className="animate-spin" size={20} />
-                    Processing...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles size={20} />
-                    Enhanced Screening
-                  </>
-                )}
+                {enhancedLoading ? <Loader2 className="animate-spin" size={16} /> : <Sparkles size={16} />}
+                {enhancedLoading ? "Processing..." : "Enhanced Screening"}
               </button>
             </div>
           </div>
-
           {/* Results Section */}
           {(results.length > 0 || enhancedResults.length > 0) && (
-            <div className="space-y-8">
+            <div className="space-y-5">
               {/* Basic Results */}
               {results.length > 0 && (
-                <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border">
-                  <div className="flex flex-col gap-4 mb-6">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        Basic Screening Results
-                      </h2>
-                      <span className="text-sm text-gray-600 font-semibold">
-                        {results.length} Candidate{results.length > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    
-                    {/* Contact Information Summary */}
-                    {results.length > 0 && results.some(r => r.contact_information) && (
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
-                        <h3 className="font-bold text-green-800 mb-2 flex items-center gap-2">
-                          <Shield size={16} />
-                          Contact Verification Summary
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div className="text-center">
-                            <p className="font-bold text-green-600 text-lg">
-                              {results.filter(r => r.contact_information?.contact_completeness === 'COMPLETE').length}
-                            </p>
-                            <p className="text-green-700">Complete Contacts</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-bold text-blue-600 text-lg">
-                              {results.reduce((sum, r) => sum + (r.contact_information?.total_phones || 0), 0)}
-                            </p>
-                            <p className="text-blue-700">Total Phones</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-bold text-purple-600 text-lg">
-                              {results.reduce((sum, r) => sum + (r.contact_information?.total_emails || 0), 0)}
-                            </p>
-                            <p className="text-purple-700">Total Emails</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-bold text-orange-600 text-lg">
-                              {results.filter(r => r.contact_information?.regex_detected?.contact_found).length}
-                            </p>
-                            <p className="text-orange-700">Pattern Detected</p>
-                          </div>
-                        </div>
+                <div className="bg-white rounded-2xl shadow-md border overflow-hidden">
+                  <div className="px-4 py-3 border-b bg-gradient-to-r from-gray-50 to-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#ff004f]"></span>
+                    <h2 className="text-sm font-bold text-gray-800">Basic Screening Results</h2>
+                    <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                      {results.length} candidate{results.length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {results.some(r => r.contact_information) && (
+                      <div className="flex flex-wrap gap-2 p-3 bg-green-50 border border-green-100 rounded-xl">
+                        <span className="text-xs font-semibold text-green-700 flex items-center gap-1 mr-1">
+                          <Shield size={12} /> Contacts:
+                        </span>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                          ✓ {results.filter(r => r.contact_information?.contact_completeness === 'COMPLETE').length} complete
+                        </span>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                          📞 {results.reduce((s, r) => s + (r.contact_information?.total_phones || 0), 0)} phones
+                        </span>
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                          ✉ {results.reduce((s, r) => s + (r.contact_information?.total_emails || 0), 0)} emails
+                        </span>
+                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                          🔍 {results.filter(r => r.contact_information?.regex_detected?.contact_found).length} pattern detected
+                        </span>
                       </div>
                     )}
-                    
-                    {/* Download Options */}
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => downloadResumes("basic")}
-                        disabled={loading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <Download size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Resume PDFs</span>
+                    <div className="flex flex-wrap gap-2">
+                      <button onClick={() => downloadResumes("basic")} disabled={loading}
+                        className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <Download size={13} /> Resume PDFs
                       </button>
-                      
-                      <button
-                        onClick={() => downloadPDFCertificates("basic")}
-                        disabled={loading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#e60047] to-[#ff004f] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <FileDown size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Certificates</span>
+                      <button onClick={() => downloadPDFCertificates("basic")} disabled={loading}
+                        className="flex items-center gap-1.5 bg-[#ff004f] hover:bg-[#e60047] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <FileDown size={13} /> Certificates
                       </button>
-                      
-                      <button
-                        onClick={() => downloadExcelReport("basic")}
-                        disabled={loading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <FileSpreadsheet size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Excel Report</span>
+                      <button onClick={() => downloadExcelReport("basic")} disabled={loading}
+                        className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <FileSpreadsheet size={13} /> Excel
                       </button>
-                      
-                      <button
-                        onClick={() => downloadReport("basic", results)}
-                        disabled={loading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <FileText size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Text Summary</span>
+                      <button onClick={() => downloadReport("basic", results)} disabled={loading}
+                        className="flex items-center gap-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <FileText size={13} /> Text
                       </button>
-                      
-                      <button
-                        onClick={() => downloadAll("basic")}
-                        disabled={loading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-purple-500 via-purple-600 to-pink-500 text-white px-5 py-3 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden border-2 border-purple-400"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <Download size={20} className="relative z-10 group-hover:animate-pulse" />
-                        <span className="relative z-10">Complete Package</span>
+                      <button onClick={() => downloadAll("basic")} disabled={loading}
+                        className="flex items-center gap-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <Download size={13} /> Full Package
                       </button>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {results.map((res, idx) =>
-                      renderResumeCard(res, idx, "basic")
-                    )}
+                    <div className="space-y-3">
+                      {results.map((res, idx) => renderResumeCard(res, idx, "basic"))}
+                    </div>
                   </div>
                 </div>
               )}
 
               {/* Enhanced Results */}
               {enhancedResults.length > 0 && (
-                <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border">
-                  <div className="flex flex-col gap-4 mb-6">
-                    <div className="flex justify-between items-center">
-                      <h2 className="text-2xl font-bold text-gray-900">
-                        Enhanced Screening Results
-                      </h2>
-                      <span className="text-sm text-gray-600 font-semibold">
-                        {enhancedResults.length} Candidate{enhancedResults.length > 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    
-                    {/* Contact Information Summary */}
-                    {enhancedResults.length > 0 && enhancedResults.some(r => r.contact_information) && (
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
-                        <h3 className="font-bold text-green-800 mb-2 flex items-center gap-2">
-                          <Shield size={16} />
-                          Contact Verification Summary
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                          <div className="text-center">
-                            <p className="font-bold text-green-600 text-lg">
-                              {enhancedResults.filter(r => r.contact_information?.contact_completeness === 'COMPLETE').length}
-                            </p>
-                            <p className="text-green-700">Complete Contacts</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-bold text-blue-600 text-lg">
-                              {enhancedResults.reduce((sum, r) => sum + (r.contact_information?.total_phones || 0), 0)}
-                            </p>
-                            <p className="text-blue-700">Total Phones</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-bold text-purple-600 text-lg">
-                              {enhancedResults.reduce((sum, r) => sum + (r.contact_information?.total_emails || 0), 0)}
-                            </p>
-                            <p className="text-purple-700">Total Emails</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="font-bold text-orange-600 text-lg">
-                              {enhancedResults.filter(r => r.contact_information?.regex_detected?.contact_found).length}
-                            </p>
-                            <p className="text-orange-700">Pattern Detected</p>
-                          </div>
-                        </div>
+                <div className="bg-white rounded-2xl shadow-md border overflow-hidden">
+                  <div className="px-4 py-3 border-b bg-gradient-to-r from-gray-50 to-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-gray-800"></span>
+                    <h2 className="text-sm font-bold text-gray-800">Enhanced Screening Results</h2>
+                    <span className="bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full">
+                      {enhancedResults.length} candidate{enhancedResults.length > 1 ? "s" : ""}
+                    </span>
+                  </div>
+                  <div className="p-4 space-y-3">
+                    {enhancedResults.some(r => r.contact_information) && (
+                      <div className="flex flex-wrap gap-2 p-3 bg-green-50 border border-green-100 rounded-xl">
+                        <span className="text-xs font-semibold text-green-700 flex items-center gap-1 mr-1">
+                          <Shield size={12} /> Contacts:
+                        </span>
+                        <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                          ✓ {enhancedResults.filter(r => r.contact_information?.contact_completeness === 'COMPLETE').length} complete
+                        </span>
+                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                          📞 {enhancedResults.reduce((s, r) => s + (r.contact_information?.total_phones || 0), 0)} phones
+                        </span>
+                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full font-medium">
+                          ✉ {enhancedResults.reduce((s, r) => s + (r.contact_information?.total_emails || 0), 0)} emails
+                        </span>
+                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-medium">
+                          🔍 {enhancedResults.filter(r => r.contact_information?.regex_detected?.contact_found).length} pattern detected
+                        </span>
                       </div>
                     )}
-                    
-                    {/* Download Options */}
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => downloadResumes("enhanced")}
-                        disabled={loading || enhancedLoading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <Download size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Resume PDFs</span>
+                    <div className="flex flex-wrap gap-2">
+                      <button onClick={() => downloadResumes("enhanced")} disabled={loading || enhancedLoading}
+                        className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <Download size={13} /> Resume PDFs
                       </button>
-                      
-                      <button
-                        onClick={() => downloadPDFCertificates("enhanced")}
-                        disabled={loading || enhancedLoading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-[#e60047] to-[#ff004f] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <FileDown size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Certificates</span>
+                      <button onClick={() => downloadPDFCertificates("enhanced")} disabled={loading || enhancedLoading}
+                        className="flex items-center gap-1.5 bg-[#ff004f] hover:bg-[#e60047] text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <FileDown size={13} /> Certificates
                       </button>
-                      
-                      <button
-                        onClick={() => downloadExcelReport("enhanced")}
-                        disabled={loading || enhancedLoading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-green-600 to-green-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <FileSpreadsheet size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Excel Report</span>
+                      <button onClick={() => downloadExcelReport("enhanced")} disabled={loading || enhancedLoading}
+                        className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <FileSpreadsheet size={13} /> Excel
                       </button>
-                      
-                      <button
-                        onClick={() => downloadReport("enhanced", enhancedResults)}
-                        disabled={loading || enhancedLoading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-gray-600 to-gray-700 text-white px-5 py-3 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-gray-700 to-gray-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <FileText size={18} className="relative z-10 group-hover:animate-bounce" />
-                        <span className="relative z-10">Text Summary</span>
+                      <button onClick={() => downloadReport("enhanced", enhancedResults)} disabled={loading || enhancedLoading}
+                        className="flex items-center gap-1.5 bg-gray-600 hover:bg-gray-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <FileText size={13} /> Text
                       </button>
-                      
-                      <button
-                        onClick={() => downloadAll("enhanced")}
-                        disabled={loading || enhancedLoading}
-                        className="group relative flex items-center gap-2 bg-gradient-to-r from-purple-500 via-purple-600 to-pink-500 text-white px-5 py-3 rounded-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden border-2 border-purple-400"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-500 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <Download size={20} className="relative z-10 group-hover:animate-pulse" />
-                        <span className="relative z-10">Complete Package</span>
+                      <button onClick={() => downloadAll("enhanced")} disabled={loading || enhancedLoading}
+                        className="flex items-center gap-1.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:opacity-50">
+                        <Download size={13} /> Full Package
                       </button>
                     </div>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {enhancedResults.map((res, idx) =>
-                      renderResumeCard(res, idx, "enhanced")
-                    )}
+                    <div className="space-y-3">
+                      {enhancedResults.map((res, idx) => renderResumeCard(res, idx, "enhanced"))}
+                    </div>
                   </div>
                 </div>
               )}

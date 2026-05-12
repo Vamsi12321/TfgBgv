@@ -3,6 +3,10 @@ import { BACKEND_URL } from "@/config/backend";
 
 const BACKEND = BACKEND_URL;
 
+// Allow long-running requests (AI screening can take 60+ seconds)
+export const maxDuration = 120;
+export const dynamic = "force-dynamic";
+
 export async function GET(req, { params }) {
   const resolvedParams = await params;
   return proxyRequest(req, resolvedParams);
@@ -76,32 +80,33 @@ async function proxyRequest(req, params) {
   }
 
   try {
+    // Use AbortController with 90s timeout for long-running requests (AI screening etc.)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+
     const backendRes = await fetch(backendUrl, {
       method: req.method,
       headers: fetchHeaders,
       body,
       credentials: "include",
+      signal: controller.signal,
     });
 
-    // Read the response as text/json
+    clearTimeout(timeoutId);
+
+    // Read the response based on content type
     const contentType = backendRes.headers.get("content-type");
-    let responseData;
+    const contentDisposition = backendRes.headers.get("content-disposition");
 
-    if (contentType && contentType.includes("application/json")) {
-      responseData = await backendRes.json();
-    } else {
-      responseData = await backendRes.text();
-    }
-
-    // Create response with proper headers
+    // Create response headers
     const responseHeaders = new Headers();
 
-    // Copy important headers
+    // Copy important headers (skip content-length as Next.js will set it)
     backendRes.headers.forEach((value, key) => {
       if (
         key !== "content-encoding" &&
-        key !== "content-length" &&
-        key !== "transfer-encoding"
+        key !== "transfer-encoding" &&
+        key !== "content-length"
       ) {
         responseHeaders.set(key, value);
       }
@@ -111,6 +116,26 @@ async function proxyRequest(req, params) {
     const setCookie = backendRes.headers.get("set-cookie");
     if (setCookie) {
       responseHeaders.set("set-cookie", setCookie);
+    }
+
+    // If it's a file download (has content-disposition or non-json/text content type), stream as binary
+    const isFileDownload = contentDisposition ||
+      (contentType && !contentType.includes("application/json") && !contentType.includes("text/"));
+
+    if (isFileDownload) {
+      const blob = await backendRes.arrayBuffer();
+      return new NextResponse(blob, {
+        status: backendRes.status,
+        headers: responseHeaders,
+      });
+    }
+
+    // Handle JSON
+    let responseData;
+    if (contentType && contentType.includes("application/json")) {
+      responseData = await backendRes.json();
+    } else {
+      responseData = await backendRes.text();
     }
 
     // Return appropriate response

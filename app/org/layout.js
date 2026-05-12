@@ -25,6 +25,8 @@ import {
   Headset,
   Sparkles,
   ClipboardListIcon,
+  Briefcase,
+  CalendarCheck,
 } from "lucide-react";
 
 export default function OrgAdminLayout({ children }) {
@@ -108,14 +110,14 @@ export default function OrgAdminLayout({ children }) {
     { name: "Dashboard", href: "/org/dashboard", icon: LayoutDashboard },
     { name: "Organization", href: "/org/organization", icon: Building },
     { name: "Users & Roles", href: "/org/users", icon: Users },
-    { name: "Verifications", href: "/org/verifications", icon: ClipboardList },
+    { name: "AI Screening", href: "/org/AI-screening", icon: Brain },
+    { name: "Jobs & ATS", href: "/org/jobs", icon: Briefcase },
+    { name: "Interviews", href: "/org/interviews", icon: CalendarCheck },
     {
       name: "Manage Candidates",
       href: "/org/manage-candidates",
       icon: UserSearch,
     },
-    // ⭐ STANDARDIZED NAMES — SAME AS SUPERADMIN
-    { name: "AI Screening", href: "/org/AI-screening", icon: Brain },
     {
       name: "AI CV Validation",
       href: "/org/AI-CV-Verification",
@@ -137,6 +139,7 @@ export default function OrgAdminLayout({ children }) {
       href: "/org/self-verification",
       icon: UserCheck,
     },
+    { name: "Verifications", href: "/org/verifications", icon: ClipboardList },
 
     
    

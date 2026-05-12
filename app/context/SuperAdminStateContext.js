@@ -88,6 +88,10 @@ export function SuperAdminStateProvider({ children }) {
     niceToHave: "",
     results: [],
     enhancedResults: [],
+    expanded: null,
+    prefillOpen: {},
+    prefillForms: {},
+    addedCandidates: {},
   });
 
   const value = {
