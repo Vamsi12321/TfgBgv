@@ -28,7 +28,7 @@ import {
   XCircle
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -62,6 +62,45 @@ export default function HomePage() {
     setMounted(true);
   }, []);
 
+  const smoothScrollTo = useCallback((targetId) => {
+    const element = document.getElementById(targetId);
+    if (!element) return;
+
+    const navHeight = 64; // fixed nav height
+    const targetPosition = element.getBoundingClientRect().top + window.pageYOffset - navHeight;
+    const startPosition = window.pageYOffset;
+    const distance = targetPosition - startPosition;
+    const duration = 1200; // ms — longer = smoother
+    let startTime = null;
+
+    // Custom easing: easeInOutCubic for buttery smooth feel
+    const easeInOutCubic = (t) => {
+      return t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    };
+
+    const animation = (currentTime) => {
+      if (startTime === null) startTime = currentTime;
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = easeInOutCubic(progress);
+
+      window.scrollTo(0, startPosition + distance * eased);
+
+      if (progress < 1) {
+        requestAnimationFrame(animation);
+      }
+    };
+
+    requestAnimationFrame(animation);
+  }, []);
+
+  const handleNavClick = useCallback((e, targetId) => {
+    e.preventDefault();
+    smoothScrollTo(targetId);
+  }, [smoothScrollTo]);
+
   if (!mounted) return null;
 
   return (
@@ -80,11 +119,11 @@ export default function HomePage() {
               </div>
             </div>
             <div className="hidden lg:flex items-center bg-white/70 backdrop-blur-xl border border-surface-200/60 rounded-full p-1.5 shadow-xl shadow-brand-500/5 ring-1 ring-slate-900/5 transition-all duration-300 hover:shadow-brand-500/10 hover:border-brand-200/50">
-              <Link href="#flow" className="group flex items-center gap-1.5 text-sm font-black text-brand-700 bg-white px-4 py-2 rounded-full shadow-md shadow-brand-500/10 border border-brand-100 hover:shadow-brand-500/20 transition-all hover:-translate-y-0.5 relative overflow-hidden">
+              <a href="#flow" onClick={(e) => handleNavClick(e, 'flow')} className="group flex items-center gap-1.5 text-sm font-black text-brand-700 bg-white px-4 py-2 rounded-full shadow-md shadow-brand-500/10 border border-brand-100 hover:shadow-brand-500/20 transition-all hover:-translate-y-0.5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-brand-50 via-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <GitMerge className="w-3.5 h-3.5 text-brand-600 relative z-10" /> 
                 <span className="relative z-10">Hiring Paths</span>
-              </Link>
+              </a>
               
               <div className="flex items-center px-4 relative">
                 <div className="absolute left-1 w-px h-4 bg-gradient-to-b from-transparent via-slate-200 to-transparent"></div>
@@ -92,27 +131,27 @@ export default function HomePage() {
                 <div className="absolute right-1 w-px h-4 bg-gradient-to-b from-transparent via-slate-200 to-transparent"></div>
               </div>
               
-              <Link href="#ai" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+              <a href="#ai" onClick={(e) => handleNavClick(e, 'ai')} className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
                 <Brain className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> AI Screen
-              </Link>
+              </a>
               
               <ChevronRight className="w-3 h-3 text-slate-300 mx-0.5" />
               
-              <Link href="#ats" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+              <a href="#ats" onClick={(e) => handleNavClick(e, 'ats')} className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
                 <Users className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> ATS & Interviews
-              </Link>
+              </a>
               
               <ChevronRight className="w-3 h-3 text-slate-300 mx-0.5" />
               
-              <Link href="#bgv" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+              <a href="#bgv" onClick={(e) => handleNavClick(e, 'bgv')} className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
                 <ShieldCheck className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> BGV
-              </Link>
+              </a>
               
               <ChevronRight className="w-3 h-3 text-slate-300 mx-0.5" />
               
-              <Link href="#hrms" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+              <a href="#hrms" onClick={(e) => handleNavClick(e, 'hrms')} className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
                 <UserCheck className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> HRMS
-              </Link>
+              </a>
             </div>
             <div className="flex items-center gap-4">
               <Link href="/login" className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/30 hover:shadow-indigo-500/40 hover:scale-105 active:scale-95">
