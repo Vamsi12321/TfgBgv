@@ -1,1506 +1,1411 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { jsPDF } from "jspdf";
-import { safeHtml2Canvas } from "@/utils/safeHtml2Canvas";
+
+import { motion } from "framer-motion";
 import {
-  Shield,
   Brain,
   Users,
-  FileCheck,
-  Lock,
-  CheckCircle,
+  ShieldCheck,
+  GitMerge,
+  ArrowRight,
+  Sparkles,
+  CheckCircle2,
+  FileText,
+  Star,
+  UserCheck,
+  Search,
+  ChevronRight,
+  Activity,
+  Fingerprint,
+  Briefcase,
+  GraduationCap,
+  Scale,
   CreditCard,
   MapPin,
-  GraduationCap,
-  UserCheck,
-  FileText,
-  Building,
-  Sparkles,
-  Zap,
-  TrendingUp,
-  Eye,
-  ArrowRight,
+  FileSearch,
   Globe,
   Clock,
-  Award,
-  Database,
-  Cpu,
-  Network,
-  ChevronDown,
-  Play,
-  CheckSquare,
-  Rocket,
-  Download,
+  Loader2,
+  XCircle
 } from "lucide-react";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+
+const fadeIn = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
+};
+
+const fadeInLeft = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6 } }
+};
+
+const fadeInRight = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6 } }
+};
+
+const scaleIn = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1, transition: { duration: 0.5 } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+};
 
 export default function HomePage() {
-  const router = useRouter();
-  const [showLanding, setShowLanding] = useState(false);
-  const [redirecting, setRedirecting] = useState(true);
-  const [generatingReport, setGeneratingReport] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("bgvUser");
-    const tokenCookie = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("bgvTemp="));
+    setMounted(true);
+  }, []);
 
-    if (storedUser && tokenCookie) {
-      try {
-        const user = JSON.parse(storedUser);
-        const role = user.role?.toUpperCase();
-
-        if (
-          ["SUPER_ADMIN", "SUPER_ADMIN_HELPER", "SUPER_SPOC"].includes(role)
-        ) {
-          router.replace("/superadmin/dashboard");
-          return;
-        }
-
-        if (["ORG_HR", "HELPER", "SPOC", "ORG_SPOC"].includes(role)) {
-          router.replace("/org/dashboard");
-          return;
-        }
-      } catch {
-        localStorage.removeItem("bgvUser");
-      }
-    }
-
-    setShowLanding(true);
-    setRedirecting(false);
-  }, [router]);
-
-  // Sample Report Generation Function
-  const generateSampleReport = async () => {
-    if (generatingReport) return; // Prevent multiple clicks
-    
-    setGeneratingReport(true);
-    try {
-      // Create sample data
-      const sampleCandidate = {
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@example.com",
-        phone: "+91-9876543210",
-        _id: "sample123456789"
-      };
-
-      const sampleOrganization = "TFG AI Solutions";
-
-      const sampleChecks = [
-        { 
-          checkName: "pan_verification", 
-          status: "COMPLETED", 
-          stage: "Primary", 
-          completedAt: new Date().toISOString(),
-          initiatedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-          apiResponse: { 
-            status: "VALID", 
-            pan_number: "ABCDE1234F", 
-            name_match: "EXACT",
-            date_of_birth: "15/08/1995",
-            father_name: "ROBERT DOE"
-          }
-        },
-        { 
-          checkName: "employment_history", 
-          status: "COMPLETED", 
-          stage: "Primary", 
-          completedAt: new Date().toISOString(),
-          initiatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-          apiResponse: { 
-            company: "Tech Solutions Pvt Ltd", 
-            designation: "Software Engineer", 
-            duration: "2 years 3 months",
-            employment_type: "Full Time",
-            last_working_day: "31/12/2023",
-            hr_contact: "hr@techsolutions.com"
-          }
-        },
-        { 
-          checkName: "education_check_manual", 
-          status: "COMPLETED", 
-          stage: "Secondary", 
-          completedAt: new Date().toISOString(),
-          initiatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-          apiResponse: { 
-            degree: "B.Tech Computer Science", 
-            university: "ABC University", 
-            year: "2020", 
-            status: "VERIFIED",
-            cgpa: "8.5/10",
-            registration_number: "ABC123456789"
-          }
-        },
-        { 
-          checkName: "court_record", 
-          status: "COMPLETED", 
-          stage: "Secondary", 
-          completedAt: new Date().toISOString(),
-          initiatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-          apiResponse: { 
-            criminal_records: "CLEAR", 
-            civil_records: "CLEAR", 
-            status: "NO_RECORDS_FOUND",
-            courts_searched: ["District Court", "High Court", "Supreme Court"],
-            search_period: "Last 7 years"
-          }
-        },
-        { 
-          checkName: "credit_report", 
-          status: "COMPLETED", 
-          stage: "Final", 
-          completedAt: new Date().toISOString(),
-          initiatedAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(), // 4 hours ago
-          apiResponse: { 
-            credit_score: 750, 
-            status: "GOOD", 
-            total_accounts: 3, 
-            overdue_amount: 0,
-            credit_history_length: "5 years",
-            payment_history: "100% on time"
-          }
-        },
-        { 
-          checkName: "address_verification", 
-          status: "COMPLETED", 
-          stage: "Final", 
-          completedAt: new Date().toISOString(),
-          initiatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days ago
-          apiResponse: { 
-            address_match: "CONFIRMED", 
-            verification_method: "FIELD_VISIT", 
-            status: "VERIFIED",
-            address: "123 Tech Park, Bangalore, Karnataka 560001",
-            resident_since: "2 years",
-            verification_agent: "Agent ID: TFG001"
-          }
-        }
-      ];
-
-      // Create a new jsPDF instance
-      let pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: "a4",
-      });
-
-      // Generate Index Page first
-      const indexDiv = document.createElement("div");
-      indexDiv.id = "temp-index-page";
-      indexDiv.style.position = "absolute";
-      indexDiv.style.left = "-9999px";
-      indexDiv.style.top = "0";
-      indexDiv.style.width = "860px";
-      indexDiv.style.minHeight = "1120px";
-      indexDiv.style.visibility = "visible";
-      indexDiv.style.backgroundColor = "#ffffff";
-      indexDiv.style.fontFamily = "Arial, sans-serif";
-      indexDiv.style.color = "#000";
-      document.body.appendChild(indexDiv);
-
-      // Build verification summary table rows
-      const tableRows = sampleChecks.map((chk, index) => {
-        const serviceName = chk.checkName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        return '<tr style="background: ' + (index % 2 === 0 ? "#ffffff" : "#f9f9f9") + ';">' +
-          '<td style="padding: 10px 12px; font-size: 12px; color: #000; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;">' + chk.stage + '</td>' +
-          '<td style="padding: 10px 12px; font-size: 12px; color: #000; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0;">' + serviceName + '</td>' +
-          '<td style="padding: 10px 12px; font-size: 12px; font-weight: bold; color: #22c55e; border-bottom: 1px solid #e0e0e0;">✓ Verified</td>' +
-          '</tr>';
-      }).join("");
-
-      indexDiv.innerHTML = 
-        '<div style="width: 860px; min-height: 1120px; padding: 40px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; color: #000; position: relative; overflow: hidden;">' +
-        '<img src="/logos/tfgLogo.jpeg" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; pointer-events: none; z-index: 1;" />' +
-        '<div style="position: relative; z-index: 2;">' +
-        '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
-        '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
-        '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">TFG Enterprise Gold Certificate</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">Comprehensive Background Verification Certificate</p></div>' +
-        '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 8886099008</p><p style="margin: 0 0 5px 0;">✉ naresh@tfgorg.com</p><p style="margin: 0 0 5px 0;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #0066cc; text-decoration: underline;">LinkedIn</a></p><p style="margin: 0;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #0066cc; text-decoration: underline;">www.tfgorg.com</a></p></div>' +
-        '</div>' +
-        '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 10px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
-        '<table style="width: 100%; border-collapse: collapse;">' +
-        '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">Name:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleCandidate.firstName + ' ' + sampleCandidate.lastName + '</td></tr>' +
-        '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Email:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleCandidate.email + '</td></tr>' +
-        '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Phone:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleCandidate.phone + '</td></tr>' +
-        '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Organization:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleOrganization + '</td></tr>' +
-        '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Certificate Level:</td><td style="padding: 8px 0; font-size: 13px; color: #000; font-weight: bold;">Gold Certificate</td></tr>' +
-        '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Completion Score:</td><td style="padding: 8px 0; font-size: 13px; color: #000; font-weight: bold;">100%</td></tr>' +
-        '</table></div>' +
-        '<div style="margin-bottom: 30px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Verification Summary</h2>' +
-        '<table style="width: 100%; border-collapse: collapse; border: 2px solid #e0e0e0;">' +
-        '<thead><tr style="background: #f0f0f0;">' +
-        '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">BGV Check</th>' +
-        '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd; border-right: 1px solid #ddd;">Service</th>' +
-        '<th style="padding: 12px; text-align: left; font-size: 13px; font-weight: bold; color: #000; border-bottom: 2px solid #ddd;">Status</th>' +
-        '</tr></thead>' +
-        '<tbody>' + tableRows + '</tbody>' +
-        '</table></div>' +
-        '<div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;"><div style="font-size: 11px; color: #666; margin-bottom: 15px;">' +
-        '<p style="margin: 5px 0;">Generated on: ' + new Date().toLocaleString() + '</p>' +
-        '<p style="margin: 5px 0;">Total Verifications: ' + sampleChecks.length + '</p>' +
-        '<p style="margin: 5px 0;">Completed: ' + sampleChecks.filter((c) => c.status === "COMPLETED").length + '</p>' +
-        '<p style="margin: 5px 0;">Certificate ID: TFG-SAMPLE-DEMO</p>' +
-        '</div><div style="margin-top: 120px; padding-top: 15px; border-top: 2px solid #272626ff; font-size: 12px; color: #dc3545; text-align: center; font-weight: 600; line-height: 1.4;">' +
-        '<div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;"><img src="/logos/T-Hub.jpg" alt="T-Hub Address" style="width: 24px; height: 24px; margin-right: 8px; object-fit: contain;" /><span>TFG AI powered IT solutions</span></div>' +
-        '<p style="margin: 0;">T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
-        '<div style="margin-top: 8px; font-size: 11px;"><span>📞 8886099008 | ✉ naresh@tfgorg.com | 🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #dc3545; text-decoration: underline;">LinkedIn</a> | 🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #dc3545; text-decoration: underline;">www.tfgorg.com</a></span></div>' +
-        '</div></div></div></div>';
-
-      // Wait for images to load and proper rendering
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      // Generate PDF for index page
-      const indexCanvas = await safeHtml2Canvas(indexDiv, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-        logging: false,
-        width: 860,
-        height: 1120,
-      });
-
-      if (!indexCanvas || indexCanvas.width === 0 || indexCanvas.height === 0) {
-        throw new Error('Failed to generate index page canvas');
-      }
-
-      const indexImgData = indexCanvas.toDataURL("image/png", 1.0);
-      
-      if (!indexImgData || !indexImgData.startsWith('data:image/png;base64,')) {
-        throw new Error('Failed to generate index page image');
-      }
-
-      // Create PDF with proper A4 dimensions
-      pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "pt",
-        format: "a4",
-      });
-
-      // Add index page to PDF with proper scaling
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = indexCanvas.width * 0.75;
-      const imgHeight = indexCanvas.height * 0.75;
-      
-      // Scale to fit page while maintaining aspect ratio
-      const scale = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const scaledWidth = imgWidth * scale;
-      const scaledHeight = imgHeight * scale;
-      
-      // Center the image on the page
-      const x = (pdfWidth - scaledWidth) / 2;
-      const y = (pdfHeight - scaledHeight) / 2;
-      
-      pdf.addImage(indexImgData, "PNG", x, y, scaledWidth, scaledHeight);
-      document.body.removeChild(indexDiv);
-
-      // Generate individual service certificates
-      for (let i = 0; i < sampleChecks.length; i++) {
-        const check = sampleChecks[i];
-        const serviceName = check.checkName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-        
-        // Create individual service certificate
-        const serviceDiv = document.createElement("div");
-        serviceDiv.id = `temp-service-${i}`;
-        serviceDiv.style.position = "absolute";
-        serviceDiv.style.left = "-9999px";
-        serviceDiv.style.top = "0";
-        serviceDiv.style.width = "860px";
-        serviceDiv.style.minHeight = "1120px";
-        serviceDiv.style.visibility = "visible";
-        serviceDiv.style.backgroundColor = "#ffffff";
-        serviceDiv.style.fontFamily = "Arial, sans-serif";
-        serviceDiv.style.color = "#000";
-        document.body.appendChild(serviceDiv);
-
-        // Format API response for display
-        const formatApiResponse = (data) => {
-          if (!data) return "No data available";
-          return JSON.stringify(data, null, 2);
-        };
-
-        serviceDiv.innerHTML = 
-          '<div style="width: 860px; min-height: 1120px; padding: 40px 50px 60px 50px; background: #ffffff; font-family: Arial, sans-serif; color: #000; position: relative; overflow: hidden;">' +
-          '<img src="/logos/tfgLogo.jpeg" alt="watermark" style="position: absolute; top: 300px; left: 50%; transform: translateX(-50%); opacity: 0.08; width: 750px; height: 750px; object-fit: contain; pointer-events: none; z-index: 1;" />' +
-          '<div style="position: relative; z-index: 2;">' +
-          '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">' +
-          '<div style="flex-shrink: 0; margin-top: 5px;"><img src="/logos/tfgLogo.jpeg" alt="logo" style="max-height: 180px; max-width: 450px; height: auto; width: auto; display: block; object-fit: contain;" /></div>' +
-          '<div style="display: flex; flex-direction: column; justify-content: flex-start; margin-top: 55px; flex: 1; padding: 0 20px;"><h1 style="font-size: 26px; font-weight: bold; color: #000; margin: 0 0 8px 0; line-height: 1.3;">TFG Enterprise Service Certificate</h1><p style="font-size: 14px; color: #555; margin: 0; line-height: 1.4;">' + serviceName + ' Verification Report</p></div>' +
-          '<div style="flex-shrink: 0; margin-top: 5px; text-align: right; font-size: 12px; color: #333; line-height: 1.8;"><p style="margin: 0 0 5px 0; font-weight: bold;">📞 8886099008</p><p style="margin: 0 0 5px 0;">✉ naresh@tfgorg.com</p><p style="margin: 0 0 5px 0;">🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #0066cc; text-decoration: underline;">LinkedIn</a></p><p style="margin: 0;">🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #0066cc; text-decoration: underline;">www.tfgorg.com</a></p></div>' +
-          '</div>' +
-          '<div style="background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; padding: 20px; margin-bottom: 20px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Candidate Information</h2>' +
-          '<table style="width: 100%; border-collapse: collapse;">' +
-          '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold; width: 150px;">Name:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleCandidate.firstName + ' ' + sampleCandidate.lastName + '</td></tr>' +
-          '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Email:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleCandidate.email + '</td></tr>' +
-          '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Phone:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleCandidate.phone + '</td></tr>' +
-          '<tr><td style="padding: 8px 0; font-size: 13px; color: #333; font-weight: bold;">Organization:</td><td style="padding: 8px 0; font-size: 13px; color: #000;">' + sampleOrganization + '</td></tr>' +
-          '</table></div>' +
-          '<div style="margin-bottom: 20px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Service Verification Details</h2>' +
-          '<table style="width: 100%; border-collapse: collapse; border: 2px solid #e0e0e0;">' +
-          '<tr style="background: #f0f0f0;"><td style="padding: 12px; font-size: 13px; font-weight: bold; color: #000; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd; width: 30%;">Service Name</td><td style="padding: 12px; font-size: 13px; color: #000; border-bottom: 1px solid #ddd;">' + serviceName + '</td></tr>' +
-          '<tr><td style="padding: 12px; font-size: 13px; font-weight: bold; color: #000; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Status</td><td style="padding: 12px; font-size: 13px; color: #22c55e; border-bottom: 1px solid #ddd; font-weight: bold;">✓ VERIFIED</td></tr>' +
-          '<tr style="background: #f9f9f9;"><td style="padding: 12px; font-size: 13px; font-weight: bold; color: #000; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Stage</td><td style="padding: 12px; font-size: 13px; color: #000; border-bottom: 1px solid #ddd;">' + check.stage + '</td></tr>' +
-          '<tr><td style="padding: 12px; font-size: 13px; font-weight: bold; color: #000; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Initiated</td><td style="padding: 12px; font-size: 13px; color: #000; border-bottom: 1px solid #ddd;">' + new Date(check.initiatedAt).toLocaleString() + '</td></tr>' +
-          '<tr style="background: #f9f9f9;"><td style="padding: 12px; font-size: 13px; font-weight: bold; color: #000; border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;">Completed</td><td style="padding: 12px; font-size: 13px; color: #000; border-bottom: 1px solid #ddd;">' + new Date(check.completedAt).toLocaleString() + '</td></tr>' +
-          '</table></div>' +
-          '<div style="margin-bottom: 20px;"><h2 style="font-size: 16px; font-weight: bold; color: #000; margin: 0 0 15px 0; border-bottom: 2px solid #ddd; padding-bottom: 8px;">Verification Response Data</h2>' +
-          '<div style="background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 15px; font-size: 12px; font-family: monospace; color: #000; white-space: pre-wrap; word-break: break-word; max-height: 300px; overflow: auto;">' + formatApiResponse(check.apiResponse) + '</div></div>' +
-          '<div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;"><div style="font-size: 11px; color: #666; margin-bottom: 15px;">' +
-          '<p style="margin: 5px 0;">Generated on: ' + new Date().toLocaleString() + '</p>' +
-          '<p style="margin: 5px 0;">Service ID: ' + check.checkName + '</p>' +
-          '<p style="margin: 5px 0;">Certificate ID: TFG-SAMPLE-' + check.stage.toUpperCase() + '-' + i + '</p>' +
-          '</div><div style="margin-top: 120px; padding-top: 15px; border-top: 2px solid #272626ff; font-size: 12px; color: #dc3545; text-align: center; font-weight: 600; line-height: 1.4;">' +
-          '<div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;"><img src="/logos/T-Hub.jpg" alt="T-Hub Address" style="width: 24px; height: 24px; margin-right: 8px; object-fit: contain;" /><span>TFG AI powered IT solutions</span></div>' +
-          '<p style="margin: 0;">T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081</p>' +
-          '<div style="margin-top: 8px; font-size: 11px;"><span>📞 8886099008 | ✉ naresh@tfgorg.com | 🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style="color: #dc3545; text-decoration: underline;">LinkedIn</a> | 🌐 <a href="https://www.tfgorg.com" target="_blank" style="color: #dc3545; text-decoration: underline;">www.tfgorg.com</a></span></div>' +
-          '</div></div></div></div>';
-
-        // Wait for proper rendering
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Generate canvas for service certificate
-        const serviceCanvas = await safeHtml2Canvas(serviceDiv, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: "#ffffff",
-          logging: false,
-          width: 860,
-          height: 1120,
-        });
-
-        if (serviceCanvas && serviceCanvas.width > 0 && serviceCanvas.height > 0) {
-          const serviceImgData = serviceCanvas.toDataURL("image/png", 1.0);
-          
-          if (serviceImgData && serviceImgData.startsWith('data:image/png;base64,')) {
-            // Add new page for each service with proper scaling
-            pdf.addPage("a4", "portrait");
-            
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const imgWidth = serviceCanvas.width * 0.75;
-            const imgHeight = serviceCanvas.height * 0.75;
-            
-            // Scale to fit page while maintaining aspect ratio
-            const scale = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-            const scaledWidth = imgWidth * scale;
-            const scaledHeight = imgHeight * scale;
-            
-            // Center the image on the page
-            const x = (pdfWidth - scaledWidth) / 2;
-            const y = (pdfHeight - scaledHeight) / 2;
-            
-            pdf.addImage(serviceImgData, "PNG", x, y, scaledWidth, scaledHeight);
-          }
-        }
-
-        // Clean up
-        document.body.removeChild(serviceDiv);
-      }
-
-      // Save the complete PDF with all pages
-      pdf.save("TFG_John_Doe_Complete_BGV_Report_Package.pdf");
-
-    } catch (error) {
-      console.error('Failed to generate sample report:', error);
-      alert('Failed to generate sample report. Please try again.');
-    } finally {
-      setGeneratingReport(false);
-    }
-  };
-
-  if (redirecting) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p>Redirecting...</p>
-      </div>
-    );
-  }
-
-  if (!showLanding) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-        <div className="relative">
-          <div className="animate-spin h-16 w-16 rounded-full border-4 border-[#0066cc] border-t-transparent"></div>
-          <div className="absolute inset-0 animate-ping h-16 w-16 rounded-full border-4 border-[#0066cc] opacity-20"></div>
-        </div>
-        <p className="mt-6 text-gray-600 font-medium animate-pulse">
-          Loading...
-        </p>
-      </div>
-    );
-  }
-
-  const enterpriseFeatures = [
-    {
-      category: "AI-Powered Intelligence",
-      items: [
-        { name: "Resume Screening AI", description: "Bulk processing with JD matching" },
-        { name: "Fraud Detection ML", description: "98% accuracy in authenticity verification" },
-        { name: "Document Analysis", description: "Automated credential validation" },
-        { name: "Risk Assessment", description: "Intelligent scoring algorithms" }
-      ]
-    },
-    {
-      category: "Verification Services",
-      items: [
-        { name: "PAN & Aadhaar Verification", description: "Government database validation" },
-        { name: "Employment History", description: "Comprehensive background checks" },
-        { name: "Court Record Search", description: "Criminal and civil records" },
-        { name: "Credit Report Analysis", description: "Financial background verification" }
-      ]
-    },
-    {
-      category: "Enterprise Platform",
-      items: [
-        { name: "Multi-Organization Support", description: "Manage multiple entities" },
-        { name: "Role-Based Access Control", description: "Granular permissions system" },
-        { name: "Real-Time Dashboards", description: "Live analytics and reporting" },
-        { name: "API Integration", description: "Seamless system connectivity" }
-      ]
-    }
-  ];
+  if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Navigation Header - Floating Design */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 flex items-center justify-center">
-                <img 
-                  src="/logos/tfgLogo.jpeg" 
-                  alt="TFG Reports Logo" 
-                  className="w-10 h-10 object-contain"
-                />
+    <div className="min-h-screen bg-[#f4f7fb] text-slate-800 font-sans selection:bg-brand-200">
+      {/* Navbar */}
+      <nav className="fixed top-0 w-full z-50 glass-panel border-b border-surface-200/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-2">
+              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-brand-600 to-blue-600 flex items-center justify-center shadow-md shadow-brand-500/20">
+                <ShieldCheck className="w-5 h-5 text-white" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">TFG Reports</h1>
-                <p className="text-xs text-gray-500">AI-Powered BGV Platform</p>
+              <div className="leading-tight">
+                <span className="text-base font-black tracking-tight text-slate-900">TFG <span className="text-brand-600">Reports</span></span>
+                <p className="text-[9px] text-slate-400 font-medium">AI-Powered BGV Platform</p>
               </div>
             </div>
-
-            {/* Navigation Links */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#ai-solutions" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">AI Solutions</a>
-              <a href="#bgv-process" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">BGV Process</a>
-              <a href="#services" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Services</a>
-              <a href="#platform" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Platform</a>
-              <a href="#reports" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">Reports</a>
-              <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" className="text-gray-600 hover:text-blue-600 font-medium transition-colors">LinkedIn</a>
+            <div className="hidden lg:flex items-center bg-white/70 backdrop-blur-xl border border-surface-200/60 rounded-full p-1.5 shadow-xl shadow-brand-500/5 ring-1 ring-slate-900/5 transition-all duration-300 hover:shadow-brand-500/10 hover:border-brand-200/50">
+              <Link href="#flow" className="group flex items-center gap-1.5 text-sm font-black text-brand-700 bg-white px-4 py-2 rounded-full shadow-md shadow-brand-500/10 border border-brand-100 hover:shadow-brand-500/20 transition-all hover:-translate-y-0.5 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-brand-50 via-blue-50 to-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <GitMerge className="w-3.5 h-3.5 text-brand-600 relative z-10" /> 
+                <span className="relative z-10">Hiring Paths</span>
+              </Link>
+              
+              <div className="flex items-center px-4 relative">
+                <div className="absolute left-1 w-px h-4 bg-gradient-to-b from-transparent via-slate-200 to-transparent"></div>
+                <span className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">Features Flow</span>
+                <div className="absolute right-1 w-px h-4 bg-gradient-to-b from-transparent via-slate-200 to-transparent"></div>
+              </div>
+              
+              <Link href="#ai" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+                <Brain className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> AI Screen
+              </Link>
+              
+              <ChevronRight className="w-3 h-3 text-slate-300 mx-0.5" />
+              
+              <Link href="#ats" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+                <Users className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> ATS & Interviews
+              </Link>
+              
+              <ChevronRight className="w-3 h-3 text-slate-300 mx-0.5" />
+              
+              <Link href="#bgv" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+                <ShieldCheck className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> BGV
+              </Link>
+              
+              <ChevronRight className="w-3 h-3 text-slate-300 mx-0.5" />
+              
+              <Link href="#hrms" className="group flex items-center gap-1.5 text-sm font-bold text-slate-600 hover:text-brand-600 transition-all px-3 py-1.5 rounded-full hover:bg-blue-50/50">
+                <UserCheck className="w-3.5 h-3.5 text-slate-400 group-hover:text-brand-500 transition-colors" /> HRMS
+              </Link>
             </div>
-
-            {/* CTA Button */}
-            <button
-              onClick={() => router.push("/login")}
-              className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-blue-200 transition-all duration-300"
-            >
-              Get Started
-            </button>
+            <div className="flex items-center gap-4">
+              <Link href="/login" className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-blue-500/30 hover:shadow-indigo-500/40 hover:scale-105 active:scale-95">
+                Get Started
+              </Link>
+            </div>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section - Split Layout */}
-      <section className="pt-24 pb-16 bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 relative overflow-hidden">
-        {/* Background Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-400/20 to-indigo-500/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-purple-400/20 to-pink-500/20 rounded-full blur-3xl"></div>
-        </div>
+      {/* Hero Section */}
+      <div className="relative pt-32 pb-20 sm:pt-40 sm:pb-24 overflow-hidden min-h-[90vh] flex items-center" style={{ background: "linear-gradient(180deg, #eef2f9 0%, #f0f4fa 40%, #f7f9fc 100%)" }}>
+        {/* Animated gradient orbs */}
+        <motion.div
+          animate={{ x: [0, 30, 0], y: [0, -20, 0], scale: [1, 1.1, 1] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-blue-200/60 via-indigo-100/40 to-transparent rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ x: [0, -20, 0], y: [0, 30, 0], scale: [1, 1.15, 1] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute -bottom-20 -left-20 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-200/40 to-blue-100/30 rounded-full blur-3xl"
+        />
+        <motion.div
+          animate={{ x: [0, 15, -10, 0], y: [0, -15, 10, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-gradient-to-br from-purple-100/30 to-pink-50/20 rounded-full blur-3xl"
+        />
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Left Content */}
-            <div className="space-y-8">
-              {/* Badge */}
-              <div className="inline-flex items-center space-x-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-blue-200 shadow-sm">
-                <Sparkles className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-semibold text-blue-600">AI-Powered BGV Platform</span>
-                <span className="bg-gradient-to-r from-orange-400 to-red-400 text-white text-xs px-2 py-0.5 rounded-full font-bold">NEW</span>
-              </div>
+        {/* Floating icons - decorative */}
+        <motion.div
+          animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[20%] left-[8%] hidden lg:flex w-14 h-14 rounded-2xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-blue-500/10 items-center justify-center"
+        >
+          <Brain className="w-6 h-6 text-blue-500" />
+        </motion.div>
+        <motion.div
+          animate={{ y: [0, 12, 0], rotate: [0, -5, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute top-[25%] right-[10%] hidden lg:flex w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-indigo-500/10 items-center justify-center"
+        >
+          <ShieldCheck className="w-5 h-5 text-indigo-500" />
+        </motion.div>
+        <motion.div
+          animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute bottom-[25%] left-[12%] hidden lg:flex w-11 h-11 rounded-xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-green-500/10 items-center justify-center"
+        >
+          <UserCheck className="w-5 h-5 text-green-500" />
+        </motion.div>
+        <motion.div
+          animate={{ y: [0, 14, 0], rotate: [0, -6, 0] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+          className="absolute bottom-[30%] right-[8%] hidden lg:flex w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-purple-500/10 items-center justify-center"
+        >
+          <FileText className="w-5 h-5 text-purple-500" />
+        </motion.div>
 
-              {/* Main Headline */}
-              <div className="space-y-4">
-                <h1 className="text-5xl lg:text-7xl font-black text-gray-900 leading-tight">
-                  Hire with
-                  <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    Confidence
-                  </span>
-                </h1>
-                <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                  Complete Background Verification (BGV) platform with AI-powered screening and instant report downloads. 
-                  <span className="font-semibold text-blue-600"> Verify candidates in minutes, not days.</span>
-                </p>
-              </div>
+        {/* Subtle grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, #3b82f6 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
 
-              {/* Stats Row */}
-              <div className="flex items-center space-x-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">AI</div>
-                  <div className="text-sm text-gray-500">Powered</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">24hrs</div>
-                  <div className="text-sm text-gray-500">Report Ready</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-gray-900">12+</div>
-                  <div className="text-sm text-gray-500">BGV Services</div>
-                </div>
-              </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+            className="text-center max-w-5xl mx-auto"
+          >
+            <motion.div
+              variants={fadeIn}
+              whileHover={{ scale: 1.05 }}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white shadow-xl shadow-brand-500/10 border border-brand-100 text-brand-600 text-sm font-bold mb-8 cursor-default"
+            >
+              <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
+                <Sparkles className="w-5 h-5 text-accent-500" />
+              </motion.div>
+              <span>Next-Gen Hiring, BGV & HRMS Platform</span>
+            </motion.div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={() => router.push("/login")}
-                  className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-2xl hover:shadow-xl hover:shadow-blue-200 transition-all duration-300 flex items-center justify-center space-x-2"
+            <motion.h1 variants={fadeIn} className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-6 text-slate-900 leading-[1.1]">
+              The smartest way to <br />
+              <span className="relative inline-block">
+                <motion.span
+                  className="text-gradient"
+                  animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  style={{ backgroundSize: "200% 200%", backgroundImage: "linear-gradient(135deg, #0066cc, #3b82f6, #6366f1, #8b5cf6, #3b82f6, #0066cc)" }}
                 >
-                  <span>Start Free Trial</span>
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-                <button className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-2xl border-2 border-gray-200 hover:border-blue-300 hover:text-blue-600 transition-all duration-300 flex items-center justify-center space-x-2">
-                  <Play className="w-5 h-5" />
-                  <span>Watch Demo</span>
-                </button>
-              </div>
+                  hire, verify & manage.
+                </motion.span>
+                {/* Animated underline */}
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
+                  className="absolute -bottom-2 left-0 right-0 h-[4px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full origin-left"
+                />
+              </span>
+            </motion.h1>
 
-              {/* Trust Indicators */}
-              <div className="flex items-center space-x-6 text-sm text-gray-500">
-                <div className="flex items-center space-x-2">
-                  <Shield className="w-4 h-4 text-green-500" />
-                  <span>SOC 2 Compliant</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Lock className="w-4 h-4 text-blue-500" />
-                  <span>Bank-Grade Security</span>
-                </div>
-              </div>
-            </div>
+            <motion.p variants={fadeIn} className="mt-6 text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
+              Seamlessly connect AI screening, Applicant Tracking, multi-round interviews, instant BGV, and HRMS auto-onboarding into one unified, intelligent flow.
+            </motion.p>
 
-            {/* Right Content - BGV Report Demo */}
-            <div className="relative">
-              <div className="bg-white rounded-3xl shadow-2xl p-8 border border-gray-100">
-                <div className="space-y-6">
-                  {/* Demo Header */}
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-gray-900">BGV Report Generation</h3>
-                    <div className="flex items-center space-x-2 text-green-600">
-                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm font-medium">Live Demo</span>
-                    </div>
+            <motion.div variants={fadeIn} className="flex flex-col sm:flex-row justify-center gap-4">
+              <Link href="/login">
+                <motion.button
+                  whileHover={{ scale: 1.05, boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.4)" }}
+                  whileTap={{ scale: 0.95 }}
+                  className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-2xl text-lg font-bold transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-500/25 overflow-hidden group"
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                  <span className="relative z-10">Start Hiring Flow</span>
+                  <motion.div animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="relative z-10">
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.div>
+                </motion.button>
+              </Link>
+              <Link href="/tfgjobs">
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -12px rgba(100, 116, 139, 0.2)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="bg-white hover:bg-surface-100 text-slate-800 px-8 py-4 rounded-2xl text-lg font-bold transition-all flex items-center justify-center gap-2 border border-surface-200 shadow-xl shadow-slate-200/50"
+                >
+                  <Search className="w-5 h-5 text-accent-500" />
+                  Find Jobs (Seeker)
+                </motion.button>
+              </Link>
+            </motion.div>
+
+            {/* Trust badges with stagger animation */}
+            <motion.div variants={fadeIn} className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-10">
+              {[
+                { icon: <ShieldCheck className="w-4 h-4 text-green-500" />, text: "SOC 2 Compliant" },
+                { icon: <ShieldCheck className="w-4 h-4 text-blue-500" />, text: "Bank-Grade Security" },
+                { icon: <Activity className="w-4 h-4 text-indigo-500" />, text: "99.9% Uptime" },
+              ].map((badge, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.2 + i * 0.15 }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-slate-100 shadow-sm text-sm text-slate-600"
+                >
+                  {badge.icon}
+                  <span className="font-medium">{badge.text}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Animated scroll indicator */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 2 }}
+              className="mt-14 flex justify-center"
+            >
+              <motion.div
+                animate={{ y: [0, 8, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="w-8 h-12 rounded-full border-2 border-slate-300 flex items-start justify-center p-2"
+              >
+                <motion.div
+                  animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="w-1.5 h-3 bg-slate-400 rounded-full"
+                />
+              </motion.div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Problem → Solution Section */}
+      <section className="py-16 bg-white relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-600 text-xs font-bold border border-red-100 mb-4">
+              <XCircle className="w-3.5 h-3.5" /> Industry Problems We Solve
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-3">Traditional Hiring is <span className="text-red-500">Broken</span></h2>
+            <p className="text-sm text-slate-500 max-w-xl mx-auto">Companies lose time, money, and quality hires due to fragmented processes. Here is how TFG fixes it.</p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[
+              { problem: "Manual resume screening takes weeks", solution: "AI screens 100+ resumes in 60 seconds", icon: <Brain className="w-5 h-5" />, color: "blue" },
+              { problem: "BGV takes 15-30 days with vendors", solution: "Instant API checks + 48hr full report", icon: <ShieldCheck className="w-5 h-5" />, color: "indigo" },
+              { problem: "Fake resumes slip through undetected", solution: "98% fraud detection with ML models", icon: <FileSearch className="w-5 h-5" />, color: "purple" },
+              { problem: "Unstructured interview process", solution: "Dynamic multi-round interviews with ratings", icon: <Users className="w-5 h-5" />, color: "cyan" },
+              { problem: "Manual onboarding after hire takes days", solution: "BGV done → Auto-added to HRMS instantly", icon: <UserCheck className="w-5 h-5" />, color: "amber" },
+              { problem: "Hard to find right candidates for roles", solution: "TFG Jobs portal brings candidates directly to you", icon: <Briefcase className="w-5 h-5" />, color: "green" }
+            ].map((item, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
+                className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all group"
+              >
+                <div className="flex items-start gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <XCircle className="w-4 h-4 text-red-400" />
                   </div>
+                  <p className="text-sm text-red-500 font-medium">{item.problem}</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className={`w-8 h-8 rounded-lg bg-${item.color}-50 flex items-center justify-center flex-shrink-0 text-${item.color}-600`}>
+                    {item.icon}
+                  </div>
+                  <p className="text-sm text-slate-900 font-bold">{item.solution}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
 
-                  {/* Candidate Info */}
-                  <div className="bg-blue-50 rounded-xl p-4">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                        JD
+          {/* Stats bar */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { val: "10x", label: "Faster Hiring", color: "text-blue-600" },
+              { val: "95%", label: "Cost Reduction in BGV", color: "text-indigo-600" },
+              { val: "Zero", label: "Manual Errors", color: "text-purple-600" },
+              { val: "48hrs", label: "Complete BGV Report", color: "text-green-600" }
+            ].map((s, i) => (
+              <div key={i} className="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <div className={`text-2xl font-black ${s.color}`}>{s.val}</div>
+                <div className="text-xs text-slate-500 font-medium mt-0.5">{s.label}</div>
+              </div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Two Hiring Paths - Premium */}
+      <section id="flow" className="py-20 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-50/50 via-white to-blue-50/30" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white text-brand-600 text-xs font-bold border border-brand-100 shadow-sm mb-5">
+              <GitMerge className="w-4 h-4" /> Intelligent Workflow
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">Two Flexible <span className="text-gradient">Hiring Paths</span></h2>
+            <p className="text-base text-slate-500 max-w-2xl mx-auto">Choose the path that fits — full pipeline or fast-track direct verification.</p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Path 1 - Job Portal */}
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, type: "spring", stiffness: 80 }} whileHover={{ y: -4 }} className="group">
+              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_60px_-15px_rgba(59,130,246,0.15)] transition-all duration-500 relative overflow-hidden">
+                {/* Decorative gradient orb */}
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-indigo-400/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:scale-110 transition-transform duration-300">
+                        <Briefcase className="w-6 h-6 text-white" />
                       </div>
                       <div>
-                        <div className="font-semibold text-gray-900">John Doe</div>
-                        <div className="text-sm text-gray-600">Software Engineer</div>
+                        <h3 className="text-xl font-black text-slate-900">Job Portal Pipeline</h3>
+                        <p className="text-sm text-blue-600 font-semibold">Full Hiring Flow</p>
                       </div>
                     </div>
-                    <div className="text-xs text-blue-600 font-medium">Candidate ID: BGV2024001</div>
+                    <span className="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-[10px] font-black rounded-full border border-blue-200 uppercase tracking-wider">Recommended</span>
                   </div>
 
-                  {/* Verification Progress */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600">BGV Verification Progress</span>
-                      <span className="text-blue-600 font-medium">8/12 Complete</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2 rounded-full animate-pulse" style={{width: '67%'}}></div>
-                    </div>
-                  </div>
-
-                  {/* Verification Results */}
-                  <div className="space-y-2">
-                    <h4 className="text-sm font-semibold text-gray-900">Verification Status</h4>
-                    {[
-                      { name: "PAN Verification", status: "Verified", color: "green" },
-                      { name: "Employment History", status: "Verified", color: "green" },
-                      { name: "Education Check", status: "In Progress", color: "yellow" },
-                      { name: "Court Records", status: "Pending", color: "gray" }
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-2 h-2 rounded-full ${
-                            item.color === 'green' ? 'bg-green-500' : 
-                            item.color === 'yellow' ? 'bg-yellow-500' : 'bg-gray-400'
-                          }`}></div>
-                          <span className="text-sm text-gray-900">{item.name}</span>
-                        </div>
-                        <span className={`text-xs font-medium ${
-                          item.color === 'green' ? 'text-green-600' : 
-                          item.color === 'yellow' ? 'text-yellow-600' : 'text-gray-500'
-                        }`}>
-                          {item.status}
-                        </span>
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-3 mb-8">
+                    {[{ val: "6", label: "Steps" }, { val: "4", label: "Interview Rounds" }, { val: "Auto", label: "BGV Trigger" }].map((s, i) => (
+                      <div key={i} className="text-center p-4 bg-gradient-to-b from-slate-50 to-white rounded-2xl border border-slate-100">
+                        <div className="text-2xl font-black text-slate-900">{s.val}</div>
+                        <div className="text-[11px] text-slate-500 font-medium mt-0.5">{s.label}</div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Download Report Button */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-semibold text-gray-900">BGV Report Ready</div>
-                        <div className="text-xs text-gray-600">Comprehensive verification report</div>
-                      </div>
-                      <button 
-                        onClick={generateSampleReport}
-                        disabled={generatingReport}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center space-x-2 transition-colors ${
-                          generatingReport 
-                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                            : 'bg-blue-600 text-white hover:bg-blue-700'
-                        }`}
-                      >
-                        {generatingReport ? (
-                          <>
-                            <div className="w-4 h-4 border-2 border-gray-300 border-t-white rounded-full animate-spin"></div>
-                            <span>Generating...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Download className="w-4 h-4" />
-                            <span>Download</span>
-                          </>
-                        )}
-                      </button>
+                  {/* Steps with connecting line */}
+                  <div className="relative">
+                    {/* Vertical connecting line - centered on circles */}
+                    <div className="absolute left-[22px] top-[28px] bottom-[28px] w-[2px] bg-gradient-to-b from-blue-300 via-indigo-300 to-blue-300 rounded-full" />
+                    
+                    <div className="space-y-0">
+                      {[
+                        { step: "Apply", desc: "Seeker registers & uploads resume" },
+                        { step: "AI Screen", desc: "Bulk AI scoring against JD" },
+                        { step: "Shortlist", desc: "Top candidates auto-shortlisted" },
+                        { step: "Interview", desc: "Rounds: Tech → Manager → HR → Final" },
+                        { step: "Hired", desc: "Offer extended & accepted" },
+                        { step: "BGV", desc: "Verification starts automatically" }
+                      ].map((item, i) => (
+                        <div key={i} className="flex items-center gap-4 py-3 px-1 rounded-xl hover:bg-blue-50/50 transition-colors group/item relative">
+                          <div className="w-[36px] h-[36px] rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-md shadow-blue-500/20 flex-shrink-0 relative z-10 ring-[3px] ring-white">{i + 1}</div>
+                          <div className="flex-1 flex items-baseline gap-2">
+                            <span className="text-sm font-bold text-slate-900">{item.step}</span>
+                            <span className="text-xs text-slate-400 font-medium">{item.desc}</span>
+                          </div>
+                          {i === 5 ? <ShieldCheck className="w-4 h-4 text-green-500 flex-shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-200 flex-shrink-0 group-hover/item:text-blue-400 transition-colors" />}
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Floating Elements */}
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center shadow-xl animate-bounce">
-                <Shield className="w-8 h-8 text-white" />
-              </div>
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg">
-                <CheckCircle className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      {/* Enhanced AI Showcase - More Prominent */}
-      <section id="ai-solutions" className="py-20 bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-900 text-white relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full blur-3xl animate-pulse animation-delay-2000"></div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-8 py-4 rounded-full font-bold text-lg mb-8 shadow-2xl">
-              <Sparkles className="w-6 h-6" />
-              <span>REVOLUTIONARY AI TECHNOLOGY</span>
-              <Zap className="w-6 h-6" />
-            </div>
-            <h2 className="text-5xl lg:text-7xl font-black mb-6 leading-tight">
-              AI-Powered
-              <br />
-              <span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-purple-300 bg-clip-text text-transparent">
-                Verification Suite
-              </span>
-            </h2>
-            <p className="text-2xl text-blue-100 max-w-4xl mx-auto leading-relaxed">
-              Experience the future of hiring with cutting-edge artificial intelligence that transforms how you screen, validate, and verify candidates
-            </p>
-          </div>
-
-          {/* AI Features Grid - Enhanced */}
-          <div className="grid lg:grid-cols-3 gap-8 mb-16">
-            {/* AI Resume Screening - Enhanced */}
-            <div className="group bg-white/10 backdrop-blur-lg rounded-3xl p-10 border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:rotate-1">
-              <div className="text-center mb-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl mx-auto group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-                  <Rocket className="w-12 h-12 text-white" />
-                </div>
-                <h3 className="text-3xl font-bold mb-2">AI Resume Screening</h3>
-                <p className="text-green-300 font-semibold">Bulk Processing Engine</p>
-              </div>
-              
-              <p className="text-blue-100 mb-8 leading-relaxed text-center">
-                Revolutionary AI that processes 100+ resumes simultaneously, ranking candidates by JD compatibility in under 60 seconds
-              </p>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="text-center p-3 bg-green-500/20 rounded-xl border border-green-400/30">
-                  <div className="text-2xl font-bold text-white">100+</div>
-                  <div className="text-xs text-green-200">Resumes</div>
-                </div>
-                <div className="text-center p-3 bg-green-500/20 rounded-xl border border-green-400/30">
-                  <div className="text-2xl font-bold text-white">60s</div>
-                  <div className="text-xs text-green-200">Processing</div>
-                </div>
-                <div className="text-center p-3 bg-green-500/20 rounded-xl border border-green-400/30">
-                  <div className="text-2xl font-bold text-white">95%</div>
-                  <div className="text-xs text-green-200">Accuracy</div>
-                </div>
-              </div>
-
-              {/* Features */}
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                  <span>Intelligent JD Matching Algorithm</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                  <span>Bulk Upload & Batch Processing</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                  <span>Smart Candidate Ranking System</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
-                  <span>Instant Results & Reports</span>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-green-500/30 to-emerald-500/30 rounded-2xl p-6 border border-green-400/40">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-white mb-2">100+ Hours</div>
-                  <div className="text-green-200 font-semibold">Saved Per Hiring Cycle</div>
-                </div>
-              </div>
-            </div>
-
-            {/* AI CV Validation - Enhanced */}
-            <div className="group bg-white/10 backdrop-blur-lg rounded-3xl p-10 border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:-rotate-1">
-              <div className="text-center mb-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-400 to-indigo-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl mx-auto group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-                  <Shield className="w-12 h-12 text-white" />
-                </div>
-                <h3 className="text-3xl font-bold mb-2">AI CV Validation</h3>
-                <p className="text-blue-300 font-semibold">Fraud Detection System</p>
-              </div>
-              
-              <p className="text-blue-100 mb-8 leading-relaxed text-center">
-                Advanced machine learning algorithms detect CV fraud, inconsistencies, and authenticity issues with industry-leading accuracy
-              </p>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="text-center p-3 bg-blue-500/20 rounded-xl border border-blue-400/30">
-                  <div className="text-2xl font-bold text-white">98%</div>
-                  <div className="text-xs text-blue-200">Accuracy</div>
-                </div>
-                <div className="text-center p-3 bg-blue-500/20 rounded-xl border border-blue-400/30">
-                  <div className="text-2xl font-bold text-white">Real-time</div>
-                  <div className="text-xs text-blue-200">Detection</div>
-                </div>
-                <div className="text-center p-3 bg-blue-500/20 rounded-xl border border-blue-400/30">
-                  <div className="text-2xl font-bold text-white">360°</div>
-                  <div className="text-xs text-blue-200">Coverage</div>
-                </div>
-              </div>
-
-              {/* Features */}
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <span>Deep Learning Fraud Detection</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <span>Authenticity Scoring Engine</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <span>Pattern Recognition Analysis</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                  <span>Risk Assessment Reports</span>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-blue-500/30 to-indigo-500/30 rounded-2xl p-6 border border-blue-400/40">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-white mb-2">Zero</div>
-                  <div className="text-blue-200 font-semibold">False Positives Guaranteed</div>
-                </div>
-              </div>
-            </div>
-
-            {/* AI Education Verification - Enhanced */}
-            <div className="group bg-white/10 backdrop-blur-lg rounded-3xl p-10 border border-white/20 shadow-2xl hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:rotate-1">
-              <div className="text-center mb-8">
-                <div className="w-24 h-24 bg-gradient-to-br from-purple-400 to-pink-600 rounded-3xl flex items-center justify-center mb-6 shadow-2xl mx-auto group-hover:scale-110 group-hover:rotate-12 transition-all duration-300">
-                  <GraduationCap className="w-12 h-12 text-white" />
-                </div>
-                <h3 className="text-3xl font-bold mb-2">AI Education Verification</h3>
-                <p className="text-purple-300 font-semibold">Document Analysis Engine</p>
-              </div>
-              
-              <p className="text-blue-100 mb-8 leading-relaxed text-center">
-                Automated validation of educational credentials using advanced OCR, document analysis, and institution database verification
-              </p>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="text-center p-3 bg-purple-500/20 rounded-xl border border-purple-400/30">
-                  <div className="text-2xl font-bold text-white">96%</div>
-                  <div className="text-xs text-purple-200">Accuracy</div>
-                </div>
-                <div className="text-center p-3 bg-purple-500/20 rounded-xl border border-purple-400/30">
-                  <div className="text-2xl font-bold text-white">24hrs</div>
-                  <div className="text-xs text-purple-200">Turnaround</div>
-                </div>
-                <div className="text-center p-3 bg-purple-500/20 rounded-xl border border-purple-400/30">
-                  <div className="text-2xl font-bold text-white">100%</div>
-                  <div className="text-xs text-purple-200">Automated</div>
-                </div>
-              </div>
-
-              {/* Features */}
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                  <span>Advanced OCR Technology</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                  <span>Institution Database Validation</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                  <span>Degree Authenticity Verification</span>
-                </div>
-                <div className="flex items-center space-x-3 text-white/90">
-                  <CheckCircle className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                  <span>Automated Report Generation</span>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-2xl p-6 border border-purple-400/40">
-                <div className="text-center">
-                  <div className="text-4xl font-bold text-white mb-2">98%</div>
-                  <div className="text-purple-200 font-semibold">Accuracy Rate</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* AI Technology Highlights */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-12 border border-white/10">
-            <div className="text-center mb-12">
-              <h3 className="text-3xl font-bold mb-4">Powered by Advanced AI Technology</h3>
-              <p className="text-blue-100 text-lg max-w-3xl mx-auto">
-                Our AI engine combines multiple machine learning models, natural language processing, and computer vision to deliver unmatched accuracy and speed
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                  <Cpu className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="font-bold text-white mb-2">Neural Networks</h4>
-                <p className="text-blue-200 text-sm">Deep learning models trained on millions of data points</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                  <Network className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="font-bold text-white mb-2">NLP Processing</h4>
-                <p className="text-blue-200 text-sm">Advanced natural language understanding and analysis</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                  <Eye className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="font-bold text-white mb-2">Computer Vision</h4>
-                <p className="text-blue-200 text-sm">Document analysis and image recognition technology</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center mb-4 mx-auto">
-                  <Database className="w-8 h-8 text-white" />
-                </div>
-                <h4 className="font-bold text-white mb-2">Big Data Analytics</h4>
-                <p className="text-blue-200 text-sm">Real-time processing of massive datasets</p>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-16">
-            <button
-              onClick={() => router.push("/login")}
-              className="group px-12 py-6 bg-gradient-to-r from-white to-blue-50 text-blue-900 font-bold rounded-3xl hover:shadow-2xl hover:shadow-white/20 hover:scale-110 transition-all duration-300 inline-flex items-center gap-4 text-xl shadow-2xl relative overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <Zap className="w-8 h-8 text-blue-600 relative z-10 group-hover:rotate-12 transition-transform" />
-              <span className="relative z-10">Experience AI-Powered Verification</span>
-              <ArrowRight className="w-8 h-8 text-blue-600 relative z-10 group-hover:translate-x-2 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* BGV Application Flow - Step by Step */}
-      <section id="bgv-process" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-100 to-indigo-100 px-6 py-3 rounded-full mb-6">
-              <FileCheck className="w-5 h-5 text-blue-600" />
-              <span className="text-blue-800 font-semibold">Simple BGV Process</span>
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              How BGV Verification Works
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Complete background verification in 4 simple steps. From candidate onboarding to instant report downloads.
-            </p>
-          </div>
-
-          {/* Application Flow Steps */}
-          <div className="relative">
-            {/* Connection Line */}
-            <div className="hidden lg:block absolute top-24 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 via-purple-500 to-green-500 z-0 rounded-full"></div>
-            
-            <div className="grid lg:grid-cols-4 gap-8 relative z-10">
-              {/* Step 1: Add Candidate */}
-              <div className="text-center">
-                <div className="bg-gradient-to-br from-blue-500 to-blue-600 w-20 h-20 rounded-3xl flex items-center justify-center mb-6 mx-auto shadow-2xl relative">
-                  <Users className="w-10 h-10 text-white" />
-                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-black text-sm shadow-lg">
-                    1
+                  <div className="mt-6 pt-5 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-400 font-medium">
+                    <Clock className="w-3.5 h-3.5" /> Timeline: Days to Weeks
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Add Candidate</h3>
-                <p className="text-gray-600 mb-4">Upload candidate details, documents, and select required BGV services</p>
-                <div className="bg-blue-50 rounded-xl p-4">
-                  <div className="text-sm text-blue-800 font-semibold mb-2">What you need:</div>
-                  <ul className="text-xs text-blue-700 space-y-1">
-                    <li>• Basic candidate information</li>
-                    <li>• Identity documents (PAN, Aadhaar)</li>
-                    <li>• Employment & education details</li>
-                  </ul>
-                </div>
               </div>
+            </motion.div>
 
-              {/* Step 2: Select BGV Services */}
-              <div className="text-center">
-                <div className="bg-gradient-to-br from-indigo-500 to-purple-600 w-20 h-20 rounded-3xl flex items-center justify-center mb-6 mx-auto shadow-2xl relative">
-                  <CheckSquare className="w-10 h-10 text-white" />
-                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-black text-sm shadow-lg">
-                    2
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Select Services</h3>
-                <p className="text-gray-600 mb-4">Choose from 12+ BGV services including AI-powered verification options</p>
-                <div className="bg-indigo-50 rounded-xl p-4">
-                  <div className="text-sm text-indigo-800 font-semibold mb-2">Available services:</div>
-                  <ul className="text-xs text-indigo-700 space-y-1">
-                    <li>• PAN & Aadhaar verification</li>
-                    <li>• Employment & education checks</li>
-                    <li>• Court records & credit reports</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Step 3: Automated Verification */}
-              <div className="text-center">
-                <div className="bg-gradient-to-br from-purple-500 to-pink-600 w-20 h-20 rounded-3xl flex items-center justify-center mb-6 mx-auto shadow-2xl relative">
-                  <Cpu className="w-10 h-10 text-white" />
-                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-black text-sm shadow-lg">
-                    3
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">AI Verification</h3>
-                <p className="text-gray-600 mb-4">Our AI engine processes and verifies information across multiple databases</p>
-                <div className="bg-purple-50 rounded-xl p-4">
-                  <div className="text-sm text-purple-800 font-semibold mb-2">Processing includes:</div>
-                  <ul className="text-xs text-purple-700 space-y-1">
-                    <li>• Government database checks</li>
-                    <li>• AI fraud detection</li>
-                    <li>• Cross-reference validation</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Step 4: Download Reports */}
-              <div className="text-center">
-                <div className="bg-gradient-to-br from-green-500 to-emerald-600 w-20 h-20 rounded-3xl flex items-center justify-center mb-6 mx-auto shadow-2xl relative">
-                  <Download className="w-10 h-10 text-white" />
-                  <div className="absolute -top-3 -right-3 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-gray-900 font-black text-sm shadow-lg">
-                    4
-                  </div>
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Instant Reports</h3>
-                <p className="text-gray-600 mb-4">Download comprehensive BGV reports instantly in multiple formats</p>
-                <div className="bg-green-50 rounded-xl p-4">
-                  <div className="text-sm text-green-800 font-semibold mb-2">Report features:</div>
-                  <ul className="text-xs text-green-700 space-y-1">
-                    <li>• PDF & Excel formats</li>
-                    <li>• Detailed verification status</li>
-                    <li>• Executive summary included</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Timeline */}
-          <div className="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8">
-            <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Typical BGV Timeline</h3>
-              <p className="text-gray-600">Most verifications complete within 24-48 hours</p>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600 mb-2">0-2 hrs</div>
-                <div className="text-sm text-gray-700 font-semibold mb-1">Instant Checks</div>
-                <div className="text-xs text-gray-600">PAN, Aadhaar, Basic validations</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-indigo-600 mb-2">24 hrs</div>
-                <div className="text-sm text-gray-700 font-semibold mb-1">Standard Verification</div>
-                <div className="text-xs text-gray-600">Employment, Education, Court records</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold text-purple-600 mb-2">48 hrs</div>
-                <div className="text-sm text-gray-700 font-semibold mb-1">Complete Report</div>
-                <div className="text-xs text-gray-600">All verifications, Final report ready</div>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA */}
-          <div className="text-center mt-16">
-            <button
-              onClick={() => router.push("/login")}
-              className="px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-2xl hover:shadow-xl hover:scale-105 transition-all duration-300 inline-flex items-center space-x-3 text-lg"
-            >
-              <span>Start BGV Process</span>
-              <ArrowRight className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Enterprise Platform Features */}
-      <section id="platform" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-full shadow-lg mb-6">
-              <Building className="w-5 h-5 text-indigo-600" />
-              <span className="text-indigo-800 font-semibold">Enterprise Platform</span>
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              Built for Enterprise Scale
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Comprehensive verification platform designed to handle enterprise-level requirements with advanced features and integrations
-            </p>
-          </div>
-
-          <div className="grid lg:grid-cols-3 gap-8">
-            {enterpriseFeatures.map((category, index) => (
-              <div key={index} className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-300">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">{category.category}</h3>
-                <div className="space-y-4">
-                  {category.items.map((item, itemIndex) => (
-                    <div key={itemIndex} className="flex items-start space-x-3">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                      <div>
-                        <div className="font-semibold text-gray-900">{item.name}</div>
-                        <div className="text-sm text-gray-600">{item.description}</div>
+            {/* Path 2 - External */}
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.15, duration: 0.7, type: "spring", stiffness: 80 }} whileHover={{ y: -4 }} className="group">
+              <div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-[0_8px_40px_-12px_rgba(0,0,0,0.08)] hover:shadow-[0_20px_60px_-15px_rgba(99,102,241,0.15)] transition-all duration-500 relative overflow-hidden">
+                <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-indigo-400/20 to-purple-400/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-110 transition-transform duration-300">
+                        <Brain className="w-6 h-6 text-white" />
                       </div>
+                      <div>
+                        <h3 className="text-xl font-black text-slate-900">External AI Screening</h3>
+                        <p className="text-sm text-indigo-600 font-semibold">Referrals / Walk-ins / Manual</p>
+                      </div>
+                    </div>
+                    <span className="px-3 py-1.5 bg-gradient-to-r from-indigo-50 to-purple-50 text-indigo-700 text-[10px] font-black rounded-full border border-indigo-200 uppercase tracking-wider">Flexible</span>
+                  </div>
+
+                  {/* Description */}
+                  <div className="p-4 bg-gradient-to-r from-indigo-50/60 to-purple-50/40 rounded-2xl border border-indigo-100/60 mb-6">
+                    <p className="text-sm text-slate-600">Upload JD + external resumes → AI ranks them → Choose your path below:</p>
+                  </div>
+
+                  {/* Options with connecting line */}
+                  <div className="relative pl-4">
+                    {/* Vertical connecting line - centered on circles */}
+                    <div className="absolute left-[17px] top-[30px] bottom-[30px] w-[3px] bg-gradient-to-b from-blue-400 via-indigo-400 to-slate-300 rounded-full" />
+
+                    {/* Option A */}
+                    <div className="mb-4 p-5 rounded-2xl bg-gradient-to-r from-blue-50/80 to-indigo-50/60 border border-blue-100 hover:border-blue-200 transition-colors relative overflow-hidden group/card ml-6">
+                      <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white text-[10px] font-black flex items-center justify-center shadow-sm ring-[3px] ring-white z-10">A</div>
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-blue-200/20 rounded-full blur-2xl" />
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-sm font-black text-slate-900">Direct BGV</h4>
+                          <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-2.5 py-1 rounded-full">Skip Pipeline</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {['AI Screen', 'Add to BGV', 'Verified'].map((s, idx) => (
+                            <span key={idx} className="flex items-center gap-1.5">
+                              <span className="text-xs font-semibold text-blue-700 bg-white px-2.5 py-1 rounded-lg border border-blue-100 shadow-sm">{s}</span>
+                              {idx < 2 && <ArrowRight className="w-3 h-3 text-blue-300" />}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Option B */}
+                    <div className="mb-4 p-5 rounded-2xl bg-gradient-to-r from-indigo-50/80 to-purple-50/60 border border-indigo-100 hover:border-indigo-200 transition-colors relative overflow-hidden group/card ml-6">
+                      <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-[10px] font-black flex items-center justify-center shadow-sm ring-[3px] ring-white z-10">B</div>
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-200/20 rounded-full blur-2xl" />
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-3">
+                          <h4 className="text-sm font-black text-slate-900">Full Pipeline</h4>
+                          <span className="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-2.5 py-1 rounded-full">With Interviews</span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          {['AI Screen', 'Job', 'Shortlist', 'Interview', 'BGV'].map((s, idx) => (
+                            <span key={idx} className="flex items-center gap-1.5">
+                              <span className="text-xs font-semibold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-100 shadow-sm">{s}</span>
+                              {idx < 4 && <ArrowRight className="w-3 h-3 text-indigo-300" />}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Self-Verification */}
+                    <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/40 border border-blue-100 hover:border-blue-200 transition-colors relative ml-6 overflow-hidden">
+                      <div className="absolute -left-6 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center shadow-md ring-[3px] ring-white z-10">
+                        <Globe className="w-3.5 h-3.5" />
+                      </div>
+                      <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-200/20 rounded-full blur-2xl" />
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="text-sm font-black text-slate-900">Self-Verification Portal</h4>
+                          <span className="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-2.5 py-1 rounded-full">Parallel Process</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {['Send Link', 'Candidate Fills', 'Auto-Verify'].map((s, idx) => (
+                            <span key={idx} className="flex items-center gap-1.5">
+                              <span className="text-xs font-semibold text-indigo-700 bg-white px-2.5 py-1 rounded-lg border border-indigo-100 shadow-sm">{s}</span>
+                              {idx < 2 && <ArrowRight className="w-3 h-3 text-indigo-300" />}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 pt-5 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-400 font-medium">
+                    <Clock className="w-3.5 h-3.5" /> Timeline: Immediate to Days
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI Screening - Premium Dark Section */}
+      <section id="ai" className="py-20 relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[60%] bg-blue-500/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[50%] bg-indigo-500/10 rounded-full blur-[80px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-blue-300 text-xs font-bold border border-white/10 mb-4 backdrop-blur-sm">
+              <Brain className="w-3.5 h-3.5" /> AI-Powered Intelligence
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black mb-3">AI Resume <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Screening</span></h2>
+            <p className="text-base text-blue-200/70 max-w-2xl mx-auto">Upload a Job Description and resumes. Our AI reads, scores, and ranks candidates instantly.</p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+              <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
+                <div className="flex justify-between items-center mb-5 pb-3 border-b border-white/10">
+                  <div className="flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-blue-400" />
+                    <span className="text-sm font-bold text-white">AI Analysis Report</span>
+                  </div>
+                  <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-bold border border-green-500/30">Strong Fit</span>
+                </div>
+
+                <div className="flex items-center gap-4 mb-5 p-4 bg-white/5 rounded-2xl border border-white/10">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-blue-500/30">98</div>
+                  <div>
+                    <h5 className="text-base font-bold text-white">Alex Rodriguez</h5>
+                    <p className="text-xs text-blue-300/70">Senior React Engineer • 5y exp</p>
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-[10px] font-bold text-blue-300/50 uppercase tracking-wider mb-2">Matched Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {['React', 'Next.js', 'TypeScript', 'Node.js', 'System Design'].map(s => (
+                      <span key={s} className="px-2.5 py-1 bg-blue-500/15 text-blue-300 rounded-md text-xs font-semibold border border-blue-500/20">{s}</span>
+                    ))}
+                    <span className="px-2.5 py-1 bg-red-500/15 text-red-400 rounded-md text-xs font-semibold border border-red-500/20 line-through opacity-60">GraphQL</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-green-500/10 rounded-xl border border-green-500/20">
+                    <p className="text-[10px] font-bold text-green-400 mb-1 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Strengths</p>
+                    <p className="text-xs text-green-200/70">Perfect frontend match. 5+ years Next.js.</p>
+                  </div>
+                  <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20">
+                    <p className="text-[10px] font-bold text-amber-400 mb-1 flex items-center gap-1"><Activity className="w-3 h-3" /> Gaps</p>
+                    <p className="text-xs text-amber-200/70">No backend API design experience.</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="space-y-6">
+              <div className="grid grid-cols-3 gap-3">
+                {[{ val: "100+", label: "Resumes/batch" }, { val: "60s", label: "Processing" }, { val: "95%", label: "Accuracy" }].map((s, i) => (
+                  <div key={i} className="text-center p-4 bg-white/5 rounded-2xl border border-white/10">
+                    <div className="text-2xl font-black text-white">{s.val}</div>
+                    <div className="text-[10px] text-blue-300/60 font-medium">{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <ul className="space-y-3">
+                {["Scoring & Ranking 0-100 against the JD", "Deep Strengths & Weaknesses analysis", "Skills gap identification (Matched vs Missing)", "Smart Recommendations (Strong Fit to Reject)"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/[0.07] transition-colors">
+                    <div className="w-6 h-6 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+                    </div>
+                    <span className="text-sm text-blue-100/90 font-medium">{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button className="flex items-center gap-2 text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors">
+                Explore AI Features <ArrowRight className="w-4 h-4" />
+              </button>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* ATS & Interview Management */}
+      <section id="ats" className="py-20 relative overflow-hidden">
+        {/* Gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950" />
+        <div className="absolute inset-0">
+          <div className="absolute top-[10%] left-[5%] w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[80px]" />
+          <div className="absolute bottom-[10%] right-[5%] w-[250px] h-[250px] bg-indigo-500/10 rounded-full blur-[60px]" />
+          <div className="absolute top-[50%] left-[50%] w-[200px] h-[200px] bg-purple-500/5 rounded-full blur-[60px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          {/* Header */}
+          <div className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-blue-300 text-xs font-bold border border-white/10 backdrop-blur-sm mb-5">
+              <GitMerge className="w-3.5 h-3.5" /> Complete Hiring Pipeline
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+              Powerful ATS & <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Interview Management</span>
+            </h2>
+            <p className="text-base text-blue-200/60 max-w-2xl mx-auto">
+              A comprehensive Kanban pipeline with multi-round structured interviews, AI scoring, and automatic BGV trigger on hire.
+            </p>
+          </div>
+
+          {/* Main Content - Split Layout */}
+          <div className="grid lg:grid-cols-5 gap-8 mb-14">
+            {/* Left - Kanban Pipeline (3 cols) */}
+            <div className="lg:col-span-3">
+              <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2"><GitMerge className="w-4 h-4 text-blue-400" /> Pipeline View</h3>
+                  <span className="text-[10px] text-blue-300/60 font-medium">Drag & drop candidates between stages</span>
+                </div>
+                <div className="flex gap-3 overflow-x-auto pb-2 hide-scrollbar">
+                  {[
+                    { name: "Applied", count: 12, candidates: [{ name: "Priya Sharma", role: "Full Stack Dev", score: null }] },
+                    { name: "AI Screened", count: 8, candidates: [{ name: "Rahul Verma", role: "React Engineer", score: "96%" }] },
+                    { name: "Tech Round", count: 5, candidates: [{ name: "Sarah Jenkins", role: "Frontend Dev", score: "94%" }] },
+                    { name: "HR Round", count: 3, candidates: [{ name: "Alex Chen", role: "Backend Dev", score: null }] },
+                    { name: "Hired", count: 2, candidates: [] }
+                  ].map((col, idx) => (
+                    <div key={idx} className="min-w-[160px] flex-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-bold text-slate-300">{col.name}</span>
+                        <span className="text-[10px] bg-white/10 text-slate-400 px-1.5 py-0.5 rounded font-bold">{col.count}</span>
+                      </div>
+                      {col.candidates.map((c, ci) => (
+                        <div key={ci} className="bg-white/[0.07] hover:bg-white/[0.12] border border-white/10 rounded-xl p-3 transition-colors cursor-grab">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-bold text-white">{c.name}</span>
+                            {c.score && <span className="text-[9px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold">{c.score}</span>}
+                          </div>
+                          <p className="text-[10px] text-slate-400">{c.role}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex -space-x-1">
+                              <div className="w-4 h-4 rounded-full bg-blue-500 border border-slate-800"></div>
+                              <div className="w-4 h-4 rounded-full bg-indigo-500 border border-slate-800"></div>
+                            </div>
+                            <span className="text-[9px] text-blue-400 font-bold flex items-center gap-0.5">Move <ChevronRight className="w-2.5 h-2.5" /></span>
+                          </div>
+                        </div>
+                      ))}
+                      {col.candidates.length === 0 && (
+                        <div className="border border-dashed border-white/10 rounded-xl p-3 text-center">
+                          <span className="text-[10px] text-slate-500">Drop here</span>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Right - Features (2 cols) */}
+            <div className="lg:col-span-2 flex flex-col gap-4">
+              {[
+                { icon: <Brain className="w-5 h-5 text-blue-400" />, title: "AI-Powered Screening", desc: "Bulk score 100+ resumes against JD. Auto-rank and shortlist top candidates.", tag: "AI" },
+                { icon: <Users className="w-5 h-5 text-indigo-400" />, title: "Dynamic Interviews", desc: "Configurable rounds as needed. Star ratings, feedback capture, flexible enforcement.", tag: "FLEXIBLE" },
+                { icon: <Star className="w-5 h-5 text-amber-400" />, title: "Smart Offer & Hire", desc: "One-click offer extension. Mark as Hired triggers automatic BGV initiation.", tag: "AUTO" },
+                { icon: <ShieldCheck className="w-5 h-5 text-green-400" />, title: "BGV Auto-Trigger", desc: "Hired → BGV starts instantly. No manual steps. Real-time status tracking.", tag: "SEAMLESS" }
+              ].map((f, i) => (
+                <div key={i} className="bg-white/[0.05] backdrop-blur-sm border border-white/10 rounded-2xl p-5 hover:bg-white/[0.08] transition-colors group">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      {f.icon}
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="text-sm font-bold text-white">{f.title}</h4>
+                        <span className="text-[9px] font-bold text-blue-300 bg-blue-500/20 px-1.5 py-0.5 rounded">{f.tag}</span>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed">{f.desc}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Interview Rounds Visual */}
+          <div className="bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-3xl p-8">
+            <h3 className="text-lg font-bold text-white mb-2 text-center">Dynamic Interview Rounds</h3>
+            <p className="text-xs text-slate-400 text-center mb-6">Configure as many rounds as needed — here is a typical flow:</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { round: "Round 1", title: "Technical", desc: "Coding & system design assessment", icon: <Brain className="w-6 h-6" />, color: "from-blue-500 to-blue-600" },
+                { round: "Round 2", title: "Manager", desc: "Team fit & leadership evaluation", icon: <Users className="w-6 h-6" />, color: "from-indigo-500 to-indigo-600" },
+                { round: "Round 3", title: "HR", desc: "Culture fit & compensation discussion", icon: <UserCheck className="w-6 h-6" />, color: "from-purple-500 to-purple-600" },
+                { round: "Round 4", title: "Final", desc: "Executive approval & offer decision", icon: <Star className="w-6 h-6" />, color: "from-amber-500 to-orange-500" }
+              ].map((r, i) => (
+                <div key={i} className="text-center group">
+                  <div className={`w-14 h-14 bg-gradient-to-br ${r.color} rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-lg text-white group-hover:scale-110 transition-transform`}>
+                    {r.icon}
+                  </div>
+                  <span className="text-[10px] text-blue-300/60 font-bold uppercase">{r.round}</span>
+                  <h4 className="text-sm font-bold text-white mt-0.5">{r.title}</h4>
+                  <p className="text-[11px] text-slate-400 mt-1">{r.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Rating system preview */}
+            <div className="mt-6 pt-5 border-t border-white/10 flex items-center justify-center gap-8 flex-wrap">
+              <div className="flex items-center gap-2">
+                <div className="flex gap-0.5">
+                  {[1,2,3,4,5].map(s => <Star key={s} className={`w-3.5 h-3.5 ${s <= 4 ? 'text-amber-400 fill-amber-400' : 'text-slate-600'}`} />)}
+                </div>
+                <span className="text-xs text-slate-400">Star Ratings</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-400" />
+                <span className="text-xs text-slate-400">Detailed Feedback</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-blue-400" />
+                <span className="text-xs text-slate-400">Progress Tracking</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Candidate Journey */}
+          <div className="mt-10 bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+            <h4 className="text-sm font-bold text-white mb-4 text-center">Complete Journey: Application → Verified Employee</h4>
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {[
+                { label: "Apply", color: "bg-blue-500" },
+                { label: "AI Screen", color: "bg-indigo-500" },
+                { label: "Interview", color: "bg-purple-500" },
+                { label: "Offer", color: "bg-amber-500" },
+                { label: "BGV", color: "bg-cyan-500" },
+                { label: "HRMS", color: "bg-green-500" }
+              ].map((s, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className={`${s.color} text-white text-[10px] font-bold px-3 py-1.5 rounded-full shadow-md`}>{s.label}</span>
+                  {i < 5 && <ArrowRight className="w-3.5 h-3.5 text-slate-500" />}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+      {/* How BGV Verification Works */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-xs font-bold border border-blue-100 mb-4">
+              <ShieldCheck className="w-3.5 h-3.5" /> After candidate is hired, BGV phase begins
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">How BGV Verification Works</h2>
+            <p className="text-base text-slate-500 max-w-2xl mx-auto">Complete background verification in 4 simple steps. From candidate onboarding to instant report downloads.</p>
+          </div>
+
+          <div className="relative">
+            {/* Connection Line */}
+            <div className="hidden lg:block absolute top-[72px] left-[12%] right-[12%] h-1 bg-gradient-to-r from-blue-500 via-indigo-500 via-purple-500 to-green-500 rounded-full z-0" />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
+              {[
+                { icon: <Users className="w-8 h-8 text-white" />, gradient: "from-blue-500 to-blue-600", title: "Add Candidate", desc: "Upload candidate details, documents, and select required BGV services" },
+                { icon: <CheckCircle2 className="w-8 h-8 text-white" />, gradient: "from-indigo-500 to-purple-600", title: "Select Services", desc: "Choose from 12+ BGV services including AI-powered verification options" },
+                { icon: <Brain className="w-8 h-8 text-white" />, gradient: "from-purple-500 to-pink-600", title: "AI Verification", desc: "Our AI engine processes and verifies information across multiple databases" },
+                { icon: <FileText className="w-8 h-8 text-white" />, gradient: "from-green-500 to-emerald-600", title: "Instant Reports", desc: "Download comprehensive BGV reports instantly in multiple formats" }
+              ].map((step, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15, type: "spring", stiffness: 100 }} className="text-center">
+                  <motion.div whileHover={{ y: -5, rotate: 5 }} transition={{ type: "spring", stiffness: 300 }} className="relative inline-block mb-5">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${step.gradient} rounded-2xl flex items-center justify-center shadow-xl mx-auto`}>
+                      {step.icon}
+                    </div>
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center text-slate-900 text-xs font-black shadow-md">{i + 1}</div>
+                  </motion.div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">{step.title}</h3>
+                  <p className="text-sm text-slate-500">{step.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Deep Dive: BGV */}
+      <section id="bgv" className="py-28 relative overflow-hidden">
+        {/* Background gradient decorations */}
+        <div className="absolute top-0 left-0 w-full h-full -z-10">
+          <div className="absolute top-[10%] left-[-5%] w-[40%] h-[50%] bg-blue-100/40 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[10%] right-[-5%] w-[35%] h-[45%] bg-indigo-100/30 rounded-full blur-[100px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Section Header */}
+          <div className="text-center mb-20">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white shadow-lg shadow-blue-500/10 border border-blue-100 text-brand-600 font-bold mb-8"
+            >
+              <ShieldCheck className="w-5 h-5 text-brand-600" />
+              <span>Comprehensive BGV Suite</span>
+            </motion.div>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl sm:text-6xl font-black mb-6 text-slate-900 tracking-tight"
+            >
+              Professional <span className="text-gradient">Services</span>
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+              className="text-xl text-slate-500 font-medium max-w-3xl mx-auto leading-relaxed"
+            >
+              Complete background verification solutions covering every aspect of candidate screening and validation
+            </motion.p>
+          </div>
+
+          {/* AI-Powered Services */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2"><span className="text-xl">🤖</span> AI-Powered Services</h3>
+              <span className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 text-slate-900 text-sm font-bold shadow-lg animate-pulse">
+                <Sparkles className="w-4 h-4" /> NEW AI TECHNOLOGY
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[
+                { icon: <FileSearch className="w-6 h-6 text-white" />, title: "AI Resume Screening", badge: "HOT", badgeColor: "bg-yellow-400 text-slate-900", desc: "Upload 100+ resumes, get top 10-20 candidates with JD matching in 60 seconds", features: ["Bulk Processing", "95% Accuracy"], gradient: "from-blue-500 to-indigo-600" },
+                { icon: <FileText className="w-6 h-6 text-white" />, title: "AI CV Validation", badge: "AI", badgeColor: "bg-yellow-400 text-slate-900", desc: "Advanced fraud detection and authenticity verification with 98% accuracy", features: ["Fraud Detection", "98% Accuracy"], gradient: "from-purple-500 to-pink-600" },
+                { icon: <GraduationCap className="w-6 h-6 text-white" />, title: "AI Education Verification", badge: "AI", badgeColor: "bg-yellow-400 text-slate-900", desc: "Automated validation of educational credentials with AI document analysis", features: ["Document OCR", "24hrs"], gradient: "from-emerald-500 to-teal-600" }
+              ].map((service, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 30, scale: 0.95 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }} transition={{ delay: i * 0.15, duration: 0.5 }} whileHover={{ y: -8, transition: { duration: 0.3 } }} className={`bg-gradient-to-br ${service.gradient} rounded-2xl p-6 text-white shadow-2xl transition-all duration-300 relative overflow-hidden cursor-pointer`}>
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
+                  <div className="relative z-10">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center">{service.icon}</div>
+                      <div>
+                        <h4 className="text-base font-bold">{service.title}</h4>
+                        <span className={`${service.badgeColor} px-2 py-0.5 rounded-full text-[10px] font-bold`}>{service.badge}</span>
+                      </div>
+                    </div>
+                    <p className="text-white/85 mb-4 text-sm leading-relaxed">{service.desc}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium">{service.features[0]}</span>
+                      <span className="font-bold text-sm">{service.features[1]}</span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Core BGV Services - Horizontal Scroll */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-2xl font-bold text-slate-900 flex items-center gap-2"><span className="text-xl">🛡️</span> Core BGV Services</h3>
+              <div className="hidden sm:flex items-center gap-2 text-sm text-slate-500">
+                <span>← Scroll to explore all services →</span>
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="relative">
+              <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory hide-scrollbar">
+                {[
+                  { icon: <CreditCard className="w-6 h-6 text-white" />, gradient: "from-blue-500 to-blue-600", title: "PAN Verification", subtitle: "Government Database ✓", subtitleColor: "text-blue-600", desc: "Validate PAN card details and authenticity instantly through government database integration", time: "Instant", badge: "✓ Real-time" },
+                  { icon: <Fingerprint className="w-6 h-6 text-white" />, gradient: "from-indigo-500 to-indigo-600", title: "PAN to UAN", subtitle: "EPFO Integration ✓", subtitleColor: "text-blue-600", desc: "Link and verify PAN with UAN number seamlessly through EPFO database", time: "2-4 hrs", badge: "✓ Verified" },
+                  { icon: <Briefcase className="w-6 h-6 text-white" />, gradient: "from-purple-500 to-purple-600", title: "Employment History", subtitle: "Multi-Source ✓", subtitleColor: "text-orange-600", desc: "Comprehensive employment background verification through multiple data sources", time: "24-48 hrs", badge: "✓ Detailed" },
+                  { icon: <Scale className="w-6 h-6 text-white" />, gradient: "from-red-500 to-red-600", title: "Court Records", subtitle: "Legal Database ✓", subtitleColor: "text-red-600", desc: "Criminal and civil court records verification across multiple jurisdictions", time: "48 hrs", badge: "✓ Comprehensive" },
+                  { icon: <CreditCard className="w-6 h-6 text-white" />, gradient: "from-green-500 to-green-600", title: "Credit Report", subtitle: "CIBIL Integration ✓", subtitleColor: "text-emerald-600", desc: "Detailed credit history and financial background through CIBIL integration", time: "Instant", badge: "✓ CIBIL" },
+                  { icon: <MapPin className="w-6 h-6 text-white" />, gradient: "from-cyan-500 to-cyan-600", title: "Address Verification", subtitle: "Field Verification ✓", subtitleColor: "text-cyan-600", desc: "Physical address validation and verification through field agents", time: "3-5 days", badge: "✓ Physical" },
+                  { icon: <GraduationCap className="w-6 h-6 text-white" />, gradient: "from-orange-500 to-orange-600", title: "Education Check", subtitle: "Institution Direct ✓", subtitleColor: "text-orange-600", desc: "Manual verification of educational credentials directly with institutions", time: "5-7 days", badge: "✓ Manual" },
+                  { icon: <UserCheck className="w-6 h-6 text-white" />, gradient: "from-teal-500 to-teal-600", title: "Reference Check", subtitle: "Direct Contact ✓", subtitleColor: "text-teal-600", desc: "Supervisory and professional reference verification through direct contact", time: "2-3 days", badge: "✓ Personal" }
+                ].map((service, i) => (
+                  <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className={`w-12 h-12 bg-gradient-to-br ${service.gradient} rounded-xl flex items-center justify-center`}>{service.icon}</div>
+                      <div>
+                        <h4 className="text-lg font-bold text-slate-900">{service.title}</h4>
+                        <div className={`text-xs ${service.subtitleColor} font-semibold`}>{service.subtitle}</div>
+                      </div>
+                    </div>
+                    <p className="text-slate-600 text-sm mb-4">{service.desc}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="bg-slate-50 text-slate-700 px-3 py-1 rounded-full text-xs font-medium">{service.time}</span>
+                      <span className="text-green-600 font-bold text-sm">{service.badge}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-center mt-4 space-x-2">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
+                <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+
+
+
+          {/* Real-Time Tracking & Platform Highlights */}
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left - Live Status Tracker */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-lg">
+              <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-indigo-600 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-white" />
+                </div>
+                Real-Time Tracking
+              </h3>
+
+              {/* Candidate Info */}
+              <div className="bg-blue-50 rounded-2xl p-5 mb-6 flex items-center gap-4 border border-blue-100">
+                <div className="w-12 h-12 bg-gradient-to-br from-brand-600 to-indigo-600 text-white rounded-full flex items-center justify-center font-bold text-base shadow-lg shadow-brand-500/20">SJ</div>
+                <div className="flex-1">
+                  <h4 className="font-bold text-slate-900">Sarah Jenkins</h4>
+                  <p className="text-sm text-slate-500">BGV Request #892 • Senior Engineer</p>
+                </div>
+                <span className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold border border-blue-200">In Progress</span>
+              </div>
+
+              {/* Verification Status List */}
+              <div className="space-y-4">
+                {[
+                  { name: "PAN / Aadhaar Verification", status: "COMPLETED", statusColor: "text-green-600", dotColor: "bg-green-500", time: "< 5 sec" },
+                  { name: "AI CV & Education Check", status: "COMPLETED", statusColor: "text-green-600", dotColor: "bg-green-500", time: "30-60 sec" },
+                  { name: "Employment History", status: "IN PROGRESS", statusColor: "text-blue-600", dotColor: "bg-blue-500", time: "24-48 hrs" },
+                  { name: "Court Records Search", status: "PENDING", statusColor: "text-slate-400", dotColor: "bg-slate-300", time: "48 hrs" },
+                  { name: "Address Verification", status: "PENDING", statusColor: "text-slate-400", dotColor: "bg-slate-300", time: "3-5 days" }
+                ].map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between py-3 border-b border-slate-100 last:border-0">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-2.5 h-2.5 rounded-full ${item.dotColor}`} />
+                      <span className="text-sm font-medium text-slate-800">{item.name}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-semibold italic ${item.statusColor}`}>{item.status === 'COMPLETED' ? 'Verified' : item.status === 'IN PROGRESS' ? 'In Progress' : 'Pending'}</span>
+                      <span className="text-[11px] text-slate-400">{item.time}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Why Choose */}
+              <div className="mt-6 pt-5 border-t border-slate-100">
+                <h4 className="text-base font-bold text-slate-900 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-500" /> Why Choose TFG BGV?
+                </h4>
+                <ul className="space-y-2">
+                  {[
+                    "Instant API-based identity verification (PAN, Aadhaar, UAN)",
+                    "AI-powered document fraud detection",
+                    "Multi-jurisdiction court record searches",
+                    "CIBIL-integrated financial background checks",
+                    "Self-verification portal for candidates"
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-brand-600 mt-0.5 flex-shrink-0" />
+                      <span className="text-sm text-slate-600">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Right - Platform Highlights */}
+            <div className="flex flex-col gap-6">
+              {/* Stats Card */}
+              <div className="bg-gradient-to-br from-brand-600 via-blue-600 to-indigo-700 rounded-3xl p-8 text-white shadow-2xl shadow-blue-600/20 flex-1">
+                <h3 className="text-xl font-black mb-6">Platform Highlights</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { value: "12+", label: "Verification Types" },
+                    { value: "99.5%", label: "Accuracy Rate" },
+                    { value: "<5s", label: "API Verifications" },
+                    { value: "24/7", label: "Real-time Tracking" }
+                  ].map((stat, i) => (
+                    <div key={i} className="bg-white/10 backdrop-blur-sm rounded-2xl p-5 border border-white/20">
+                      <div className="text-3xl font-black mb-1">{stat.value}</div>
+                      <div className="text-sm text-white/70 font-medium">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTA Card */}
+              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16" />
+                <div className="relative z-10">
+                  <h3 className="text-lg font-bold mb-2">Ready to Experience Next-Gen BGV?</h3>
+                  <p className="text-blue-100 text-sm mb-5">Start with our comprehensive suite of services today.</p>
+                  <button className="px-6 py-3 bg-white text-blue-600 font-bold rounded-xl hover:shadow-xl transition-all text-sm flex items-center gap-2">
+                    Start BGV Process <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Candidate to Employee Journey */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-blue-50/20 to-white" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-16">
+            <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white text-indigo-700 text-xs font-bold border border-indigo-200 shadow-sm mb-5">
+              <ArrowRight className="w-3.5 h-3.5" /> Complete Transformation
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">From Candidate to <span className="text-gradient">Verified Employee</span></h2>
+            <p className="text-base text-slate-500 max-w-2xl mx-auto">See how our platform transforms an un-employed candidate into a fully verified, onboarded employee with complete benefits.</p>
+          </motion.div>
+
+          {/* Interactive Timeline Journey */}
+          <div className="relative mb-16">
+            {/* Horizontal line */}
+            <div className="hidden lg:block absolute top-[60px] left-[8%] right-[8%] h-[3px] bg-gradient-to-r from-slate-300 via-blue-400 via-indigo-500 via-purple-500 to-green-500 rounded-full" />
+
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+              {[
+                { title: "Candidate", desc: "Applies via portal or referral", icon: <FileText className="w-6 h-6" />, color: "from-slate-400 to-slate-500", ring: "ring-slate-200", status: "Start" },
+                { title: "Screened", desc: "AI scores resume against JD", icon: <Brain className="w-6 h-6" />, color: "from-blue-500 to-blue-600", ring: "ring-blue-200", status: "AI" },
+                { title: "Interviewed", desc: "Multi-round evaluation done", icon: <Users className="w-6 h-6" />, color: "from-indigo-500 to-indigo-600", ring: "ring-indigo-200", status: "Evaluated" },
+                { title: "Selected", desc: "Offer extended & accepted", icon: <Star className="w-6 h-6" />, color: "from-purple-500 to-purple-600", ring: "ring-purple-200", status: "Offered" },
+                { title: "Verified", desc: "BGV completed successfully", icon: <ShieldCheck className="w-6 h-6" />, color: "from-cyan-500 to-teal-500", ring: "ring-cyan-200", status: "BGV ✓" },
+                { title: "Employee", desc: "Auto-onboarded to HRMS", icon: <UserCheck className="w-6 h-6" />, color: "from-green-500 to-emerald-600", ring: "ring-green-200", status: "Active ✓" }
+              ].map((step, i) => (
+                <motion.div key={i} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12, type: "spring", stiffness: 100 }} className="text-center relative">
+                  <motion.div whileHover={{ scale: 1.15, y: -5 }} transition={{ type: "spring", stiffness: 300 }}
+                    className={`w-[72px] h-[72px] bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-xl text-white relative z-10 ring-4 ${step.ring} cursor-pointer`}
+                  >
+                    {step.icon}
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-sm">
+                      <span className="text-[8px] font-black text-slate-600">{i + 1}</span>
+                    </div>
+                  </motion.div>
+                  <h4 className="text-sm font-black text-slate-900 mb-0.5">{step.title}</h4>
+                  <p className="text-[11px] text-slate-400 mb-1.5">{step.desc}</p>
+                  <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${i === 5 ? 'bg-green-100 text-green-700' : i === 0 ? 'bg-slate-100 text-slate-500' : 'bg-blue-50 text-blue-600'}`}>{step.status}</span>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
+          {/* Before vs After - Premium Cards */}
+          <div className="grid lg:grid-cols-2 gap-6 mb-14">
+            {/* Before */}
+            <motion.div initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+              <div className="h-full bg-white rounded-3xl p-7 border border-slate-200 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-slate-300 to-slate-400 rounded-r-full" />
+                <div className="pl-4">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-slate-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-black text-slate-600">Before: Un-Employed Candidate</h3>
+                      <p className="text-[11px] text-slate-400">No verification, no access, no benefits</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      "No verified identity",
+                      "Unverified history",
+                      "No BGV on record",
+                      "No system access",
+                      "No payroll setup",
+                      "No employee ID"
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg">
+                        <XCircle className="w-3.5 h-3.5 text-slate-300 flex-shrink-0" />
+                        <span className="text-xs text-slate-500">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* After */}
+            <motion.div initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+              <div className="h-full bg-white rounded-3xl p-7 border border-blue-200 shadow-[0_4px_20px_-4px_rgba(59,130,246,0.1)] relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-blue-500 via-indigo-500 to-green-500 rounded-r-full" />
+                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-100/30 rounded-full blur-2xl" />
+                <div className="pl-4 relative z-10">
+                  <div className="flex items-center gap-3 mb-5">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-md">
+                      <UserCheck className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-black text-slate-900">After: Verified Employee</h3>
+                      <p className="text-[11px] text-blue-600 font-semibold">Fully onboarded with all benefits</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      "Govt-verified identity",
+                      "Confirmed history",
+                      "BGV certificate ready",
+                      "Full HRMS access",
+                      "Payroll configured",
+                      "Employee ID assigned"
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2 p-2 bg-blue-50/60 rounded-lg border border-blue-100/50">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                        <span className="text-xs text-slate-700 font-medium">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Benefits Unlocked - Horizontal Scroll */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2"><Sparkles className="w-4 h-4 text-amber-500" /> Benefits Unlocked After Onboarding</h3>
+              <span className="hidden sm:flex text-xs text-slate-400 items-center gap-1">← Scroll → <ChevronRight className="w-3 h-3" /></span>
+            </div>
+            <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory hide-scrollbar">
+              {[
+                { icon: <CreditCard className="w-5 h-5 text-white" />, title: "Payroll & PF", desc: "Salary, PF, ESI auto-configured from day one", gradient: "from-blue-500 to-blue-600" },
+                { icon: <Clock className="w-5 h-5 text-white" />, title: "Leave System", desc: "Casual, sick, earned leave management", gradient: "from-indigo-500 to-indigo-600" },
+                { icon: <Activity className="w-5 h-5 text-white" />, title: "Performance", desc: "KPIs, goals & review cycles assigned", gradient: "from-purple-500 to-purple-600" },
+                { icon: <Globe className="w-5 h-5 text-white" />, title: "Self-Service", desc: "Payslips, tax declarations, HR requests", gradient: "from-teal-500 to-teal-600" },
+                { icon: <FileText className="w-5 h-5 text-white" />, title: "Doc Vault", desc: "All verified documents stored securely", gradient: "from-amber-500 to-orange-500" },
+                { icon: <ShieldCheck className="w-5 h-5 text-white" />, title: "BGV Report", desc: "Downloadable verification certificate", gradient: "from-green-500 to-emerald-600" },
+                { icon: <Fingerprint className="w-5 h-5 text-white" />, title: "Attendance", desc: "Biometric & geo-fencing enabled", gradient: "from-rose-500 to-pink-600" },
+                { icon: <Briefcase className="w-5 h-5 text-white" />, title: "Dept Access", desc: "Role-based system permissions", gradient: "from-cyan-500 to-blue-600" }
+              ].map((b, i) => (
+                <div key={i} className="flex-shrink-0 w-[180px] bg-white rounded-2xl p-4 border border-slate-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all snap-start">
+                  <div className={`w-10 h-10 bg-gradient-to-br ${b.gradient} rounded-xl flex items-center justify-center mb-3 shadow-md`}>{b.icon}</div>
+                  <h4 className="text-sm font-bold text-slate-900 mb-0.5">{b.title}</h4>
+                  <p className="text-[11px] text-slate-500 leading-relaxed">{b.desc}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+
+      {/* HRMS Auto-Onboarding - After BGV */}
+      <section id="hrms" className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-indigo-50/40 to-white" />
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-100/30 rounded-full blur-[100px]" />
+        <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-indigo-100/20 rounded-full blur-[80px]" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white text-blue-700 text-xs font-bold border border-blue-200 shadow-sm mb-5">
+              <UserCheck className="w-4 h-4" /> After BGV Completion → Employee Onboarded
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">HRMS <span className="text-gradient">Auto-Onboarding</span></h2>
+            <p className="text-base text-slate-500 max-w-2xl mx-auto">Once BGV is successfully completed, the candidate is automatically added as an employee in the HRMS system — no manual data entry required.</p>
+          </motion.div>
+
+          {/* Flow indicator */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex items-center justify-center gap-3 mb-14 flex-wrap">
+            <div className="flex items-center gap-2 px-5 py-2.5 bg-white rounded-full border border-blue-200 shadow-md">
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-bold text-blue-700">BGV Completed</span>
+            </div>
+            <ArrowRight className="w-5 h-5 text-blue-400" />
+            <div className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full shadow-lg shadow-blue-500/20">
+              <UserCheck className="w-4 h-4 text-white" />
+              <span className="text-sm font-bold text-white">Auto-Added to HRMS</span>
+            </div>
+            <ArrowRight className="w-5 h-5 text-blue-400" />
+            <div className="flex items-center gap-2 px-5 py-2.5 bg-white rounded-full border border-indigo-200 shadow-md">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <span className="text-sm font-bold text-indigo-700">Full Employee Benefits</span>
+            </div>
+          </motion.div>
+
+          {/* HRMS Features - Horizontal Scroll */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2"><span className="text-lg">🏢</span> HRMS Features</h3>
+              <div className="hidden sm:flex items-center gap-2 text-sm text-slate-500">
+                <span>← Scroll to explore →</span>
+                <ChevronRight className="w-4 h-4" />
+              </div>
+            </div>
+
+            <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory hide-scrollbar">
+              {[
+                { icon: <UserCheck className="w-6 h-6 text-white" />, gradient: "from-blue-500 to-blue-600", title: "Auto Employee Creation", desc: "Candidate data flows directly into HRMS as a new employee record after BGV clearance" },
+                { icon: <FileText className="w-6 h-6 text-white" />, gradient: "from-green-500 to-emerald-600", title: "Document Management", desc: "All verified documents (PAN, Aadhaar, education) auto-attached to employee profile" },
+                { icon: <CreditCard className="w-6 h-6 text-white" />, gradient: "from-purple-500 to-indigo-600", title: "Payroll Integration", desc: "Bank details, PAN, UAN auto-linked for seamless payroll setup from day one" },
+                { icon: <Clock className="w-6 h-6 text-white" />, gradient: "from-amber-500 to-orange-600", title: "Attendance & Leave", desc: "Employee immediately gets access to attendance tracking and leave management" },
+                { icon: <Activity className="w-6 h-6 text-white" />, gradient: "from-cyan-500 to-blue-600", title: "Performance Tracking", desc: "Goals, KPIs, and review cycles auto-configured based on role and department" },
+                { icon: <Globe className="w-6 h-6 text-white" />, gradient: "from-indigo-500 to-purple-600", title: "Self-Service Portal", desc: "Employee gets instant access to payslips, tax declarations, and HR requests" }
+              ].map((feature, i) => (
+                <div key={i} className="flex-shrink-0 w-72 bg-white rounded-xl p-6 border-2 border-slate-100 shadow-sm hover:shadow-lg hover:border-blue-200 transition-all duration-300 snap-start">
+                  <div className={`w-12 h-12 bg-gradient-to-br ${feature.gradient} rounded-xl flex items-center justify-center mb-4 shadow-lg`}>
+                    {feature.icon}
+                  </div>
+                  <h4 className="text-base font-bold text-slate-900 mb-2">{feature.title}</h4>
+                  <p className="text-sm text-slate-500 leading-relaxed">{feature.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center mt-4 space-x-2">
+              <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+              <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
+              <div className="w-2 h-2 bg-slate-300 rounded-full"></div>
+            </div>
+          </div>
+
+          {/* Stats bar */}
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 rounded-2xl p-8 text-white shadow-xl shadow-blue-600/20">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              {[
+                { val: "Zero", label: "Manual Data Entry" },
+                { val: "100%", label: "Data Accuracy" },
+                { val: "Instant", label: "Employee Access" },
+                { val: "Seamless", label: "BGV → HRMS Flow" }
+              ].map((s, i) => (
+                <div key={i}>
+                  <div className="text-2xl font-black">{s.val}</div>
+                  <div className="text-sm text-blue-100">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Built for Enterprise Scale - Enhanced */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950" />
+        <div className="absolute top-[10%] left-[-5%] w-[300px] h-[300px] bg-blue-500/10 rounded-full blur-[80px]" />
+        <div className="absolute bottom-[10%] right-[-5%] w-[250px] h-[250px] bg-indigo-500/10 rounded-full blur-[60px]" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-14">
+            <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 text-blue-300 text-xs font-bold border border-white/10 backdrop-blur-sm mb-5">
+              <Sparkles className="w-3.5 h-3.5" /> Enterprise Platform
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-3">Built for <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Enterprise Scale</span></h2>
+            <p className="text-base text-blue-200/60 max-w-2xl mx-auto">Comprehensive hiring, verification & HRMS platform with advanced features and integrations</p>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {[
+              {
+                title: "AI-Powered Intelligence",
+                icon: <Brain className="w-6 h-6 text-white" />,
+                gradient: "from-blue-500 to-indigo-600",
+                items: [
+                  { name: "Resume Screening AI", desc: "Bulk processing with JD matching", icon: <FileSearch className="w-4 h-4" /> },
+                  { name: "Fraud Detection ML", desc: "98% accuracy in authenticity verification", icon: <ShieldCheck className="w-4 h-4" /> },
+                  { name: "Document Analysis", desc: "Automated credential validation", icon: <FileText className="w-4 h-4" /> },
+                  { name: "Risk Assessment", desc: "Intelligent scoring algorithms", icon: <Activity className="w-4 h-4" /> },
+                  { name: "Smart Recommendations", desc: "AI-driven candidate ranking", icon: <Star className="w-4 h-4" /> }
+                ]
+              },
+              {
+                title: "Verification Services",
+                icon: <ShieldCheck className="w-6 h-6 text-white" />,
+                gradient: "from-indigo-500 to-purple-600",
+                items: [
+                  { name: "PAN & Aadhaar Verification", desc: "Government database validation", icon: <Fingerprint className="w-4 h-4" /> },
+                  { name: "Employment History", desc: "Comprehensive background checks", icon: <Briefcase className="w-4 h-4" /> },
+                  { name: "Court Record Search", desc: "Criminal and civil records", icon: <Scale className="w-4 h-4" /> },
+                  { name: "Credit Report Analysis", desc: "Financial background verification", icon: <CreditCard className="w-4 h-4" /> },
+                  { name: "Address Verification", desc: "Field agent physical verification", icon: <MapPin className="w-4 h-4" /> }
+                ]
+              },
+              {
+                title: "Enterprise Platform",
+                icon: <Globe className="w-6 h-6 text-white" />,
+                gradient: "from-purple-500 to-pink-600",
+                items: [
+                  { name: "Multi-Organization Support", desc: "Manage multiple entities", icon: <Users className="w-4 h-4" /> },
+                  { name: "Role-Based Access Control", desc: "Granular permissions system", icon: <ShieldCheck className="w-4 h-4" /> },
+                  { name: "Real-Time Dashboards", desc: "Live analytics and reporting", icon: <Activity className="w-4 h-4" /> },
+                  { name: "API Integration", desc: "Seamless system connectivity", icon: <GitMerge className="w-4 h-4" /> },
+                  { name: "HRMS Auto-Onboarding", desc: "BGV → Employee in one click", icon: <UserCheck className="w-4 h-4" /> }
+                ]
+              }
+            ].map((category, index) => (
+              <motion.div key={index} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}
+                className="bg-white/[0.05] backdrop-blur-sm rounded-3xl p-7 border border-white/10 hover:bg-white/[0.08] transition-all duration-300"
+              >
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${category.gradient} flex items-center justify-center shadow-lg`}>
+                    {category.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-white">{category.title}</h3>
+                </div>
+                <div className="space-y-4">
+                  {category.items.map((item, itemIndex) => (
+                    <div key={itemIndex} className="flex items-start gap-3 group/item">
+                      <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 text-blue-300 group-hover/item:bg-white/20 transition-colors">
+                        {item.icon}
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-white">{item.name}</div>
+                        <div className="text-xs text-slate-400">{item.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Comprehensive Services - Horizontal Scroll */}
-      <section id="services" className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center space-x-2 bg-white px-6 py-3 rounded-full shadow-lg mb-6">
-              <Shield className="w-5 h-5 text-indigo-600" />
-              <span className="text-indigo-800 font-semibold">Comprehensive BGV Suite</span>
-            </div>
-            <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
-              12+ Professional Services
+
+      {/* Final CTA - Start Your Journey */}
+      <section className="py-20 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-white/5 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[80px] translate-x-1/3 translate-y-1/3" />
+
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="space-y-8">
+            <h2 className="text-3xl sm:text-5xl font-black leading-tight">
+              Start Your AI-Powered<br />Hiring & Verification Journey
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Complete background verification solutions covering every aspect of candidate screening and validation
+            <p className="text-lg text-white/80 max-w-2xl mx-auto">
+              Experience the complete flow — AI screening, structured interviews, instant BGV, and seamless HRMS onboarding. All in one platform.
             </p>
-          </div>
 
-          {/* AI-Powered Services - Featured Row */}
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">🤖 AI-Powered Services</h3>
-              <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-2 rounded-full text-sm font-bold shadow-lg animate-pulse">
-                ✨ NEW AI TECHNOLOGY
-              </div>
+            {/* Feature highlights */}
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {[
+                { label: "AI Screening", icon: <Brain className="w-3.5 h-3.5" /> },
+                { label: "Dynamic Interviews", icon: <Users className="w-3.5 h-3.5" /> },
+                { label: "Instant BGV", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+                { label: "HRMS Onboarding", icon: <UserCheck className="w-3.5 h-3.5" /> }
+              ].map((f, i) => (
+                <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium border border-white/20">
+                  {f.icon} {f.label}
+                </span>
+              ))}
             </div>
-            <div className="grid md:grid-cols-3 gap-6 mb-8">
-              {/* AI Resume Screening */}
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-white shadow-2xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-                <div className="relative z-10">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                      <Sparkles className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold">AI Resume Screening</h4>
-                      <span className="bg-yellow-400 text-gray-900 px-2 py-1 rounded-full text-xs font-bold">HOT</span>
-                    </div>
-                  </div>
-                  <p className="text-blue-100 mb-4 text-sm">Upload 100+ resumes, get top 10-20 candidates with JD matching in 60 seconds</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="bg-white/20 px-3 py-1 rounded-full">Bulk Processing</span>
-                    <span className="font-bold">95% Accuracy</span>
-                  </div>
-                </div>
-              </div>
 
-              {/* AI CV Validation */}
-              <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl p-6 text-white shadow-2xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-                <div className="relative z-10">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                      <Brain className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold">AI CV Validation</h4>
-                      <span className="bg-yellow-400 text-gray-900 px-2 py-1 rounded-full text-xs font-bold">AI</span>
-                    </div>
-                  </div>
-                  <p className="text-purple-100 mb-4 text-sm">Advanced fraud detection and authenticity verification with 98% accuracy</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="bg-white/20 px-3 py-1 rounded-full">Fraud Detection</span>
-                    <span className="font-bold">98% Accuracy</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* AI Education Verification */}
-              <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-2xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-16 translate-x-16"></div>
-                <div className="relative z-10">
-                  <div className="flex items-center space-x-3 mb-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                      <GraduationCap className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold">AI Education Verification</h4>
-                      <span className="bg-yellow-400 text-gray-900 px-2 py-1 rounded-full text-xs font-bold">AI</span>
-                    </div>
-                  </div>
-                  <p className="text-emerald-100 mb-4 text-sm">Automated validation of educational credentials with AI document analysis</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="bg-white/20 px-3 py-1 rounded-full">Document OCR</span>
-                    <span className="font-bold">24hrs</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Traditional Services - Horizontal Scroll */}
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-gray-900">🛡️ Core BGV Services</h3>
-              <div className="text-sm text-gray-500 flex items-center space-x-2">
-                <span>← Scroll to explore all services →</span>
-                <ChevronDown className="w-4 h-4 rotate-90" />
-              </div>
-            </div>
-            
-            {/* Horizontal Scrolling Cards */}
-            <div className="relative">
-              <div className="flex overflow-x-auto gap-6 pb-6 snap-x snap-mandatory scrollbar-hide">
-                {/* PAN Verification */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-                      <CreditCard className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">PAN Verification</h4>
-                      <div className="text-xs text-blue-600 font-semibold">Government Database ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Validate PAN card details and authenticity instantly through government database integration</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-medium">Instant</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Real-time</span>
-                  </div>
-                </div>
-
-                {/* Aadhaar Verification */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center">
-                      <UserCheck className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">Aadhaar to UAN</h4>
-                      <div className="text-xs text-blue-600 font-semibold">EPFO Integration ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Link and verify Aadhaar with UAN number seamlessly through EPFO database</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">2-4 hrs</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Verified</span>
-                  </div>
-                </div>
-
-                {/* Employment History */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                      <Building className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">Employment History</h4>
-                      <div className="text-xs text-blue-600 font-semibold">Multi-Source ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Comprehensive employment background verification through multiple data sources</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-xs font-medium">24-48 hrs</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Detailed</span>
-                  </div>
-                </div>
-
-                {/* Court Records */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">Court Records</h4>
-                      <div className="text-xs text-blue-600 font-semibold">Legal Database ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Criminal and civil court records verification across multiple jurisdictions</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-red-50 text-red-700 px-3 py-1 rounded-full text-xs font-medium">48 hrs</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Comprehensive</span>
-                  </div>
-                </div>
-
-                {/* Credit Report */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">Credit Report</h4>
-                      <div className="text-xs text-blue-600 font-semibold">CIBIL Integration ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Detailed credit history and financial background through CIBIL integration</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-medium">Instant</span>
-                    <span className="text-green-600 font-bold text-sm">✓ CIBIL</span>
-                  </div>
-                </div>
-
-                {/* Address Verification */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">Address Verification</h4>
-                      <div className="text-xs text-blue-600 font-semibold">Field Verification ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Physical address validation and verification through field agents</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-cyan-50 text-cyan-700 px-3 py-1 rounded-full text-xs font-medium">3-5 days</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Physical</span>
-                  </div>
-                </div>
-
-                {/* Education Manual */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center">
-                      <GraduationCap className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">Education Check</h4>
-                      <div className="text-xs text-blue-600 font-semibold">Institution Direct ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Manual verification of educational credentials directly with institutions</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-orange-50 text-orange-700 px-3 py-1 rounded-full text-xs font-medium">5-7 days</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Manual</span>
-                  </div>
-                </div>
-
-                {/* Reference Check */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center">
-                      <Eye className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">Reference Check</h4>
-                      <div className="text-xs text-blue-600 font-semibold">Direct Contact ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Supervisory and professional reference verification through direct contact</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-medium">2-3 days</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Personal</span>
-                  </div>
-                </div>
-
-                {/* PAN-Aadhaar Seeding */}
-                <div className="flex-shrink-0 w-72 bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-gray-100 hover:border-blue-300 snap-start">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-bold text-gray-900">PAN-Aadhaar Seeding</h4>
-                      <div className="text-xs text-blue-600 font-semibold">Real-time Status ✓</div>
-                    </div>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4">Verify PAN and Aadhaar linkage status through government databases</p>
-                  <div className="flex items-center justify-between">
-                    <span className="bg-pink-50 text-pink-700 px-3 py-1 rounded-full text-xs font-medium">Instant</span>
-                    <span className="text-green-600 font-bold text-sm">✓ Live</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Scroll Indicators */}
-              <div className="flex justify-center mt-6 space-x-2">
-                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              </div>
-            </div>
-          </div>
-
-          {/* Enhanced CTA Section */}
-          <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-10 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
-              <div className="relative z-10">
-                <h3 className="text-3xl font-bold mb-4">Ready to Experience Next-Gen BGV?</h3>
-                <p className="text-blue-100 mb-8 max-w-2xl mx-auto text-lg">
-                  Join the AI revolution in background verification. Start with our comprehensive suite of services today and hire with complete confidence.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <button
-                    onClick={() => router.push("/login")}
-                    className="px-8 py-4 bg-white text-blue-600 font-bold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 inline-flex items-center space-x-2"
-                  >
-                    <span>Start BGV Process</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </button>
-                  <button 
-                    onClick={generateSampleReport}
-                    disabled={generatingReport}
-                    className={`px-8 py-4 backdrop-blur-sm font-semibold rounded-xl border-2 transition-all duration-300 inline-flex items-center space-x-2 ${
-                      generatingReport
-                        ? 'bg-gray-500/20 text-gray-300 border-gray-400/30 cursor-not-allowed'
-                        : 'bg-white/20 text-white border-white/30 hover:bg-white/30'
-                    }`}
-                  >
-                    {generatingReport ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-gray-300 border-t-white rounded-full animate-spin"></div>
-                        <span>Generating Sample Report...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-5 h-5" />
-                        <span>Download Sample Report</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Section */}
-      <section id="reports" className="py-20 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
-          <div className="space-y-8">
-            <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-6 py-3 rounded-full">
-              <Rocket className="w-5 h-5" />
-              <span className="font-semibold">Ready to Transform?</span>
-            </div>
-            
-            <h2 className="text-4xl lg:text-6xl font-bold leading-tight">
-              Start Your AI-Powered
-              <br />
-              Verification Journey
-            </h2>
-            
-            <p className="text-xl opacity-90 max-w-2xl mx-auto">
-              Experience the future of hiring with TFG Reports - AI-powered background verification that delivers speed, accuracy, and reliability
-            </p>
-            
+            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => router.push("/login")}
-                className="px-10 py-4 bg-white text-blue-600 font-bold rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 inline-flex items-center justify-center space-x-2"
-              >
-                <span>Start Free Trial</span>
-                <ArrowRight className="w-5 h-5" />
+              <button className="px-8 py-4 bg-white text-blue-600 font-bold rounded-2xl hover:shadow-2xl hover:scale-105 transition-all duration-300 inline-flex items-center justify-center gap-2 text-lg">
+                Start Free Trial <ArrowRight className="w-5 h-5" />
               </button>
-              <button className="px-10 py-4 bg-white/20 backdrop-blur-sm text-white font-semibold rounded-2xl border-2 border-white/30 hover:bg-white/30 transition-all duration-300 inline-flex items-center justify-center space-x-2">
-                <Play className="w-5 h-5" />
-                <span>Schedule Demo</span>
+              <button className="px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-2xl border-2 border-white/30 hover:bg-white/20 transition-all duration-300 inline-flex items-center justify-center gap-2 text-lg">
+                <Search className="w-5 h-5" /> Schedule Demo
               </button>
             </div>
-            
-            <div className="flex items-center justify-center space-x-8 text-sm opacity-80">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="w-4 h-4" />
+
+            {/* Trust indicators */}
+            <div className="flex items-center justify-center gap-6 text-sm text-white/70 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4" />
                 <span>No Credit Card Required</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Shield className="w-4 h-4" />
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4" />
                 <span>Enterprise Security</span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4" />
                 <span>Setup in Minutes</span>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -1511,65 +1416,28 @@ export default function HomePage() {
             {/* Company Info */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center overflow-hidden">
-                  <img 
-                    src="/logos/tfgLogo.jpeg" 
-                    alt="TFG Reports Logo" 
-                    className="w-8 h-8 object-contain"
-                  />
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
+                  <ShieldCheck className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <h3 className="text-xl font-bold">TFG Reports</h3>
                   <p className="text-xs text-gray-400">AI-Powered BGV Platform</p>
                 </div>
               </div>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Transforming hiring with AI-powered background verification and comprehensive BGV services for modern enterprises.
-              </p>
+              <p className="text-gray-400 text-sm leading-relaxed">Transforming hiring with AI-powered background verification and comprehensive BGV services for modern enterprises.</p>
               <div className="space-y-2 text-sm text-gray-400">
-                <div className="flex items-center space-x-2">
-                  <span>📞</span>
-                  <span>8886099008</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span>✉</span>
-                  <span>naresh@tfgorg.com</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span>🔗</span>
-                  <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" className="text-blue-400 hover:text-blue-300 transition-colors">LinkedIn</a>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span>🌐</span>
-                  <a href="https://www.tfgorg.com" target="_blank" className="text-blue-400 hover:text-blue-300 transition-colors">www.tfgorg.com</a>
-                </div>
+                <div className="flex items-center space-x-2"><span>📞</span><span>8886099008</span></div>
+                <div className="flex items-center space-x-2"><span>✉</span><span>naresh@tfgorg.com</span></div>
+                <div className="flex items-center space-x-2"><span>🔗</span><Link href="https://www.linkedin.com/company/threshing-floor-group/" className="text-blue-400 hover:text-blue-300 transition-colors">LinkedIn</Link></div>
+                <div className="flex items-center space-x-2"><span>🌐</span><Link href="https://www.tfgorg.com" className="text-blue-400 hover:text-blue-300 transition-colors">www.tfgorg.com</Link></div>
               </div>
-              <div className="flex items-center space-x-3 bg-gradient-to-r from-blue-50 to-indigo-50 p-3 rounded-xl border border-blue-200 shadow-md hover:shadow-lg transition-all duration-300">
-                <div className="relative">
-                  <img src="/logos/T-Hub.jpg" alt="T-Hub Address" className="w-12 h-12 object-contain rounded-lg shadow-sm border border-gray-200" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                    <MapPin className="w-2 h-2 text-white" />
-                  </div>
-                </div>
-                <div>
-                  <span className="text-sm font-semibold text-gray-800">T-Hub, Hyderabad</span>
-                  <p className="text-xs text-gray-600">Innovation Hub</p>
-                </div>
-              </div>
-              <div className="flex space-x-4">
-                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">
-                  <Globe className="w-4 h-4" />
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">
-                  <Users className="w-4 h-4" />
-                </div>
-                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer">
-                  <Building className="w-4 h-4" />
-                </div>
+              <div className="flex space-x-4 pt-2">
+                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer"><Globe className="w-4 h-4" /></div>
+                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors cursor-pointer"><Users className="w-4 h-4" /></div>
               </div>
             </div>
 
-            {/* Solutions */}
+            {/* AI Solutions */}
             <div>
               <h4 className="font-semibold mb-4 text-blue-300">AI Solutions</h4>
               <ul className="space-y-2 text-sm text-gray-400">
@@ -1608,48 +1476,15 @@ export default function HomePage() {
 
           {/* Bottom Bar */}
           <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between">
-            <p className="text-gray-400 text-sm">
-              © 2024 TFG Reports. All rights reserved. Built with AI for the future of BGV services.
-            </p>
+            <p className="text-gray-400 text-sm">© {new Date().getFullYear()} TFG Reports. All rights reserved. Built with AI for the future of BGV.</p>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <Shield className="w-3 h-3" />
-                <span>SOC 2 Compliant</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <Lock className="w-3 h-3" />
-                <span>ISO 27001</span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs text-gray-500">
-                <CheckCircle className="w-3 h-3" />
-                <span>GDPR Ready</span>
-              </div>
+              <div className="flex items-center space-x-2 text-xs text-gray-500"><ShieldCheck className="w-3 h-3" /><span>SOC 2 Compliant</span></div>
+              <div className="flex items-center space-x-2 text-xs text-gray-500"><ShieldCheck className="w-3 h-3" /><span>ISO 27001</span></div>
+              <div className="flex items-center space-x-2 text-xs text-gray-500"><CheckCircle2 className="w-3 h-3" /><span>GDPR Ready</span></div>
             </div>
           </div>
         </div>
       </footer>
-
-      {/* Custom Styles */}
-      <style jsx>{`
-        @keyframes blob {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-blob { animation: blob 7s infinite; }
-        .animate-fade-in { animation: fadeIn 0.6s ease-out forwards; }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
     </div>
   );
 }
