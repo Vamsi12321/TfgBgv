@@ -24,7 +24,7 @@ export function middleware(req) {
 
   // Public paths
   if (path.startsWith("/candidate")) return NextResponse.next();
-  if (path.startsWith("/jobseeker")) return NextResponse.next();
+  if (path.startsWith("/tfgjobs")) return NextResponse.next();
   if (path.startsWith("/api/proxy/jobseeker")) return NextResponse.next();
   if (path === "/favicon.ico") return NextResponse.next();
 
@@ -33,7 +33,7 @@ export function middleware(req) {
   const isOrgRoute = path.startsWith("/org");
   const requiresAuth = isSuperAdminRoute || isOrgRoute;
 
-  // NOT LOGGED IN → redirect to /login
+  // NOT LOGGED IN â†’ redirect to /login
   if (requiresAuth && !sessionCookie) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("redirect", path);

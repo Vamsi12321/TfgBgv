@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -54,7 +54,7 @@ export default function ProfilePage() {
   // Load real profile on mount
   useEffect(() => {
     const stored = localStorage.getItem("jobseekerUser");
-    if (!stored) { router.push("/jobseeker/login"); return; }
+    if (!stored) { router.push("/tfgjobs/jobseeker/login"); return; }
 
     const loadProfile = async () => {
       try {
@@ -66,7 +66,7 @@ export default function ProfilePage() {
         const p = data.profile || data.jobSeeker || data;
         const pj = p.profileJson || {}; // nested profileJson
 
-        // Personal info — top-level fields + profileJson fields
+        // Personal info   top-level fields + profileJson fields
         const fullName = p.name || "";
         const parts = fullName.trim().split(" ");
         setPersonal(prev => ({
@@ -81,19 +81,19 @@ export default function ProfilePage() {
           github: pj.githubUrl || pj.github || p.githubUrl || prev.github,
         }));
 
-        // Experience — inside profileJson
+        // Experience   inside profileJson
         const expList = pj.experience || p.experience || [];
         if (Array.isArray(expList) && expList.length > 0) {
           setExperience(expList.map((e, i) => ({ ...e, id: e.id || i + 1 })));
         }
 
-        // Education — inside profileJson
+        // Education   inside profileJson
         const eduList = pj.education || p.education || [];
         if (Array.isArray(eduList) && eduList.length > 0) {
           setEducation(eduList.map((e, i) => ({ ...e, id: e.id || i + 1 })));
         }
 
-        // Skills — inside profileJson, array of strings
+        // Skills   inside profileJson, array of strings
         const skillList = pj.skills || p.skills || [];
         if (Array.isArray(skillList) && skillList.length > 0) {
           setSkills(skillList.map((s, i) =>
@@ -352,7 +352,7 @@ export default function ProfilePage() {
                     <input placeholder="Company" value={newExp.company} onChange={(e) => setNewExp((p) => ({ ...p, company: e.target.value }))} className={inputClass} />
                     <input placeholder="Role / Title" value={newExp.role} onChange={(e) => setNewExp((p) => ({ ...p, role: e.target.value }))} className={inputClass} />
                   </div>
-                  <input placeholder="Duration (e.g. Jan 2022 – Present)" value={newExp.duration} onChange={(e) => setNewExp((p) => ({ ...p, duration: e.target.value }))} className={inputClass} />
+                  <input placeholder="Duration (e.g. Jan 2022   Present)" value={newExp.duration} onChange={(e) => setNewExp((p) => ({ ...p, duration: e.target.value }))} className={inputClass} />
                   <textarea rows={2} placeholder="Description" value={newExp.description} onChange={(e) => setNewExp((p) => ({ ...p, description: e.target.value }))} className={inputClass + " resize-none"} />
                   <div className="flex gap-2">
                     <button onClick={addExperience} className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors">Add</button>
@@ -399,7 +399,7 @@ export default function ProfilePage() {
                     <input placeholder="Degree" value={newEdu.degree} onChange={(e) => setNewEdu((p) => ({ ...p, degree: e.target.value }))} className={inputClass} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <input placeholder="Year (e.g. 2016 – 2020)" value={newEdu.year} onChange={(e) => setNewEdu((p) => ({ ...p, year: e.target.value }))} className={inputClass} />
+                    <input placeholder="Year (e.g. 2016   2020)" value={newEdu.year} onChange={(e) => setNewEdu((p) => ({ ...p, year: e.target.value }))} className={inputClass} />
                     <input placeholder="Grade / GPA" value={newEdu.grade} onChange={(e) => setNewEdu((p) => ({ ...p, grade: e.target.value }))} className={inputClass} />
                   </div>
                   <div className="flex gap-2">

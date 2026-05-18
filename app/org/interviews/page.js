@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import {
   CalendarCheck, Users, CheckCircle2, XCircle, Clock, Star, X,
   ChevronRight, ChevronDown, Phone, Mail, Briefcase, User,
-  Calendar, Loader2, Brain, Plus, Edit2, Trash2, UserPlus, Tag,
-  Info, FileText, ExternalLink,
+  Calendar, Loader2, Brain, Edit2, Trash2, UserPlus, Tag,
+  Info, FileText,
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────
@@ -147,26 +147,42 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-          <h3 className="text-lg font-bold text-gray-900">Schedule Round {round.roundNumber}</h3>
-          <p className="text-sm text-gray-500">{round.roundName}</p>
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+        {/* Header */}
+        <div className="relative px-7 py-6 overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+          <div className="relative flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+              <Calendar size={20} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-extrabold text-white">Schedule Round {round.roundNumber}</h3>
+              <p className="text-blue-100 text-sm mt-0.5">{round.roundName} • {interview.candidateName}</p>
+            </div>
+          </div>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+
+        <form onSubmit={handleSubmit} className="p-7 space-y-5">
+          {/* Interviewer Select */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Select Interviewer *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+              <User size={12} className="text-indigo-500" /> Select Interviewer *
+            </label>
             {loadingInterviewers ? (
-              <div className="flex items-center gap-2 text-sm text-gray-500 py-2">
-                <Loader2 size={14} className="animate-spin" /> Loading interviewers...
+              <div className="flex items-center gap-2 text-sm text-gray-500 py-3 px-4 bg-gray-50 rounded-xl">
+                <Loader2 size={14} className="animate-spin text-indigo-500" /> Loading interviewers...
               </div>
             ) : interviewers.length === 0 ? (
-              <p className="text-sm text-red-500">No interviewers available. Go to Interviewers tab to add one first.</p>
+              <div className="bg-red-50 border border-red-100 rounded-xl p-3">
+                <p className="text-sm text-red-600 font-medium">No interviewers available.</p>
+                <p className="text-xs text-red-400 mt-0.5">Go to Interviewers tab to add one first.</p>
+              </div>
             ) : (
               <select required value={form.interviewerId}
                 onChange={(e) => setForm({ ...form, interviewerId: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-                <option value="">— Select Interviewer —</option>
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300 appearance-none cursor-pointer">
+                <option value="">— Choose an interviewer —</option>
                 {interviewers.map(i => (
                   <option key={i._id || i.interviewerId} value={i._id || i.interviewerId}>
                     {i.name} — {i.designation || i.department || i.email}
@@ -175,16 +191,31 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
               </select>
             )}
           </div>
+
+          {/* Date & Time */}
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Date & Time *</label>
+            <label className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
+              <Clock size={12} className="text-blue-500" /> Date & Time *
+            </label>
             <input required type="datetime-local" value={form.scheduledAt}
               onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300" />
           </div>
+
+          {/* Info */}
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex gap-2">
+            <Info size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
+            <p className="text-[11px] text-blue-700">The interviewer will be notified and the round status will change to "Scheduled".</p>
+          </div>
+
+          {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-            <button type="submit" disabled={saving || !form.interviewerId} className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center gap-2 disabled:opacity-60">
-              {saving && <Loader2 size={14} className="animate-spin" />} Schedule
+            <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">
+              Cancel
+            </button>
+            <button type="submit" disabled={saving || !form.interviewerId} className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-50">
+              {saving && <Loader2 size={14} className="animate-spin" />}
+              <Calendar size={14} /> Schedule
             </button>
           </div>
         </form>
@@ -427,29 +458,55 @@ function DetailDrawer({ interview, onClose, onAction }) {
                 </a>
               )}
             </div>
-            {interview.resumeUrl && (
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await fetch(interview.resumeUrl);
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${interview.candidateName || "resume"}_resume.pdf`;
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                    document.body.removeChild(a);
-                  } catch {
-                    window.open(interview.resumeUrl, "_blank");
-                  }
-                }}
-                className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 mt-1 transition cursor-pointer"
-              >
-                <FileText size={13} /> Download Resume <ExternalLink size={11} />
-              </button>
-            )}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {(interview.resumeUrl || interview.resumeDownloadUrl) && (
+                <button
+                  onClick={async () => {
+                    const url = interview.resumeUrl || interview.resumeDownloadUrl;
+                    try {
+                      const response = await fetch(url);
+                      const blob = await response.blob();
+                      const blobUrl = window.URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = blobUrl;
+                      a.download = `${interview.candidateName || "resume"}_resume.pdf`;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(blobUrl);
+                      document.body.removeChild(a);
+                    } catch {
+                      window.open(url, "_blank");
+                    }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-medium transition cursor-pointer"
+                >
+                  <FileText size={12} /> Download Resume
+                </button>
+              )}
+              {interview.jobId && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const res = await fetch(`/api/proxy/secure/getScreeningResults?jobId=${interview.jobId}&applicationId=${interview.applicationId}`, { credentials: "include" });
+                      if (res.ok) {
+                        const data = await res.json();
+                        const r = data.results?.[0];
+                        if (r) {
+                          alert(`AI Score: ${r.finalScore || r.llmScore || "N/A"}\nRecommendation: ${r.recommendation || "N/A"}\n\nStrengths:\n${(r.strengths || []).join("\n")}\n\nWeaknesses:\n${(r.weaknesses || []).join("\n")}`);
+                        } else {
+                          alert("No AI screening results found for this candidate.");
+                        }
+                      } else {
+                        alert("No AI screening results available.");
+                      }
+                    } catch { alert("Failed to fetch screening results."); }
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg text-xs font-medium transition cursor-pointer"
+                >
+                  <Brain size={12} /> AI Screening Results
+                </button>
+              )}
+            </div>
             {interview.jobTitle && (
               <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
                 <Briefcase size={12} className="text-gray-400" /> Applied for: <strong>{interview.jobTitle}</strong>
@@ -725,64 +782,95 @@ function InterviewerFormModal({ interviewer, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col">
-        <div className="px-6 py-4 border-b bg-gradient-to-r from-indigo-50 to-purple-50 flex-shrink-0">
-          <h3 className="text-lg font-bold text-gray-900">{isEdit ? "Edit Interviewer" : "Add New Interviewer"}</h3>
-          <p className="text-sm text-gray-500">{isEdit ? "Update interviewer details" : "Fill in the details to add a new interviewer"}</p>
-        </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Name *</label>
-              <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="Full name" />
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col border border-gray-100">
+        {/* Header */}
+        <div className="relative px-7 py-6 flex-shrink-0 overflow-hidden bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-600">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+          <div className="relative flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                <UserPlus size={20} className="text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-extrabold text-white">{isEdit ? "Edit Interviewer" : "Add Interviewer"}</h3>
+                <p className="text-xs text-indigo-100 mt-0.5">{isEdit ? "Update details below" : "This person will appear in scheduling dropdowns"}</p>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Email *</label>
-              <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="email@company.com" />
+            <button onClick={onClose} className="text-white/70 hover:text-white hover:bg-white/10 rounded-xl p-2 transition">
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-7 space-y-5 overflow-y-auto flex-1">
+          {/* Personal Info Section */}
+          <div>
+            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <User size={12} /> Personal Information
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><User size={11} className="text-indigo-500" /> Name *</label>
+                <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300"
+                  placeholder="Full name" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><Mail size={11} className="text-blue-500" /> Email *</label>
+                <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300"
+                  placeholder="email@company.com" />
+              </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Phone</label>
-              <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                placeholder="+91 9876543210" />
+
+          {/* Role Section */}
+          <div>
+            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Briefcase size={12} /> Role & Department
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><Phone size={11} className="text-green-500" /> Phone</label>
+                <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300"
+                  placeholder="+91 9876543210" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Designation</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><Star size={11} className="text-amber-500" /> Designation</label>
               <input value={form.designation} onChange={(e) => setForm({ ...form, designation: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300"
                 placeholder="Senior Engineer" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Department</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><Briefcase size={11} className="text-purple-500" /> Department</label>
               <input value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300"
                 placeholder="Engineering" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 mb-1">Expertise (comma separated)</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><Tag size={11} className="text-cyan-500" /> Expertise (comma separated)</label>
               <input value={form.expertise} onChange={(e) => setForm({ ...form, expertise: e.target.value })}
-                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300"
                 placeholder="React, Node.js, System Design" />
             </div>
           </div>
+          </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-2">Round Preferences</label>
+            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <CalendarCheck size={12} /> Interview Preferences
+            </p>
+            <label className="block text-xs font-bold text-gray-700 mb-2">Round Preferences</label>
             <div className="flex flex-wrap gap-2">
               {[1, 2, 3, 4].map((r) => (
                 <button key={r} type="button" onClick={() => toggleRound(r)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border-2 transition ${
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
                     form.roundPreferences.includes(r)
-                      ? "border-indigo-500 bg-indigo-50 text-indigo-700"
-                      : "border-gray-200 text-gray-500 hover:border-indigo-300"
+                      ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm"
+                      : "border-gray-200 text-gray-500 hover:border-indigo-300 hover:bg-indigo-50/50"
                   }`}>
                   R{r}: {ROUND_NAMES[r - 1]}
                 </button>
@@ -790,23 +878,26 @@ function InterviewerFormModal({ interviewer, onClose, onSuccess }) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Availability Notes</label>
+            <label className="block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5"><Clock size={11} className="text-orange-500" /> Availability Notes</label>
             <textarea rows={2} value={form.availabilityNotes} onChange={(e) => setForm({ ...form, availabilityNotes: e.target.value })}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 resize-none"
+              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300 resize-none"
               placeholder="e.g. Available Mon-Fri 10am-5pm" />
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 bg-gray-50 rounded-xl p-3 border border-gray-100">
             <label className="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" checked={form.isAvailable} onChange={(e) => setForm({ ...form, isAvailable: e.target.checked })} className="sr-only peer" />
-              <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+              <div className="w-10 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
             </label>
-            <span className="text-sm text-gray-700 font-medium">Available for interviews</span>
+            <div>
+              <span className="text-sm text-gray-700 font-bold">Available for interviews</span>
+              <p className="text-[10px] text-gray-400">Toggle off if temporarily unavailable</p>
+            </div>
           </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-            <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center gap-2 disabled:opacity-60">
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+            <button type="submit" disabled={saving} className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-bold shadow-lg shadow-indigo-200 hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-60">
               {saving && <Loader2 size={14} className="animate-spin" />}
-              {isEdit ? "Update" : "Create"}
+              {isEdit ? "Save Changes" : "Add Interviewer"}
             </button>
           </div>
         </form>
@@ -1102,17 +1193,23 @@ export default function OrgInterviewsPage() {
   const hired = interviews.filter((i) => i.overallStatus === "Hired").length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-6">
 
         {/* ── Header ── */}
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
-            <CalendarCheck size={22} className="text-white" />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-200">
+              <CalendarCheck size={22} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold text-gray-900">Interview Management</h1>
+              <p className="text-sm text-gray-500">Schedule rounds and manage your interviewer panel</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Interview Management</h1>
-            <p className="text-sm text-gray-500">Schedule rounds and manage your interviewer panel</p>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-full">
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+            <span className="text-xs font-medium text-blue-700">{totalInterviews} active</span>
           </div>
         </div>
 
@@ -1203,44 +1300,49 @@ export default function OrgInterviewsPage() {
                   const rounds = interview.rounds || [];
                   const passedCount = rounds.filter(r => r.status === "Passed").length;
                   const scheduledCount = rounds.filter(r => r.status === "Scheduled").length;
+                  const progress = rounds.length > 0 ? Math.round((passedCount / rounds.length) * 100) : 0;
                   return (
-                    <div key={interview._id || interview.id || interview.applicationId || idx} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+                    <div key={interview._id || interview.id || interview.applicationId || idx} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-lg hover:border-blue-100 transition-all duration-300 group">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-md group-hover:scale-105 transition-transform">
                             {(interview.candidateName || "C")[0].toUpperCase()}
                           </div>
                           <div className="min-w-0">
                             <p className="text-sm font-bold text-gray-900 truncate">{interview.candidateName}</p>
                             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${OVERALL_STATUS_STYLES[interview.overallStatus] || "bg-gray-100 text-gray-600"}`}>
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${OVERALL_STATUS_STYLES[interview.overallStatus] || "bg-gray-100 text-gray-600"}`}>
                                 {interview.overallStatus}
                               </span>
                               {interview.jobTitle && <span className="text-xs text-gray-400 truncate">• {interview.jobTitle}</span>}
-                              {interview.candidateEmail && <span className="text-xs text-gray-400 truncate hidden sm:inline">• {interview.candidateEmail}</span>}
                             </div>
                           </div>
                         </div>
                         <button onClick={() => setSelectedInterview(interview)}
-                          className="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition flex items-center gap-1.5 flex-shrink-0">
+                          className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-xs font-bold hover:from-blue-100 hover:to-indigo-100 transition flex items-center gap-1.5 flex-shrink-0 border border-blue-100">
                           Manage <ChevronRight size={14} />
                         </button>
                       </div>
 
-                      {/* Round pills + progress summary */}
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex flex-wrap gap-2">
+                      {/* Round pills + progress bar */}
+                      <div className="mt-4 space-y-3">
+                        <div className="flex flex-wrap gap-1.5">
                           {rounds.map((round, ridx) => (
                             <span key={ridx}
-                              className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold ${ROUND_STATUS_STYLES[round.status] || "bg-gray-100 text-gray-500"}`}>
+                              className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold ${ROUND_STATUS_STYLES[round.status] || "bg-gray-100 text-gray-500"}`}>
                               {round.roundName || ROUND_NAMES[ridx] || `R${round.roundNumber}`}
                             </span>
                           ))}
                         </div>
-                        <span className="text-[11px] text-gray-400 flex-shrink-0 ml-2">
-                          {passedCount}/{rounds.length} passed
-                          {scheduledCount > 0 && ` • ${scheduledCount} scheduled`}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
+                          </div>
+                          <span className="text-[11px] text-gray-400 font-medium flex-shrink-0">
+                            {passedCount}/{rounds.length} passed
+                            {scheduledCount > 0 && ` • ${scheduledCount} scheduled`}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   );

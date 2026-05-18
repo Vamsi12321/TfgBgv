@@ -73,8 +73,13 @@ export default function StageCandidatesPage() {
           source: a.source === "JOB_PORTAL" ? "Portal" : a.source === "AI_SCREENING" ? "AI Screening" : "Manual",
           resumeUrl: a.resumeUrl || a.jobSeekerProfile?.resumeUrl || null,
           resumeDownloadUrl: a.resumeDownloadUrl || a.jobSeekerProfile?.resumeDownloadUrl || null,
+          interviewCreated: (a.stageHistory || []).some(h => h.notes && h.notes.includes("Interview process initiated")),
         }));
-        setCandidates(all.filter(c => c.stage === stage));
+        // For Interview stage, filter out candidates who already have interviews created
+        const filtered = stage === "Interview"
+          ? all.filter(c => c.stage === stage && !c.interviewCreated)
+          : all.filter(c => c.stage === stage);
+        setCandidates(filtered);
       }
       if (jobRes.ok) {
         const jd = await jobRes.json();
@@ -179,10 +184,12 @@ export default function StageCandidatesPage() {
       });
       if (res.ok) {
         setCandidates(prev => prev.filter(c => c.id !== id));
+        setSelectedIds(prev => prev.filter(x => x !== id));
         showToast("Interview created! Manage in Interviews page.");
       } else {
         const d = await res.json().catch(() => ({}));
-        showToast(d?.detail || "Failed");
+        const errMsg = typeof d?.detail === "string" ? d.detail : Array.isArray(d?.detail) ? d.detail[0]?.msg : d?.message || "Failed to create interview";
+        showToast(errMsg);
       }
     } catch { showToast("Network error"); }
   };
@@ -214,7 +221,7 @@ export default function StageCandidatesPage() {
     .sort((a, b) => sort === "score-desc" ? b.score - a.score : sort === "newest" ? new Date(b.appliedAt) - new Date(a.appliedAt) : a.name.localeCompare(b.name));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30 p-4 md:p-8">
       {toast && (
         <div className="fixed top-20 right-4 z-50 flex items-center gap-3 px-5 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl shadow-lg">
           <CheckCircle2 className="w-5 h-5" />
@@ -226,23 +233,45 @@ export default function StageCandidatesPage() {
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <div>
-          <Link href={`/org/jobs/${jobId}`} className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium mb-3 transition-colors">
+          <Link href={`/org/jobs/${jobId}`} className="inline-flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium mb-4 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Pipeline
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">{stage} — {filteredCandidates.length} Candidate{filteredCandidates.length !== 1 ? "s" : ""}</h1>
-          <p className="text-gray-500 mt-1 text-sm">{jobTitle || "Loading..."}</p>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 rounded-2xl shadow-lg ${
+              stage === "Applied" ? "bg-gradient-to-br from-blue-500 to-cyan-500 shadow-blue-200" :
+              stage === "Resume Shortlist" ? "bg-gradient-to-br from-amber-500 to-orange-500 shadow-amber-200" :
+              "bg-gradient-to-br from-violet-500 to-purple-600 shadow-violet-200"
+            }`}>
+              {stage === "Applied" ? <Users className="w-5 h-5 text-white" /> :
+               stage === "Resume Shortlist" ? <Star className="w-5 h-5 text-white" /> :
+               <UserCheck className="w-5 h-5 text-white" />}
+            </div>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-extrabold text-gray-900">{stage}</h1>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                  stage === "Applied" ? "bg-blue-500" : stage === "Resume Shortlist" ? "bg-amber-500" : "bg-violet-500"
+                }`}>{filteredCandidates.length}</span>
+              </div>
+              <p className="text-gray-500 mt-0.5 text-sm">{jobTitle || "Loading..."}</p>
+            </div>
+          </div>
         </div>
 
         {/* Stage Navigation Tabs */}
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-1.5 flex gap-1 overflow-x-auto">
-          {["Applied", "Resume Shortlist", "Interview"].map((s) => (
-            <Link key={s} href={`/org/jobs/${jobId}/stage/${encodeURIComponent(s)}`}
-              className={`px-4 py-2.5 rounded-lg text-sm font-semibold whitespace-nowrap transition ${
-                s === stage
-                  ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow"
-                  : "text-gray-600 hover:bg-gray-50"
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5 flex gap-1 overflow-x-auto">
+          {[
+            { key: "Applied", icon: "📥", gradient: "from-blue-500 to-cyan-500" },
+            { key: "Resume Shortlist", icon: "⭐", gradient: "from-amber-500 to-orange-500" },
+            { key: "Interview", icon: "🎯", gradient: "from-violet-500 to-purple-600" },
+          ].map((s) => (
+            <Link key={s.key} href={`/org/jobs/${jobId}/stage/${encodeURIComponent(s.key)}`}
+              className={`px-5 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
+                s.key === stage
+                  ? `bg-gradient-to-r ${s.gradient} text-white shadow-md`
+                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
               }`}>
-              {s}
+              <span>{s.icon}</span> {s.key}
             </Link>
           ))}
         </div>
@@ -253,50 +282,50 @@ export default function StageCandidatesPage() {
           </div>
         ) : (<>
           {/* Toolbar */}
-          <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
             <div className="flex flex-col md:flex-row md:items-center gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input type="text" placeholder="Search by name or email..." value={search}
                   onChange={e => setSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                  className="w-full pl-10 pr-4 py-2.5 border border-gray-200 bg-gray-50/50 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:bg-white transition" />
               </div>
 
               {/* AI Screening button — only for Applied stage */}
               {stage === "Applied" && (
                 <button onClick={() => setShowAIModal(true)} disabled={aiScreening}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-medium rounded-lg transition disabled:opacity-60">
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-sm font-bold rounded-xl shadow-md shadow-purple-200 hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-60">
                   {aiScreening ? <Loader2 size={14} className="animate-spin" /> : <Brain size={14} />}
-                  {aiScreening ? "Screening..." : "AI Screen All"}
+                  {aiScreening ? "Screening..." : "AI Screen"}
                 </button>
               )}
 
               {/* Move button */}
               {stage !== "Interview" ? (
                 <button onClick={handleBulkMove} disabled={selectedIds.length === 0}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 text-white text-sm font-medium rounded-lg transition disabled:opacity-40 disabled:cursor-not-allowed ${
-                    stage === "Applied" ? "bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700"
-                    : "bg-gradient-to-r from-indigo-500 to-blue-600 hover:from-indigo-600 hover:to-blue-700"
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-bold rounded-xl shadow-md hover:shadow-lg hover:scale-[1.02] transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
+                    stage === "Applied" ? "bg-gradient-to-r from-green-500 to-emerald-600 shadow-green-200"
+                    : "bg-gradient-to-r from-indigo-500 to-blue-600 shadow-indigo-200"
                   }`}>
                   {actionLabel} ({selectedIds.length}) <ChevronRight className="w-4 h-4" />
                 </button>
               ) : (
                 <Link href="/org/interviews"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-violet-600 hover:to-purple-700 transition">
-                  Manage in Interviews <ChevronRight className="w-4 h-4" />
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-bold rounded-xl shadow-md shadow-violet-200 hover:shadow-lg hover:scale-[1.02] transition-all">
+                  Manage Interviews <ChevronRight className="w-4 h-4" />
                 </Link>
               )}
 
-              <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer whitespace-nowrap">
+              <label className="flex items-center gap-2.5 text-sm text-gray-600 cursor-pointer whitespace-nowrap bg-gray-50 px-3 py-2 rounded-xl border border-gray-200 hover:border-blue-200 transition">
                 <input type="checkbox"
                   checked={filteredCandidates.length > 0 && selectedIds.length === filteredCandidates.length}
                   onChange={() => setSelectedIds(selectedIds.length === filteredCandidates.length ? [] : filteredCandidates.map(c => c.id))}
                   className="w-4 h-4 accent-blue-600 rounded" />
-                Select All
+                <span className="font-medium">Select All</span>
               </label>
 
               <select value={sort} onChange={e => setSort(e.target.value)}
-                className="px-3 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white hover:border-blue-200 transition cursor-pointer">
                 <option value="score-desc">Score (High→Low)</option>
                 <option value="newest">Newest First</option>
                 <option value="name-asc">Name A-Z</option>
@@ -314,39 +343,58 @@ export default function StageCandidatesPage() {
           ) : (
             <div className="space-y-3">
               {filteredCandidates.map(c => (
-                <div key={c.id} className={`bg-white rounded-xl border shadow-sm p-4 transition-all hover:shadow-md cursor-pointer ${selectedIds.includes(c.id) ? "border-blue-300 ring-2 ring-blue-100" : "border-gray-100"}`}
+                <div key={c.id} className={`bg-white rounded-2xl border shadow-sm p-5 transition-all duration-300 hover:shadow-lg cursor-pointer group ${selectedIds.includes(c.id) ? "border-blue-300 ring-2 ring-blue-100 shadow-blue-50" : "border-gray-100 hover:border-blue-100"}`}
                   onClick={() => handleOpenDrawer(c)}>
                   <div className="flex items-start gap-4" onClick={e => e.stopPropagation()}>
                     <input type="checkbox" checked={selectedIds.includes(c.id)}
                       onChange={() => setSelectedIds(prev => prev.includes(c.id) ? prev.filter(x => x !== c.id) : [...prev, c.id])}
-                      className="w-4 h-4 accent-blue-600 rounded mt-3 shrink-0" />
-                    <div className={`w-11 h-11 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white font-bold text-sm shrink-0`}>
-                      {c.name.split(" ").map(n => n[0]).join("").toUpperCase()}
+                      className="w-4 h-4 accent-blue-600 rounded mt-3.5 shrink-0" />
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${
+                      stage === "Applied" ? "from-blue-400 to-cyan-500" :
+                      stage === "Resume Shortlist" ? "from-amber-400 to-orange-500" :
+                      "from-violet-400 to-purple-500"
+                    } flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-md group-hover:scale-105 transition-transform`}>
+                      {c.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                         <div>
-                          <h3 className="font-semibold text-gray-900">{c.name}</h3>
+                          <h3 className="font-bold text-gray-900 text-base">{c.name}</h3>
                           <div className="flex items-center gap-3 mt-1 flex-wrap">
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-500"><Mail className="w-3 h-3" />{c.email}</span>
-                            <span className="inline-flex items-center gap-1 text-xs text-gray-500"><Phone className="w-3 h-3" />{c.phone}</span>
+                            <span className="inline-flex items-center gap-1 text-xs text-gray-500"><Mail className="w-3 h-3 text-gray-400" />{c.email}</span>
+                            {c.phone && <span className="inline-flex items-center gap-1 text-xs text-gray-500"><Phone className="w-3 h-3 text-gray-400" />{c.phone}</span>}
                           </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                          <ScoreBadge score={c.score} />
-                          <SourceBadge source={c.source} />
+                          {c.score > 0 && (
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold border ${
+                              c.score >= 70 ? "bg-green-50 text-green-700 border-green-200" :
+                              c.score >= 50 ? "bg-amber-50 text-amber-700 border-amber-200" :
+                              "bg-red-50 text-red-600 border-red-200"
+                            }`}>
+                              <Star className="w-3 h-3" /> {c.score}%
+                            </span>
+                          )}
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold ${
+                            c.source === "AI Screening" ? "bg-purple-50 text-purple-700 border border-purple-100" :
+                            c.source === "Portal" ? "bg-blue-50 text-blue-700 border border-blue-100" :
+                            "bg-gray-50 text-gray-600 border border-gray-100"
+                          }`}>
+                            {c.source === "AI Screening" ? <Brain className="w-3 h-3" /> : <UserCheck className="w-3 h-3" />}
+                            {c.source}
+                          </span>
                         </div>
                       </div>
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mt-3">
                         <div className="flex flex-wrap gap-1.5">
                           {c.skills.slice(0, 4).map(s => (
-                            <span key={s} className="px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md text-xs font-medium">{s}</span>
+                            <span key={s} className="px-2.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[11px] font-medium">{s}</span>
                           ))}
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2">
                           <span className="text-xs text-gray-400 flex items-center gap-1"><Calendar className="w-3 h-3" />{c.appliedAt}</span>
                           <button onClick={(e) => { e.stopPropagation(); handleOpenDrawer(c); }}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg bg-purple-50 text-purple-700 border border-purple-100 hover:bg-purple-100 transition">
                             <Eye className="w-3 h-3" /> AI Details
                           </button>
                           {stage === "Applied" && (
@@ -362,7 +410,7 @@ export default function StageCandidatesPage() {
                             </button>
                           )}
                           {stage === "Interview" && (
-                            <button onClick={() => handleCreateInterview(c.id)}
+                            <button onClick={(e) => { e.stopPropagation(); handleCreateInterview(c.id); }}
                               className="inline-flex items-center gap-1 px-3 py-1.5 text-white text-xs font-medium rounded-lg bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700">
                               Create Interview <ChevronRight className="w-3 h-3" />
                             </button>

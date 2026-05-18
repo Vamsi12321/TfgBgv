@@ -40,16 +40,16 @@ export default function JobSeekerNavbar() {
   const handleLogout = () => {
     localStorage.removeItem("jobseekerUser");
     setIsLoggedIn(false); setUser(null); setDropdownOpen(false);
-    router.push("/jobseeker");
+    router.push("/tfgjobs");
   };
 
   const publicLinks = [
-    { href: "/jobseeker", label: "Home" },
-    { href: "/jobseeker/jobs", label: "Browse Jobs" },
+    { href: "/tfgjobs", label: "Home" },
+    { href: "/tfgjobs/jobseeker/jobs", label: "Browse Jobs" },
   ];
   const privateLinks = [
-    { href: "/jobseeker/dashboard", label: "Dashboard" },
-    { href: "/jobseeker/profile", label: "Profile" },
+    { href: "/tfgjobs/jobseeker/dashboard", label: "Dashboard" },
+    { href: "/tfgjobs/jobseeker/profile", label: "Profile" },
   ];
   const navLinks = mounted && isLoggedIn ? [...publicLinks, ...privateLinks] : publicLinks;
   const isActive = (href) => pathname === href;
@@ -59,7 +59,7 @@ export default function JobSeekerNavbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/jobseeker" className="flex items-center gap-2 group">
+          <Link href="/tfgjobs" className="flex items-center gap-2 group">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg group-hover:shadow-blue-200 transition-all duration-300 group-hover:scale-105">
               <Briefcase className="w-5 h-5 text-white" />
             </div>
@@ -102,11 +102,11 @@ export default function JobSeekerNavbar() {
                         <p className="text-sm font-semibold text-slate-800">{user.name}</p>
                         <p className="text-xs text-slate-500 truncate">{user.email}</p>
                       </div>
-                      <Link href="/jobseeker/dashboard" onClick={() => setDropdownOpen(false)}
+                      <Link href="/tfgjobs/jobseeker/dashboard" onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">
                         <Briefcase className="w-4 h-4" /> Dashboard
                       </Link>
-                      <Link href="/jobseeker/profile" onClick={() => setDropdownOpen(false)}
+                      <Link href="/tfgjobs/jobseeker/profile" onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors">
                         <User className="w-4 h-4" /> My Profile
                       </Link>
@@ -122,8 +122,8 @@ export default function JobSeekerNavbar() {
               </>
             ) : (
               <>
-                <Link href="/jobseeker/login" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Login</Link>
-                <Link href="/jobseeker/register" className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all hover:scale-105">Register</Link>
+                <Link href="/tfgjobs/jobseeker/login" className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Login</Link>
+                <Link href="/tfgjobs/jobseeker/register" className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:from-blue-700 hover:to-indigo-700 shadow-md transition-all hover:scale-105">Register</Link>
               </>
             )}
           </div>
@@ -164,9 +164,9 @@ export default function JobSeekerNavbar() {
                 </>
               ) : (
                 <>
-                  <Link href="/jobseeker/login" onClick={() => setMobileMenuOpen(false)}
+                  <Link href="/tfgjobs/jobseeker/login" onClick={() => setMobileMenuOpen(false)}
                     className="block px-4 py-2.5 text-center text-sm font-medium text-slate-600 border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">Login</Link>
-                  <Link href="/jobseeker/register" onClick={() => setMobileMenuOpen(false)}
+                  <Link href="/tfgjobs/jobseeker/register" onClick={() => setMobileMenuOpen(false)}
                     className="block px-4 py-2.5 text-center text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl">Register</Link>
                 </>
               )}

@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem("jobseekerUser");
-    if (!stored) { router.push("/jobseeker/login"); return; }
+    if (!stored) { router.push("/tfgjobs/jobseeker/login"); return; }
     setUser(JSON.parse(stored));
     const hour = new Date().getHours();
     if (hour < 12) setGreeting("Good morning");
@@ -113,7 +113,7 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
-            {greeting}, {user.name?.split(" ")[0]}! 👋
+            {greeting}, {user.name?.split(" ")[0]}!  
           </h1>
           <p className="text-slate-500 mt-1">Here's what's happening with your job search today.</p>
         </div>
@@ -123,7 +123,7 @@ export default function DashboardPage() {
             <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
           </button>
           <Link
-            href="/jobseeker/profile"
+            href="/tfgjobs/jobseeker/profile"
             className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md hover:shadow-blue-200"
           >
             <Edit2 className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function DashboardPage() {
             </p>
           </div>
           <Link
-            href="/jobseeker/profile"
+            href="/tfgjobs/jobseeker/profile"
             className="px-4 py-2 bg-amber-500 text-white text-sm font-semibold rounded-xl hover:bg-amber-600 transition-colors whitespace-nowrap"
           >
             Complete Now
@@ -184,7 +184,7 @@ export default function DashboardPage() {
         <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
             <h2 className="text-lg font-bold text-slate-900">Recent Applications</h2>
-            <Link href="/jobseeker/jobs" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
+            <Link href="/tfgjobs/jobseeker/jobs" className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1">
               View all <ArrowRight className="w-3 h-3" />
             </Link>
           </div>
@@ -194,7 +194,7 @@ export default function DashboardPage() {
                 <div className="w-6 h-6 border-2 border-blue-600/30 border-t-blue-600 rounded-full animate-spin" />
               </div>
             ) : applications.length === 0 ? (
-              <div className="text-center py-10 text-slate-400 text-sm">No applications yet. <Link href="/jobseeker/jobs" className="text-blue-600 font-medium hover:underline">Browse jobs</Link></div>
+              <div className="text-center py-10 text-slate-400 text-sm">No applications yet. <Link href="/tfgjobs/jobseeker/jobs" className="text-blue-600 font-medium hover:underline">Browse jobs</Link></div>
             ) : (
               applications.slice(0, 5).map((app) => {
                 // Handle all possible field names from backend
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                 return (
                   <div key={appId} className="flex items-center gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors">
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
-                      {(company !== "—" ? company : jobTitle).charAt(0).toUpperCase()}
+                      {(company !== " " ? company : jobTitle).charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-slate-800 truncate">{jobTitle}</p>
@@ -223,7 +223,7 @@ export default function DashboardPage() {
                         {stage}
                       </span>
                       <span className="text-xs text-slate-400">
-                        {appliedAt ? new Date(appliedAt).toLocaleDateString() : "—"}
+                        {appliedAt ? new Date(appliedAt).toLocaleDateString() : " "}
                       </span>
                     </div>
                   </div>
@@ -268,7 +268,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <Link
-              href="/jobseeker/profile"
+              href="/tfgjobs/jobseeker/profile"
               className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600 text-sm font-semibold rounded-xl hover:bg-blue-100 transition-colors"
             >
               Complete Profile
@@ -284,9 +284,9 @@ export default function DashboardPage() {
             </h3>
             <div className="space-y-2">
               {[
-                { label: "Update Resume", icon: FileText, href: "/jobseeker/profile", color: "text-blue-600 bg-blue-50 hover:bg-blue-100" },
-                { label: "Browse Jobs", icon: Briefcase, href: "/jobseeker/jobs", color: "text-purple-600 bg-purple-50 hover:bg-purple-100" },
-                { label: "Edit Profile", icon: Edit2, href: "/jobseeker/profile", color: "text-green-600 bg-green-50 hover:bg-green-100" },
+                { label: "Update Resume", icon: FileText, href: "/tfgjobs/jobseeker/profile", color: "text-blue-600 bg-blue-50 hover:bg-blue-100" },
+                { label: "Browse Jobs", icon: Briefcase, href: "/tfgjobs/jobseeker/jobs", color: "text-purple-600 bg-purple-50 hover:bg-purple-100" },
+                { label: "Edit Profile", icon: Edit2, href: "/tfgjobs/jobseeker/profile", color: "text-green-600 bg-green-50 hover:bg-green-100" },
               ].map((action) => {
                 const Icon = action.icon;
                 return (
@@ -311,7 +311,7 @@ export default function DashboardPage() {
         <Briefcase className="w-10 h-10 mx-auto mb-3 opacity-80" />
         <h2 className="text-xl font-bold mb-2">Ready to find your next opportunity?</h2>
         <p className="text-blue-100 text-sm mb-5">Browse thousands of open positions across top companies</p>
-        <Link href="/jobseeker/jobs"
+        <Link href="/tfgjobs/jobseeker/jobs"
           className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-all shadow-lg">
           Browse Jobs <ArrowRight className="w-4 h-4" />
         </Link>

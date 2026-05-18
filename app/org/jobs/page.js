@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
@@ -6,7 +6,7 @@ import {
   Briefcase, Plus, Search, Users, Clock, CheckCircle2, XCircle,
   Eye, Trash2, MoreVertical, MapPin, Star, TrendingUp, Calendar,
   ArrowRight, X, Loader2, Edit2, Copy, ToggleLeft, ToggleRight,
-  AlertTriangle, FileText, ChevronDown, Zap, BarChart2,
+  AlertTriangle, FileText, ChevronDown, Zap, BarChart2, Sparkles,
 } from "lucide-react";
 
 /* 
@@ -111,8 +111,57 @@ function JobFormModal({ initialData, onClose, onSave }) {
     status:      initialData?.status      ?? "draft",
   });
   const [saving, setSaving] = useState(false);
+  const [showAiStep, setShowAiStep] = useState(!isEdit); // Show AI step only for new jobs
+  const [aiMethod, setAiMethod] = useState("text"); // "text" | "file"
+  const [jdText, setJdText] = useState("");
+  const [jdFile, setJdFile] = useState(null);
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState("");
 
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
+
+  const handleAiParse = async () => {
+    setParsing(true);
+    setParseError("");
+    try {
+      const fd = new FormData();
+      if (aiMethod === "file" && jdFile) {
+        fd.append("jd_file", jdFile);
+      } else if (aiMethod === "text" && jdText.trim()) {
+        fd.append("jd_text", jdText.trim());
+      } else {
+        setParseError("Please provide a JD file or text.");
+        setParsing(false);
+        return;
+      }
+
+      const res = await fetch("/api/proxy/secure/parseJobDescription", {
+        method: "POST", credentials: "include", body: fd,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Auto-fill form with parsed data
+        if (data.title) set("title", data.title);
+        if (data.department) set("department", data.department);
+        if (data.location) set("location", data.location);
+        if (data.type) set("type", data.type);
+        if (data.experience) set("experience", data.experience);
+        if (data.salary) set("salary", data.salary);
+        if (data.skills) set("skills", Array.isArray(data.skills) ? data.skills.join(", ") : data.skills);
+        if (data.description) set("description", data.description);
+        if (data.deadline) set("deadline", data.deadline);
+        setShowAiStep(false); // Move to form
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setParseError(typeof d?.detail === "string" ? d.detail : "Failed to parse JD. Try again or fill manually.");
+      }
+    } catch {
+      setParseError("Network error. Try again or fill manually.");
+    } finally {
+      setParsing(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -127,158 +176,207 @@ function JobFormModal({ initialData, onClose, onSave }) {
   };
 
   const inputCls =
-    "w-full px-3 py-2 rounded-xl border border-gray-200 bg-white/70 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition placeholder-gray-400";
-  const labelCls = "block text-xs font-semibold text-gray-600 mb-1";
+    "w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent focus:bg-white transition placeholder-gray-400 hover:border-gray-300";
+  const labelCls = "block text-xs font-bold text-gray-700 mb-1.5 flex items-center gap-1.5";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[92vh] flex flex-col overflow-hidden border border-gray-100">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-indigo-600 px-6 py-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-white">
+        <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-7 py-6 flex items-center justify-between overflow-hidden">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+          <div className="relative">
+            <h2 className="text-xl font-extrabold text-white">
               {isEdit ? "Edit Job" : "Create New Job"}
             </h2>
-            <p className="text-blue-100 text-sm mt-0.5">
-              {isEdit ? "Update the job details below" : "Fill in the details to post a new job"}
+            <p className="text-blue-100 text-sm mt-1">
+              {isEdit ? "Update the job details below" : "Fill in the details to post a new job posting"}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white/70 hover:text-white transition rounded-lg p-1"
-          >
+          <button onClick={onClose} className="relative text-white/70 hover:text-white hover:bg-white/10 transition rounded-xl p-2">
             <X size={22} />
           </button>
         </div>
 
-        {/* Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelCls}>Job Title *</label>
-              <input
-                required
-                className={inputCls}
-                placeholder="e.g. Senior ML Engineer"
-                value={form.title}
-                onChange={(e) => set("title", e.target.value)}
-              />
+        {/* AI Parse Step — only for new jobs */}
+        {showAiStep && !isEdit && (
+          <div className="flex-1 overflow-y-auto p-7 space-y-5">
+            <div className="text-center mb-2">
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-200 mb-4">
+                <Sparkles size={24} className="text-white" />
+              </div>
+              <h3 className="text-lg font-extrabold text-gray-900">AI-Powered Job Creation</h3>
+              <p className="text-sm text-gray-500 mt-1">Upload a JD file or paste text — AI will extract all fields automatically</p>
             </div>
-            <div>
-              <label className={labelCls}>Department *</label>
-              <input
-                required
-                className={inputCls}
-                placeholder="e.g. Engineering"
-                value={form.department}
-                onChange={(e) => set("department", e.target.value)}
-              />
+
+            {/* Method toggle */}
+            <div className="flex gap-2 bg-gray-100 rounded-xl p-1">
+              <button type="button" onClick={() => setAiMethod("text")}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition ${aiMethod === "text" ? "bg-white text-indigo-700 shadow-sm" : "text-gray-500"}`}>
+                ✏️ Paste JD Text
+              </button>
+              <button type="button" onClick={() => setAiMethod("file")}
+                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition ${aiMethod === "file" ? "bg-white text-indigo-700 shadow-sm" : "text-gray-500"}`}>
+                📄 Upload File
+              </button>
             </div>
-            <div>
-              <label className={labelCls}>Location *</label>
-              <input
-                required
-                className={inputCls}
-                placeholder="e.g. Remote / New York, NY"
-                value={form.location}
-                onChange={(e) => set("location", e.target.value)}
-              />
+
+            {/* Text input */}
+            {aiMethod === "text" && (
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-2">Paste Job Description</label>
+                <textarea rows={8} value={jdText} onChange={e => setJdText(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition resize-none"
+                  placeholder="Paste the full job description here... AI will extract title, skills, experience, location, salary, and more." />
+              </div>
+            )}
+
+            {/* File upload */}
+            {aiMethod === "file" && (
+              <div>
+                <label className="block text-xs font-bold text-gray-700 mb-2">Upload JD File (PDF / DOCX / TXT)</label>
+                <label className={`flex items-center justify-center gap-3 px-4 py-6 border-2 border-dashed rounded-xl cursor-pointer transition ${
+                  jdFile ? "border-green-300 bg-green-50" : "border-gray-200 hover:border-indigo-300 hover:bg-indigo-50/30"
+                }`}>
+                  <input type="file" accept=".pdf,.docx,.doc,.txt" onChange={e => setJdFile(e.target.files[0] || null)} className="hidden" />
+                  {jdFile ? (
+                    <div className="flex items-center gap-2 text-sm">
+                      <CheckCircle2 size={16} className="text-green-500" />
+                      <span className="font-medium text-green-700">{jdFile.name}</span>
+                      <button type="button" onClick={(e) => { e.preventDefault(); setJdFile(null); }} className="text-gray-400 hover:text-red-500 ml-2"><X size={14} /></button>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <FileText size={24} className="text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-500 font-medium">Click to upload or drag & drop</p>
+                      <p className="text-xs text-gray-400 mt-0.5">PDF, DOCX, or TXT</p>
+                    </div>
+                  )}
+                </label>
+              </div>
+            )}
+
+            {/* Error */}
+            {parseError && (
+              <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-sm text-red-600">{parseError}</div>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-2">
+            {/* Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+              <button type="button" onClick={() => setShowAiStep(false)}
+                className="px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition flex items-center gap-2">
+                <Edit2 size={14} /> Fill Manually
+              </button>
+              <button type="button" onClick={handleAiParse} disabled={parsing || (aiMethod === "text" ? !jdText.trim() : !jdFile)}
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-bold shadow-lg shadow-purple-200 hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-50">
+                {parsing ? <><Loader2 size={14} className="animate-spin" /> Parsing...</> : <><Sparkles size={14} /> Extract with AI</>}
+              </button>
             </div>
-            <div>
-              <label className={labelCls}>Job Type</label>
-              <select
-                className={inputCls}
-                value={form.type}
-                onChange={(e) => set("type", e.target.value)}
-              >
-                <option>Full-time</option>
-                <option>Part-time</option>
-                <option>Contract</option>
-                <option>Internship</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelCls}>Experience Required</label>
-              <input
-                className={inputCls}
-                placeholder="e.g. 3+ years"
-                value={form.experience}
-                onChange={(e) => set("experience", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Salary Range</label>
-              <input
-                className={inputCls}
-                placeholder="e.g. $80,000 – $110,000"
-                value={form.salary}
-                onChange={(e) => set("salary", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Skills (comma separated)</label>
-              <input
-                className={inputCls}
-                placeholder="e.g. React, Node.js, TypeScript"
-                value={form.skills}
-                onChange={(e) => set("skills", e.target.value)}
-              />
-            </div>
-            <div>
-              <label className={labelCls}>Application Deadline</label>
-              <input
-                type="date"
-                className={inputCls}
-                value={form.deadline}
-                onChange={(e) => set("deadline", e.target.value)}
-              />
             </div>
           </div>
+        )}
 
+        {/* Body — Form (shown after AI step or for edit) */}
+        {(!showAiStep || isEdit) && (
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7 space-y-5">
+          {/* Section: Basic Info */}
           <div>
-            <label className={labelCls}>Description *</label>
-            <textarea
-              required
-              rows={4}
-              className={inputCls + " resize-none"}
-              placeholder="Describe the role, responsibilities, and requirements..."
-              value={form.description}
-              onChange={(e) => set("description", e.target.value)}
-            />
+            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Briefcase size={12} /> Basic Information
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}><FileText size={12} className="text-blue-500" /> Job Title *</label>
+                <input required className={inputCls} placeholder="e.g. Senior ML Engineer" value={form.title} onChange={(e) => set("title", e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}><Briefcase size={12} className="text-purple-500" /> Department *</label>
+                <input required className={inputCls} placeholder="e.g. Engineering" value={form.department} onChange={(e) => set("department", e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}><MapPin size={12} className="text-emerald-500" /> Location *</label>
+                <input required className={inputCls} placeholder="e.g. Remote / New York, NY" value={form.location} onChange={(e) => set("location", e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}><Clock size={12} className="text-amber-500" /> Job Type</label>
+                <select className={inputCls} value={form.type} onChange={(e) => set("type", e.target.value)}>
+                  <option>Full-time</option>
+                  <option>Part-time</option>
+                  <option>Contract</option>
+                  <option>Internship</option>
+                </select>
+              </div>
+            </div>
           </div>
 
+          {/* Section: Requirements */}
+          <div>
+            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Star size={12} /> Requirements & Compensation
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className={labelCls}><TrendingUp size={12} className="text-indigo-500" /> Experience Required</label>
+                <input className={inputCls} placeholder="e.g. 3+ years" value={form.experience} onChange={(e) => set("experience", e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}><BarChart2 size={12} className="text-green-500" /> Salary Range</label>
+                <input className={inputCls} placeholder="e.g. ₹8L – ₹15L / $80K – $110K" value={form.salary} onChange={(e) => set("salary", e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}><Zap size={12} className="text-orange-500" /> Skills (comma separated)</label>
+                <input className={inputCls} placeholder="e.g. React, Node.js, TypeScript" value={form.skills} onChange={(e) => set("skills", e.target.value)} />
+              </div>
+              <div>
+                <label className={labelCls}><Calendar size={12} className="text-red-500" /> Application Deadline</label>
+                <input type="date" className={inputCls} value={form.deadline} onChange={(e) => set("deadline", e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* Section: Description */}
+          <div>
+            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Eye size={12} /> Job Description
+            </p>
+            <textarea required rows={4} className={inputCls + " resize-none"}
+              placeholder="Describe the role, responsibilities, key requirements, and what makes this opportunity exciting..."
+              value={form.description} onChange={(e) => set("description", e.target.value)} />
+          </div>
+
+          {/* Status */}
           <div>
             <label className={labelCls}>Status</label>
-            <select
-              className={inputCls}
-              value={form.status}
-              onChange={(e) => set("status", e.target.value)}
-            >
-              <option value="open">Open</option>
-              <option value="draft">Draft</option>
-              <option value="closed">Closed</option>
-            </select>
+            <div className="flex gap-2">
+              {[
+                { value: "open", label: "Open", color: "border-green-300 bg-green-50 text-green-700" },
+                { value: "draft", label: "Draft", color: "border-amber-300 bg-amber-50 text-amber-700" },
+                { value: "closed", label: "Closed", color: "border-red-300 bg-red-50 text-red-700" },
+              ].map(opt => (
+                <button key={opt.value} type="button" onClick={() => set("status", opt.value)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border-2 transition ${form.status === opt.value ? opt.color : "border-gray-200 text-gray-500 hover:border-gray-300"}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
-            >
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+            <button type="button" onClick={onClose}
+              className="px-6 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={saving}
-              className="px-6 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center gap-2 disabled:opacity-60"
-            >
-              {saving ? <Loader2 size={15} className="animate-spin" /> : null}
+            <button type="submit" disabled={saving}
+              className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-60">
+              {saving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
               {isEdit ? "Save Changes" : "Create Job"}
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
@@ -364,9 +462,9 @@ function JobCard({ job, onEdit, onDelete, onDuplicate, onToggleStatus }) {
   };
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-lg hover:shadow-xl transition-all duration-200 flex flex-col overflow-hidden group">
-      {/* Top accent bar */}
-      <div className={`h-1 w-full ${job.status === "open" ? "bg-gradient-to-r from-emerald-400 to-teal-500" : job.status === "closed" ? "bg-gradient-to-r from-red-400 to-rose-500" : "bg-gradient-to-r from-amber-400 to-orange-400"}`} />
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex overflow-hidden group relative">
+      {/* Left gradient accent */}
+      <div className={`w-1.5 flex-shrink-0 ${job.status === "open" ? "bg-gradient-to-b from-emerald-400 via-teal-500 to-cyan-500" : job.status === "closed" ? "bg-gradient-to-b from-red-400 to-rose-500" : "bg-gradient-to-b from-amber-400 to-orange-400"}`} />
 
       <div className="p-5 flex flex-col flex-1 gap-3">
         {/* Row 1: badges + menu */}
@@ -424,22 +522,14 @@ function JobCard({ job, onEdit, onDelete, onDuplicate, onToggleStatus }) {
 
         {/* Title + department */}
         <div>
-          <h3 className="text-base font-bold text-gray-900 leading-tight group-hover:text-blue-700 transition">
+          <h3 className="text-lg font-extrabold text-gray-900 leading-tight group-hover:text-blue-700 transition">
             {job.title}
           </h3>
-          <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
-            <Briefcase size={11} /> {job.department}
-          </p>
-        </div>
-
-        {/* Location + experience */}
-        <div className="flex items-center gap-4 text-xs text-gray-500">
-          <span className="flex items-center gap-1">
-            <MapPin size={11} className="text-blue-400" /> {job.location}
-          </span>
-          <span className="flex items-center gap-1">
-            <Star size={11} className="text-amber-400" /> {job.experience}
-          </span>
+          <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+            <span className="flex items-center gap-1"><Briefcase size={11} className="text-gray-400" /> {job.department}</span>
+            <span className="flex items-center gap-1"><MapPin size={11} className="text-blue-400" /> {job.location}</span>
+            <span className="flex items-center gap-1"><Star size={11} className="text-amber-400" /> {job.experience}</span>
+          </div>
         </div>
 
         {/* Description */}
@@ -448,63 +538,61 @@ function JobCard({ job, onEdit, onDelete, onDuplicate, onToggleStatus }) {
         {/* Skills */}
         <div className="flex flex-wrap gap-1.5">
           {visibleSkills.map((s) => (
-            <span key={s} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">
+            <span key={s} className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-indigo-50 to-blue-50 text-indigo-700 border border-indigo-100 text-[11px] font-semibold">
               {s}
             </span>
           ))}
           {extraSkills > 0 && (
-            <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-xs font-medium">
-              +{extraSkills}
+            <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-600 border border-purple-100 text-[11px] font-semibold">
+              +{extraSkills} more
             </span>
           )}
         </div>
 
-        {/* Progress bar */}
-        <div>
-          <div className="flex justify-between text-xs text-gray-500 mb-1">
-            <span className="flex items-center gap-1"><TrendingUp size={11} /> Hiring progress</span>
-            <span className="font-semibold text-gray-700">{hiredPct}%</span>
+        {/* Stats pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-100">
+            <Users size={12} className="text-blue-500" />
+            <span className="text-xs font-bold text-blue-700">{job.applicants}</span>
+            <span className="text-[10px] text-blue-400">applied</span>
           </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
-              style={{ width: `${hiredPct}%` }}
-            />
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 rounded-lg border border-emerald-100">
+            <CheckCircle2 size={12} className="text-emerald-500" />
+            <span className="text-xs font-bold text-emerald-700">{job.shortlisted}</span>
+            <span className="text-[10px] text-emerald-400">shortlisted</span>
           </div>
-        </div>
-
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2 bg-slate-50 rounded-xl p-3">
-          {[
-            { label: "Applied",     value: job.applicants,  icon: <Users size={13} className="text-blue-500" /> },
-            { label: "Shortlisted", value: job.shortlisted, icon: <CheckCircle2 size={13} className="text-emerald-500" /> },
-            { label: "Hired",       value: job.hired,       icon: <Zap size={13} className="text-indigo-500" /> },
-          ].map(({ label, value, icon }) => (
-            <div key={label} className="text-center">
-              <div className="flex justify-center mb-0.5">{icon}</div>
-              <div className="text-sm font-bold text-gray-800">{value}</div>
-              <div className="text-xs text-gray-400">{label}</div>
-            </div>
-          ))}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 rounded-lg border border-amber-100">
+            <Zap size={12} className="text-amber-500" />
+            <span className="text-xs font-bold text-amber-700">{job.hired}</span>
+            <span className="text-[10px] text-amber-400">hired</span>
+          </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-          <span className="flex items-center gap-1 text-xs text-gray-400">
-            <Calendar size={11} />
-            {daysLeft === null
-              ? "No deadline"
-              : daysLeft < 0
-              ? <span className="text-red-500 font-medium">Expired</span>
-              : daysLeft === 0
-              ? <span className="text-orange-500 font-medium">Due today</span>
-              : <span className={daysLeft <= 7 ? "text-orange-500 font-medium" : ""}>{daysLeft}d left</span>}
-          </span>
+        <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{ width: `${hiredPct}%` }} />
+              </div>
+              <span className="text-[10px] font-bold text-gray-400">{hiredPct}%</span>
+            </div>
+            <span className="flex items-center gap-1 text-[11px] text-gray-400">
+              <Calendar size={10} />
+              {daysLeft === null
+                ? "No deadline"
+                : daysLeft < 0
+                ? <span className="text-red-500 font-bold">Expired</span>
+                : daysLeft === 0
+                ? <span className="text-orange-500 font-bold">Due today</span>
+                : <span className={daysLeft <= 7 ? "text-orange-500 font-bold" : ""}>{daysLeft}d left</span>}
+            </span>
+          </div>
           <Link
             href={`/org/jobs/${job.id}`}
-            className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-indigo-700 transition"
+            className="flex items-center gap-1.5 text-xs font-bold text-white bg-gradient-to-r from-blue-500 to-indigo-600 px-4 py-2 rounded-lg shadow-sm hover:shadow-md hover:scale-[1.02] transition-all"
           >
-            View Pipeline <ArrowRight size={12} />
+            Pipeline <ArrowRight size={12} />
           </Link>
         </div>
       </div>
@@ -716,25 +804,23 @@ export default function OrgJobsPage() {
     typeFilter === "all" ? "All Types" : typeFilter;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
         {/*  Page header  */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-extrabold text-gray-900 flex items-center gap-2">
-              <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow">
-                <Briefcase size={18} />
-              </span>
-              Job Postings
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Manage your open positions and track applicant pipelines
-            </p>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg shadow-blue-200">
+              <Briefcase size={22} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold text-gray-900">Jobs & ATS</h1>
+              <p className="text-sm text-gray-500 mt-0.5">Manage positions and track your hiring pipeline</p>
+            </div>
           </div>
           <button
             onClick={() => setShowForm("create")}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all"
           >
             <Plus size={17} /> Post New Job
           </button>
@@ -745,9 +831,9 @@ export default function OrgJobsPage() {
           {statsCards.map((card) => (
             <div
               key={card.label}
-              className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-lg p-5 flex items-center gap-4"
+              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex items-center gap-4 hover:shadow-lg hover:border-blue-50 transition-all duration-300 group"
             >
-              <div className={`w-12 h-12 rounded-xl ${card.bg} ${card.text} flex items-center justify-center flex-shrink-0`}>
+              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center flex-shrink-0 text-white shadow-md group-hover:scale-110 transition-transform`}>
                 {card.icon}
               </div>
               <div>
@@ -759,7 +845,7 @@ export default function OrgJobsPage() {
         </div>
 
         {/*  Filter bar  */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-lg p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
           {/* Search */}
           <div className="relative flex-1 min-w-0">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
