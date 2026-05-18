@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Briefcase, User, LogOut, Menu, X, ChevronDown, Bell } from "lucide-react";
+import { Briefcase, User, LogOut, Menu, X, ChevronDown } from "lucide-react";
 
 export default function JobSeekerNavbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -83,10 +83,6 @@ export default function JobSeekerNavbar() {
               <div className="w-20 h-8 bg-slate-100 rounded-xl animate-pulse" />
             ) : mounted && isLoggedIn && user ? (
               <>
-                <button className="relative w-9 h-9 rounded-xl bg-slate-100 hover:bg-blue-50 flex items-center justify-center text-slate-500 hover:text-blue-600 transition-all">
-                  <Bell className="w-4 h-4" />
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-                </button>
                 <div className="relative" ref={dropdownRef}>
                   <button onClick={() => setDropdownOpen(!dropdownOpen)}
                     className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 hover:bg-blue-50 transition-all group">

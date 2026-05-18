@@ -5,7 +5,7 @@ import {
   CalendarCheck, Users, CheckCircle2, XCircle, Clock, Star, X,
   ChevronRight, ChevronDown, Phone, Mail, Briefcase, User,
   Calendar, Loader2, Brain, Edit2, Trash2, UserPlus, Tag,
-  Info, FileText,
+  Info, FileText, MapPin,
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────
@@ -104,7 +104,10 @@ function StarRating({ rating, onRate, size = 18, readOnly = false }) {
 ───────────────────────────────────────────── */
 function ScheduleModal({ interview, round, onClose, onSuccess }) {
   const [interviewers, setInterviewers] = useState([]);
-  const [form, setForm] = useState({ interviewerId: "", scheduledAt: "" });
+  const [form, setForm] = useState({
+    interviewerId: "", scheduledAt: "", interviewMode: "online",
+    interviewLink: "", interviewAddress: "", additionalNotes: "",
+  });
   const [saving, setSaving] = useState(false);
   const [loadingInterviewers, setLoadingInterviewers] = useState(true);
 
@@ -135,6 +138,10 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
           roundNumber: round.roundNumber,
           interviewerId: form.interviewerId,
           scheduledAt: form.scheduledAt,
+          interviewMode: form.interviewMode,
+          interviewLink: form.interviewMode === "online" ? form.interviewLink : null,
+          interviewAddress: form.interviewMode === "offline" ? form.interviewAddress : null,
+          additionalNotes: form.additionalNotes || null,
         }),
       });
       if (res.ok) { onSuccess("Round scheduled successfully"); }
@@ -147,42 +154,36 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-gray-100 max-h-[80vh] flex flex-col">
         {/* Header */}
-        <div className="relative px-7 py-6 overflow-hidden bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600">
-          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
-          <div className="relative flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Calendar size={20} className="text-white" />
+        <div className="px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+              <Calendar size={16} className="text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-extrabold text-white">Schedule Round {round.roundNumber}</h3>
-              <p className="text-blue-100 text-sm mt-0.5">{round.roundName} • {interview.candidateName}</p>
+              <h3 className="text-sm font-bold text-white">Schedule Round {round.roundNumber}</h3>
+              <p className="text-blue-200 text-xs">{round.roundName} • {interview.candidateName}</p>
             </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-7 space-y-5">
-          {/* Interviewer Select */}
+        {/* Scrollable form */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
-              <User size={12} className="text-indigo-500" /> Select Interviewer *
-            </label>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Interviewer *</label>
             {loadingInterviewers ? (
-              <div className="flex items-center gap-2 text-sm text-gray-500 py-3 px-4 bg-gray-50 rounded-xl">
-                <Loader2 size={14} className="animate-spin text-indigo-500" /> Loading interviewers...
+              <div className="flex items-center gap-2 text-xs text-gray-500 py-2 px-3 bg-gray-50 rounded-lg">
+                <Loader2 size={12} className="animate-spin text-indigo-500" /> Loading...
               </div>
             ) : interviewers.length === 0 ? (
-              <div className="bg-red-50 border border-red-100 rounded-xl p-3">
-                <p className="text-sm text-red-600 font-medium">No interviewers available.</p>
-                <p className="text-xs text-red-400 mt-0.5">Go to Interviewers tab to add one first.</p>
-              </div>
+              <p className="text-xs text-red-500 bg-red-50 rounded-lg p-2 border border-red-100">No interviewers available. Add one first.</p>
             ) : (
               <select required value={form.interviewerId}
                 onChange={(e) => setForm({ ...form, interviewerId: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300 appearance-none cursor-pointer">
-                <option value="">— Choose an interviewer —</option>
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent appearance-none bg-gray-50 hover:border-gray-300 transition">
+                <option value="">Choose interviewer</option>
                 {interviewers.map(i => (
                   <option key={i._id || i.interviewerId} value={i._id || i.interviewerId}>
                     {i.name} — {i.designation || i.department || i.email}
@@ -192,33 +193,235 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
             )}
           </div>
 
-          {/* Date & Time */}
           <div>
-            <label className="block text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
-              <Clock size={12} className="text-blue-500" /> Date & Time *
-            </label>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Date & Time *</label>
             <input required type="datetime-local" value={form.scheduledAt}
               onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent focus:bg-white transition hover:border-gray-300" />
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
           </div>
 
-          {/* Info */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 flex gap-2">
-            <Info size={14} className="text-blue-500 flex-shrink-0 mt-0.5" />
-            <p className="text-[11px] text-blue-700">The interviewer will be notified and the round status will change to "Scheduled".</p>
+          <div>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Mode *</label>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setForm({ ...form, interviewMode: "online" })}
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition ${form.interviewMode === "online" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500 hover:border-blue-200"}`}>
+                🖥️ Online
+              </button>
+              <button type="button" onClick={() => setForm({ ...form, interviewMode: "offline" })}
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition ${form.interviewMode === "offline" ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-gray-200 text-gray-500 hover:border-indigo-200"}`}>
+                🏢 Offline
+              </button>
+            </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-6 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition">
-              Cancel
-            </button>
-            <button type="submit" disabled={saving || !form.interviewerId} className="px-7 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.02] transition-all flex items-center gap-2 disabled:opacity-50">
-              {saving && <Loader2 size={14} className="animate-spin" />}
-              <Calendar size={14} /> Schedule
-            </button>
+          {form.interviewMode === "online" && (
+            <div>
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Meeting Link</label>
+              <input type="url" value={form.interviewLink}
+                onChange={(e) => setForm({ ...form, interviewLink: e.target.value })}
+                placeholder="https://meet.google.com/..."
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
+            </div>
+          )}
+
+          {form.interviewMode === "offline" && (
+            <div>
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Address</label>
+              <input value={form.interviewAddress}
+                onChange={(e) => setForm({ ...form, interviewAddress: e.target.value })}
+                placeholder="Office address, floor, room"
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Notes (optional)</label>
+            <input value={form.additionalNotes}
+              onChange={(e) => setForm({ ...form, additionalNotes: e.target.value })}
+              placeholder="Special instructions..."
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
           </div>
+
+          <p className="text-[10px] text-blue-600 bg-blue-50 rounded-lg px-3 py-2 border border-blue-100">
+            📧 Both candidate & interviewer will be notified via email.
+          </p>
         </form>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-100 flex-shrink-0 bg-gray-50/50 rounded-b-2xl">
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">
+            Cancel
+          </button>
+          <button onClick={handleSubmit} disabled={saving || !form.interviewerId || !form.scheduledAt} className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50">
+            {saving ? <Loader2 size={12} className="animate-spin" /> : <Calendar size={12} />} Schedule
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   RESCHEDULE ROUND MODAL
+───────────────────────────────────────────── */
+function RescheduleModal({ interview, round, onClose, onSuccess }) {
+  const [interviewers, setInterviewers] = useState([]);
+  const [form, setForm] = useState({
+    interviewerId: round.interviewerId || "",
+    scheduledAt: round.scheduledAt ? new Date(round.scheduledAt).toISOString().slice(0, 16) : "",
+    interviewMode: round.interviewMode || "online",
+    interviewLink: round.interviewLink || "",
+    interviewAddress: round.interviewAddress || "",
+    additionalNotes: round.additionalNotes || "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [loadingInterviewers, setLoadingInterviewers] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/proxy/secure/getInterviewers?isActive=true&isAvailable=true", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.interviewers || (Array.isArray(data) ? data : []);
+          setInterviewers(Array.isArray(list) ? list.filter(i => i && i.name) : []);
+        }
+      } catch {}
+      finally { setLoadingInterviewers(false); }
+    };
+    load();
+  }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      const payload = {
+        interviewId: interview.interviewId,
+        roundNumber: round.roundNumber,
+      };
+      if (form.interviewerId) payload.interviewerId = form.interviewerId;
+      if (form.scheduledAt) payload.scheduledAt = form.scheduledAt;
+      if (form.interviewMode) payload.interviewMode = form.interviewMode;
+      if (form.interviewMode === "online" && form.interviewLink) payload.interviewLink = form.interviewLink;
+      if (form.interviewMode === "offline" && form.interviewAddress) payload.interviewAddress = form.interviewAddress;
+      if (form.additionalNotes) payload.additionalNotes = form.additionalNotes;
+
+      const res = await fetch("/api/proxy/secure/rescheduleRound", {
+        method: "PUT", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) { onSuccess("Round rescheduled successfully"); }
+      else {
+        const data = await res.json().catch(() => ({}));
+        onSuccess(getErrorMsg(data, "Failed to reschedule round"), "error");
+      }
+    } catch { onSuccess("Network error. Please try again.", "error"); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-gray-100 max-h-[80vh] flex flex-col">
+        {/* Header */}
+        <div className="px-5 py-4 bg-gradient-to-r from-amber-500 to-orange-500 rounded-t-2xl flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+              <Edit2 size={16} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Reschedule Round {round.roundNumber}</h3>
+              <p className="text-orange-100 text-xs">{round.roundName} • {interview.candidateName}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable form */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
+          <div>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Change Interviewer</label>
+            {loadingInterviewers ? (
+              <div className="flex items-center gap-2 text-xs text-gray-500 py-2 px-3 bg-gray-50 rounded-lg">
+                <Loader2 size={12} className="animate-spin" /> Loading...
+              </div>
+            ) : (
+              <select value={form.interviewerId}
+                onChange={(e) => setForm({ ...form, interviewerId: e.target.value })}
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent appearance-none bg-gray-50 hover:border-gray-300 transition">
+                <option value="">Keep current interviewer</option>
+                {interviewers.map(i => (
+                  <option key={i._id || i.interviewerId} value={i._id || i.interviewerId}>
+                    {i.name} — {i.designation || i.department || i.email}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">New Date & Time</label>
+            <input type="datetime-local" value={form.scheduledAt}
+              onChange={(e) => setForm({ ...form, scheduledAt: e.target.value })}
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Mode</label>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setForm({ ...form, interviewMode: "online" })}
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition ${form.interviewMode === "online" ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-500 hover:border-blue-200"}`}>
+                🖥️ Online
+              </button>
+              <button type="button" onClick={() => setForm({ ...form, interviewMode: "offline" })}
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition ${form.interviewMode === "offline" ? "border-indigo-500 bg-indigo-50 text-indigo-700" : "border-gray-200 text-gray-500 hover:border-indigo-200"}`}>
+                🏢 Offline
+              </button>
+            </div>
+          </div>
+
+          {form.interviewMode === "online" && (
+            <div>
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Meeting Link</label>
+              <input type="url" value={form.interviewLink}
+                onChange={(e) => setForm({ ...form, interviewLink: e.target.value })}
+                placeholder="https://meet.google.com/..."
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
+            </div>
+          )}
+
+          {form.interviewMode === "offline" && (
+            <div>
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Address</label>
+              <input value={form.interviewAddress}
+                onChange={(e) => setForm({ ...form, interviewAddress: e.target.value })}
+                placeholder="Office address, floor, room"
+                className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Notes</label>
+            <input value={form.additionalNotes}
+              onChange={(e) => setForm({ ...form, additionalNotes: e.target.value })}
+              placeholder="Reason for rescheduling..."
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
+          </div>
+
+          <p className="text-[10px] text-amber-700 bg-amber-50 rounded-lg px-3 py-2 border border-amber-100">
+            ⚠️ Both candidate & interviewer will receive a reschedule notification.
+          </p>
+        </form>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-100 flex-shrink-0 bg-gray-50/50 rounded-b-2xl">
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">
+            Cancel
+          </button>
+          <button onClick={handleSubmit} disabled={saving} className="px-5 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-orange-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50">
+            {saving ? <Loader2 size={12} className="animate-spin" /> : <Edit2 size={12} />} Reschedule
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -257,42 +460,42 @@ function UpdateRoundModal({ interview, round, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-indigo-50">
-          <h3 className="text-lg font-bold text-gray-900">Update Round {round.roundNumber}</h3>
-          <p className="text-sm text-gray-500">{round.roundName}</p>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-gray-100 max-h-[80vh] flex flex-col">
+        <div className="px-5 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl flex-shrink-0">
+          <h3 className="text-sm font-bold text-white">Update Round {round.roundNumber}</h3>
+          <p className="text-blue-200 text-xs">{round.roundName}</p>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-2">Result *</label>
-            <div className="flex gap-3">
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Result *</label>
+            <div className="flex gap-2">
               <button type="button" onClick={() => setStatus("Passed")}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 transition ${status === "Passed" ? "border-green-500 bg-green-50 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-300"}`}>
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition ${status === "Passed" ? "border-green-500 bg-green-50 text-green-700" : "border-gray-200 text-gray-500 hover:border-green-300"}`}>
                 ✓ Passed
               </button>
               <button type="button" onClick={() => setStatus("Failed")}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border-2 transition ${status === "Failed" ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 text-gray-500 hover:border-red-300"}`}>
+                className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition ${status === "Failed" ? "border-red-500 bg-red-50 text-red-700" : "border-gray-200 text-gray-500 hover:border-red-300"}`}>
                 ✗ Failed
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-2">Rating</label>
-            <StarRating rating={rating} onRate={setRating} size={24} />
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Rating</label>
+            <StarRating rating={rating} onRate={setRating} size={20} />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Feedback</label>
-            <textarea rows={3} value={feedback} onChange={(e) => setFeedback(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-              placeholder="Provide feedback about the candidate..." />
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-            <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center gap-2 disabled:opacity-60">
-              {saving && <Loader2 size={14} className="animate-spin" />} Submit
-            </button>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Feedback</label>
+            <textarea rows={2} value={feedback} onChange={(e) => setFeedback(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none bg-gray-50"
+              placeholder="Feedback about the candidate..." />
           </div>
         </form>
+        <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-100 flex-shrink-0 bg-gray-50/50 rounded-b-2xl">
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+          <button onClick={handleSubmit} disabled={saving} className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50">
+            {saving ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />} Submit
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -329,25 +532,25 @@ function RejectModal({ interview, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="px-6 py-4 border-b bg-gradient-to-r from-red-50 to-rose-50">
-          <h3 className="text-lg font-bold text-gray-900">Reject Candidate</h3>
-          <p className="text-sm text-gray-500">{interview.candidateName}</p>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-gray-100 flex flex-col">
+        <div className="px-5 py-4 bg-gradient-to-r from-red-500 to-rose-500 rounded-t-2xl flex-shrink-0">
+          <h3 className="text-sm font-bold text-white">Reject Candidate</h3>
+          <p className="text-red-100 text-xs">{interview.candidateName}</p>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-600 mb-1">Reason for Rejection *</label>
-            <textarea required rows={3} value={reason} onChange={(e) => setReason(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 resize-none"
-              placeholder="Provide reason for rejection..." />
-          </div>
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-            <button type="submit" disabled={saving} className="px-5 py-2 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center gap-2 disabled:opacity-60">
-              {saving && <Loader2 size={14} className="animate-spin" />} Reject
-            </button>
+            <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Reason *</label>
+            <textarea required rows={2} value={reason} onChange={(e) => setReason(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-red-300 resize-none bg-gray-50"
+              placeholder="Reason for rejection..." />
           </div>
         </form>
+        <div className="flex justify-end gap-2 px-5 py-3 border-t border-gray-100 flex-shrink-0 bg-gray-50/50 rounded-b-2xl">
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">Cancel</button>
+          <button onClick={handleSubmit} disabled={saving || !reason} className="px-5 py-2 rounded-lg bg-gradient-to-r from-red-500 to-rose-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50">
+            {saving ? <Loader2 size={12} className="animate-spin" /> : <XCircle size={12} />} Reject
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -359,6 +562,7 @@ function RejectModal({ interview, onClose, onSuccess }) {
 ───────────────────────────────────────────── */
 function DetailDrawer({ interview, onClose, onAction }) {
   const [scheduleModal, setScheduleModal] = useState(null);
+  const [rescheduleModal, setRescheduleModal] = useState(null);
   const [updateModal, setUpdateModal] = useState(null);
   const [rejectModal, setRejectModal] = useState(false);
   const [actionLoading, setActionLoading] = useState("");
@@ -413,6 +617,7 @@ function DetailDrawer({ interview, onClose, onAction }) {
 
   const handleModalSuccess = (msg, type) => {
     setScheduleModal(null);
+    setRescheduleModal(null);
     setUpdateModal(null);
     setRejectModal(false);
     onAction(msg, type);
@@ -582,6 +787,16 @@ function DetailDrawer({ interview, onClose, onAction }) {
                     {round.interviewer && <div className="flex items-center gap-2"><User size={12} className="text-gray-400" /><span>{round.interviewer}</span></div>}
                     {round.interviewerEmail && <div className="flex items-center gap-2"><Mail size={12} className="text-gray-400" /><span>{round.interviewerEmail}</span></div>}
                     {round.scheduledAt && <div className="flex items-center gap-2"><Calendar size={12} className="text-gray-400" /><span>{fmtDate(round.scheduledAt)}</span></div>}
+                    {round.interviewMode && (
+                      <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${round.interviewMode === "online" ? "bg-blue-50 text-blue-600" : "bg-indigo-50 text-indigo-600"}`}>
+                          {round.interviewMode === "online" ? "🖥️ Online" : "🏢 Offline"}
+                        </span>
+                      </div>
+                    )}
+                    {round.interviewLink && <div className="flex items-center gap-2"><span className="text-blue-500 underline truncate cursor-pointer" onClick={() => window.open(round.interviewLink, "_blank")}>{round.interviewLink}</span></div>}
+                    {round.interviewAddress && <div className="flex items-center gap-2"><MapPin size={12} className="text-gray-400" /><span>{round.interviewAddress}</span></div>}
+                    {round.additionalNotes && <div className="mt-1 text-xs text-gray-500 italic bg-gray-50 rounded-lg px-2.5 py-1.5 border border-gray-100">📝 {round.additionalNotes}</div>}
                   </div>
                 )}
 
@@ -615,6 +830,10 @@ function DetailDrawer({ interview, onClose, onAction }) {
                         <button onClick={() => { setUpdateModal(round); }}
                           className="px-3 py-1.5 rounded-lg bg-green-500 text-white text-xs font-semibold hover:bg-green-600 transition">
                           ✓ Mark Result
+                        </button>
+                        <button onClick={() => setRescheduleModal(round)}
+                          className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition flex items-center gap-1">
+                          <Edit2 size={11} /> Reschedule
                         </button>
                       </>
                     )}
@@ -706,6 +925,7 @@ function DetailDrawer({ interview, onClose, onAction }) {
       </div>
 
       {scheduleModal && <ScheduleModal interview={interview} round={scheduleModal} onClose={() => setScheduleModal(null)} onSuccess={handleModalSuccess} />}
+      {rescheduleModal && <RescheduleModal interview={interview} round={rescheduleModal} onClose={() => setRescheduleModal(null)} onSuccess={handleModalSuccess} />}
       {updateModal && <UpdateRoundModal interview={interview} round={updateModal} onClose={() => setUpdateModal(null)} onSuccess={handleModalSuccess} />}
       {rejectModal && <RejectModal interview={interview} onClose={() => setRejectModal(false)} onSuccess={handleModalSuccess} />}
     </>

@@ -34,6 +34,7 @@ export default function JobSeekerRegisterPage() {
     location: "", linkedin: "", github: "",
     // Step 3: Address & Identity
     permanentAddress: "", currentAddress: "", sameAddress: false,
+    district: "", state: "", pincode: "",
     panNumber: "", aadhaarNumber: "", passportNumber: "", drivingLicense: "",
     // Step 4: Education (multiple)
     educations: [{ degree: "", institution: "", year: "", grade: "", eduType: "Full-time" }],
@@ -77,6 +78,9 @@ export default function JobSeekerRegisterPage() {
     }
     if (step === 3) {
       if (!form.permanentAddress || form.permanentAddress.length < 10) { setError("Permanent address is required (min 10 chars)"); return; }
+      if (!form.district || form.district.length < 2) { setError("District is required (min 2 chars)"); return; }
+      if (!form.state || form.state.length < 2) { setError("State is required (min 2 chars)"); return; }
+      if (!form.pincode || form.pincode.length !== 6) { setError("Valid 6-digit pincode is required"); return; }
     }
     if (step < 6) setStep(step + 1);
   };
@@ -99,6 +103,9 @@ export default function JobSeekerRegisterPage() {
         motherName: form.motherName,
         permanentAddress: form.permanentAddress,
         currentAddress: form.sameAddress ? form.permanentAddress : form.currentAddress,
+        district: form.district,
+        state: form.state,
+        pincode: form.pincode,
         panNumber: form.panNumber,
         aadhaarNumber: form.aadhaarNumber,
         passportNumber: form.passportNumber,
@@ -307,11 +314,16 @@ export default function JobSeekerRegisterPage() {
               <div className="space-y-4">
                 <div className="mb-2">
                   <h2 className="text-2xl font-extrabold text-gray-900">Address & Identity</h2>
-                  <p className="text-sm text-gray-500 mt-1">All fields are optional   you can fill later</p>
+                  <p className="text-sm text-gray-500 mt-1">Address and location details</p>
                 </div>
                 <div>
                   <label className={labelCls}>Permanent Address * (min 10 chars)</label>
                   <textarea rows={2} required value={form.permanentAddress} onChange={e => set("permanentAddress", e.target.value)} placeholder="House No, Street, City, State, PIN" className={inputCls + " resize-none"} />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div><label className={labelCls}>District *</label><input required value={form.district} onChange={e => set("district", e.target.value)} placeholder="City District" className={inputCls} /></div>
+                  <div><label className={labelCls}>State *</label><input required value={form.state} onChange={e => set("state", e.target.value)} placeholder="State Name" className={inputCls} /></div>
+                  <div><label className={labelCls}>Pincode * (6 digits)</label><input required value={form.pincode} onChange={e => set("pincode", e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="560001" maxLength={6} className={inputCls} /></div>
                 </div>
                 <div>
                   <label className="flex items-center gap-2 mb-1.5 cursor-pointer">
