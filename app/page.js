@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
   Users,
@@ -54,6 +54,273 @@ const staggerContainer = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
 };
+
+/* ── Hero Feature Carousel (auto-rotates between screens) ── */
+function HeroFeatureCarousel() {
+  const [activeScreen, setActiveScreen] = useState(0);
+
+  const screens = [
+    {
+      title: "TFG HireShield - AI Screening",
+      badge: "AI-Powered",
+      badgeColor: "from-purple-500 to-pink-500",
+      content: (
+        <div className="space-y-2.5 px-1">
+          <div className="flex items-center gap-2.5 p-2.5 bg-white/80 rounded-xl border border-slate-100">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center"><FileText className="w-3.5 h-3.5 text-white" /></div>
+            <div className="flex-1 min-w-0"><p className="text-[11px] font-semibold text-slate-700 truncate">Upload JD + Resumes</p><p className="text-[9px] text-slate-400">AI ranks candidates in seconds</p></div>
+            <span className="text-[8px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">⚡ 2.3s</span>
+          </div>
+          {[{ n: "Arjun Kumar", s: 92, r: "Strong Fit", rc: "text-emerald-600 bg-emerald-50 border-emerald-100", bar: "from-emerald-400 to-green-500", av: "from-blue-500 to-indigo-600" }, { n: "Priya Sharma", s: 78, r: "Good Fit", rc: "text-blue-600 bg-blue-50 border-blue-100", bar: "from-blue-400 to-indigo-500", av: "from-violet-500 to-purple-600" }, { n: "Rahul Verma", s: 45, r: "Weak Fit", rc: "text-amber-600 bg-amber-50 border-amber-100", bar: "from-amber-400 to-orange-500", av: "from-teal-500 to-cyan-600" }].map((c, i) => (
+            <div key={i} className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-slate-50 shadow-[0_1px_3px_rgba(0,0,0,0.04)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow">
+              <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${c.av} flex items-center justify-center text-white text-[9px] font-bold`}>{c.n.split(" ").map(w=>w[0]).join("")}</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-semibold text-slate-700">{c.n}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <div className="w-14 h-1 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full bg-gradient-to-r ${c.bar} rounded-full`} style={{ width: `${c.s}%` }} /></div>
+                  <span className="text-[8px] font-semibold text-slate-400">{c.s}%</span>
+                </div>
+              </div>
+              <span className={`text-[8px] font-bold px-2 py-0.5 rounded-md border ${c.rc}`}>{c.r}</span>
+            </div>
+          ))}
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <span className="text-[8px] font-semibold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-100 flex items-center gap-0.5"><Brain className="w-2.5 h-2.5" />Screen</span>
+            <span className="text-[8px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">+ Pipeline</span>
+            <span className="text-[8px] font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">Direct BGV</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "TFG HireShield - Interview Pipeline",
+      badge: "4 Rounds",
+      badgeColor: "from-blue-500 to-indigo-600",
+      content: (
+        <div className="space-y-2.5 px-1">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[11px] font-semibold text-slate-700">Interview Progress</p>
+            <span className="text-[9px] text-slate-400 font-medium">Arjun Kumar</span>
+          </div>
+          {[{ r: "Tech Round", s: "Passed", bg: "bg-emerald-50/70 border-emerald-100", nb: "bg-emerald-500", sc: "text-emerald-600" }, { r: "Manager Round", s: "Scheduled", bg: "bg-blue-50/70 border-blue-100", nb: "bg-blue-500", sc: "text-blue-600" }, { r: "HR Round", s: "Pending", bg: "bg-white border-slate-100", nb: "bg-slate-300", sc: "text-slate-400" }, { r: "Final Round", s: "Pending", bg: "bg-white border-slate-100", nb: "bg-slate-300", sc: "text-slate-400" }].map((round, i) => (
+            <div key={i} className={`flex items-center justify-between px-3 py-2.5 rounded-xl border ${round.bg} transition-all hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)]`}>
+              <div className="flex items-center gap-2.5">
+                <div className={`w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-bold text-white ${round.nb}`}>{i + 1}</div>
+                <span className="text-[10px] font-semibold text-slate-700">{round.r}</span>
+              </div>
+              <span className={`text-[9px] font-bold ${round.sc}`}>{round.s}</span>
+            </div>
+          ))}
+          <div className="flex gap-1.5 pt-1">
+            <span className="text-[8px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg border border-emerald-100 cursor-pointer hover:bg-emerald-100 transition">Extend Offer</span>
+            <span className="text-[8px] font-semibold text-teal-600 bg-teal-50 px-2 py-1 rounded-lg border border-teal-100 cursor-pointer hover:bg-teal-100 transition">Mark Hired</span>
+            <span className="text-[8px] font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100 cursor-pointer hover:bg-blue-100 transition">Initiate BGV</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "TFG HireShield - Background Verification",
+      badge: "12+ Checks",
+      badgeColor: "from-emerald-500 to-teal-600",
+      content: (
+        <div className="space-y-2.5 px-1">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[11px] font-semibold text-slate-700">BGV Progress</p>
+            <div className="flex items-center gap-1.5">
+              <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden"><div className="h-full w-[40%] bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full" /></div>
+              <span className="text-[8px] font-bold text-emerald-600">40%</span>
+            </div>
+          </div>
+          {[{ check: "PAN Verification", status: "Verified", st: "emerald" }, { check: "Aadhaar Check", status: "Verified", st: "emerald" }, { check: "Employment History", status: "In Progress", st: "blue" }, { check: "Education Check", status: "Pending", st: "slate" }, { check: "Court Records", status: "Pending", st: "slate" }].map((v, i) => (
+            <div key={i} className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${v.st === "emerald" ? "bg-emerald-50/50 border-emerald-100" : v.st === "blue" ? "bg-blue-50/50 border-blue-100" : "bg-white border-slate-100"}`}>
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center ${v.st === "emerald" ? "bg-emerald-500" : v.st === "blue" ? "bg-blue-500 animate-pulse" : "bg-slate-200"}`}>
+                  {v.st === "emerald" && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
+                  {v.st === "blue" && <Loader2 className="w-2.5 h-2.5 text-white animate-spin" />}
+                </div>
+                <span className="text-[10px] font-medium text-slate-600">{v.check}</span>
+              </div>
+              <span className={`text-[8px] font-bold ${v.st === "emerald" ? "text-emerald-600" : v.st === "blue" ? "text-blue-600" : "text-slate-400"}`}>{v.status}</span>
+            </div>
+          ))}
+          <div className="relative h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1">
+            <div className="absolute inset-y-0 left-0 w-[40%] bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full" />
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "TFG HireShield - HRMS & Onboarding",
+      badge: "Auto-Onboard",
+      badgeColor: "from-amber-500 to-orange-500",
+      content: (
+        <div className="space-y-2.5 px-1">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-[11px] font-semibold text-slate-700">Onboarding</p>
+            <span className="text-[8px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100">New Hire</span>
+          </div>
+          <div className="flex items-center gap-2.5 p-2.5 bg-gradient-to-r from-amber-50/80 to-orange-50/50 rounded-xl border border-amber-100/60">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-[9px] font-bold shadow-sm">AK</div>
+            <div><p className="text-[10px] font-semibold text-slate-700">Arjun Kumar</p><p className="text-[8px] text-slate-400">Sr. React Developer • Engineering</p></div>
+          </div>
+          {[{ task: "Offer Letter Generated", done: true }, { task: "Documents Collected", done: true }, { task: "ID Card Created", done: false }, { task: "System Access Provisioned", done: false }, { task: "Welcome Email Sent", done: false }].map((t, i) => (
+            <div key={i} className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-all ${t.done ? "bg-emerald-50/50 border-emerald-100" : "bg-white border-slate-100"}`}>
+              <div className={`w-4 h-4 rounded-full flex items-center justify-center ${t.done ? "bg-emerald-500" : "bg-slate-200"}`}>
+                {t.done && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
+              </div>
+              <span className={`text-[10px] flex-1 ${t.done ? "text-slate-700 font-medium line-through decoration-emerald-300" : "text-slate-400"}`}>{t.task}</span>
+              {t.done && <span className="text-[7px] font-bold text-emerald-500">✓</span>}
+            </div>
+          ))}
+        </div>
+      ),
+    },
+  ];
+
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [transitionText, setTransitionText] = useState("");
+
+  const transitionMessages = [
+    { done: "AI Screening Complete", next: "Starting Interview Pipeline...", icon: "✓", color: "from-purple-500 to-pink-500" },
+    { done: "Interviews Complete", next: "Initiating Background Verification...", icon: "✓", color: "from-blue-500 to-indigo-600" },
+    { done: "BGV Verified", next: "Starting HRMS Onboarding...", icon: "✓", color: "from-emerald-500 to-teal-600" },
+    { done: "Onboarding Complete", next: "Back to AI Screening...", icon: "✓", color: "from-amber-500 to-orange-500" },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Show transition phase
+      setIsTransitioning(true);
+      setTransitionText(transitionMessages[activeScreen].done);
+
+      // After transition animation, move to next screen
+      setTimeout(() => {
+        setActiveScreen(prev => (prev + 1) % screens.length);
+        setIsTransitioning(false);
+      }, 2200);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [activeScreen]);
+
+  return (
+    <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7, delay: 0.3 }} className="hidden lg:block relative">
+      {/* Top-right static badge */}
+      <motion.div animate={{ y: [0, -4, 0] }} transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-3 -right-2 z-20 bg-white text-slate-700 text-[9px] font-bold px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 tracking-wide border border-slate-100">
+        <CheckCircle2 className="w-3 h-3 text-emerald-500" /> Hire-to-Verify
+      </motion.div>
+
+      {/* Bottom-left floating badge */}
+      <motion.div animate={{ y: [0, -5, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+        className={`absolute -bottom-3.5 -left-2.5 z-20 bg-gradient-to-r ${screens[activeScreen].badgeColor} text-white text-[9px] font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5 tracking-wide`}>
+        <Sparkles className="w-3 h-3" /> {screens[activeScreen].badge}
+      </motion.div>
+
+      {/* Mock window — clean minimal */}
+      <div className="bg-white rounded-2xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.12)] border border-slate-100 overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2 bg-slate-900">
+          <div className="flex gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-red-400" />
+            <div className="w-2 h-2 rounded-full bg-yellow-400" />
+            <div className="w-2 h-2 rounded-full bg-green-400" />
+          </div>
+          <span className="text-[9px] font-medium text-slate-400 ml-2 tracking-wide">{screens[activeScreen].title}</span>
+        </div>
+
+        {/* Content area */}
+        <div className="h-[320px] overflow-hidden">
+          <AnimatePresence mode="wait">
+            {isTransitioning ? (
+              <motion.div
+                key="transition"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="h-full flex flex-col items-center justify-center p-6"
+              >
+                {/* Success checkmark animation */}
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
+                  className={`w-12 h-12 rounded-full bg-gradient-to-br ${transitionMessages[activeScreen].color} flex items-center justify-center shadow-lg mb-4`}
+                >
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-white text-lg font-bold"
+                  >✓</motion.span>
+                </motion.div>
+
+                {/* Done text */}
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2, duration: 0.3 }}
+                  className="text-[12px] font-bold text-slate-800 mb-1"
+                >{transitionMessages[activeScreen].done}</motion.p>
+
+                {/* Next step text */}
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4, duration: 0.3 }}
+                  className="text-[10px] text-slate-400 font-medium"
+                >{transitionMessages[activeScreen].next}</motion.p>
+
+                {/* Loading dots */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="flex items-center gap-1 mt-4"
+                >
+                  {[0, 1, 2].map((dot) => (
+                    <motion.div
+                      key={dot}
+                      animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1, 0.8] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: dot * 0.15 }}
+                      className={`w-1.5 h-1.5 rounded-full bg-gradient-to-r ${transitionMessages[activeScreen].color}`}
+                    />
+                  ))}
+                </motion.div>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={activeScreen}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -12 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="p-4"
+              >
+                {screens[activeScreen].content}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Bottom nav — labeled tabs */}
+        <div className="flex items-center justify-center gap-1 px-4 py-2.5 border-t border-slate-50 bg-slate-50/50">
+          {[
+            { label: "Screening", icon: <Brain className="w-3 h-3" /> },
+            { label: "Interview", icon: <Users className="w-3 h-3" /> },
+            { label: "BGV", icon: <ShieldCheck className="w-3 h-3" /> },
+            { label: "HRMS", icon: <UserCheck className="w-3 h-3" /> },
+          ].map((tab, i) => (
+            <button key={i} onClick={() => setActiveScreen(i)}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-[9px] font-semibold transition-all ${i === activeScreen ? "bg-indigo-50 text-indigo-700 border border-indigo-100 shadow-sm" : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"}`}>
+              {tab.icon} {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -162,168 +429,57 @@ export default function HomePage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
-      <div className="relative pt-32 pb-20 sm:pt-40 sm:pb-24 overflow-hidden min-h-[90vh] flex items-center" style={{ background: "linear-gradient(180deg, #eef2f9 0%, #f0f4fa 40%, #f7f9fc 100%)" }}>
-        {/* Animated gradient orbs */}
-        <motion.div
-          animate={{ x: [0, 30, 0], y: [0, -20, 0], scale: [1, 1.1, 1] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-0 right-0 w-[700px] h-[700px] bg-gradient-to-bl from-blue-200/60 via-indigo-100/40 to-transparent rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, -20, 0], y: [0, 30, 0], scale: [1, 1.15, 1] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute -bottom-20 -left-20 w-[500px] h-[500px] bg-gradient-to-tr from-indigo-200/40 to-blue-100/30 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, 15, -10, 0], y: [0, -15, 10, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute top-1/3 left-1/4 w-[300px] h-[300px] bg-gradient-to-br from-purple-100/30 to-pink-50/20 rounded-full blur-3xl"
-        />
-
-        {/* Floating icons - decorative */}
-        <motion.div
-          animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[20%] left-[8%] hidden lg:flex w-14 h-14 rounded-2xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-blue-500/10 items-center justify-center"
-        >
-          <Brain className="w-6 h-6 text-blue-500" />
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, 12, 0], rotate: [0, -5, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute top-[25%] right-[10%] hidden lg:flex w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-indigo-500/10 items-center justify-center"
-        >
-          <ShieldCheck className="w-5 h-5 text-indigo-500" />
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-[25%] left-[12%] hidden lg:flex w-11 h-11 rounded-xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-green-500/10 items-center justify-center"
-        >
-          <UserCheck className="w-5 h-5 text-green-500" />
-        </motion.div>
-        <motion.div
-          animate={{ y: [0, 14, 0], rotate: [0, -6, 0] }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-          className="absolute bottom-[30%] right-[8%] hidden lg:flex w-12 h-12 rounded-xl bg-white/80 backdrop-blur-sm border border-white shadow-lg shadow-purple-500/10 items-center justify-center"
-        >
-          <FileText className="w-5 h-5 text-purple-500" />
-        </motion.div>
-
-        {/* Subtle grid pattern overlay */}
+      {/* Hero Section - Split Layout */}
+      <div className="relative pt-20 pb-12 sm:pt-24 sm:pb-16 overflow-hidden min-h-[80vh] flex items-center" style={{ background: "linear-gradient(180deg, #f8fafc 0%, #eef2ff 50%, #f8fafc 100%)" }}>
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, #3b82f6 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-3xl -translate-y-1/4 translate-x-1/4" />
+        <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-100/30 rounded-full blur-3xl translate-y-1/4 -translate-x-1/4" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="text-center max-w-5xl mx-auto"
-          >
-            <motion.div
-              variants={fadeIn}
-              whileHover={{ scale: 1.05 }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white shadow-xl shadow-brand-500/10 border border-brand-100 text-brand-600 text-sm font-bold mb-8 cursor-default"
-            >
-              <motion.div animate={{ rotate: [0, 15, -15, 0] }} transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}>
-                <Sparkles className="w-5 h-5 text-accent-500" />
-              </motion.div>
-              <span>Next-Gen Hiring, BGV & HRMS Platform</span>
-            </motion.div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left - Text (smaller font) */}
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white shadow-md border border-blue-100 text-blue-600 text-xs font-bold mb-5">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                AI-Powered Hiring & BGV Platform
+              </div>
 
-            <motion.h1 variants={fadeIn} className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter mb-6 text-slate-900 leading-[1.1]">
-              The smartest way to <br />
-              <span className="relative inline-block">
-                <motion.span
-                  className="text-gradient"
-                  animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-                  style={{ backgroundSize: "200% 200%", backgroundImage: "linear-gradient(135deg, #0066cc, #3b82f6, #6366f1, #8b5cf6, #3b82f6, #0066cc)" }}
-                >
+              <h1 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-black tracking-tight text-slate-900 leading-[1.15] mb-5">
+                The smartest way to{" "}
+                <span style={{ backgroundImage: "linear-gradient(135deg, #3b82f6, #6366f1, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                   hire, verify & manage.
-                </motion.span>
-                {/* Animated underline */}
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
-                  className="absolute -bottom-2 left-0 right-0 h-[4px] bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full origin-left"
-                />
-              </span>
-            </motion.h1>
+                </span>
+              </h1>
 
-            <motion.p variants={fadeIn} className="mt-6 text-lg sm:text-xl text-slate-600 max-w-3xl mx-auto mb-10 leading-relaxed font-medium">
-              Seamlessly connect AI screening, Applicant Tracking, multi-round interviews, instant BGV, and HRMS auto-onboarding into one unified, intelligent flow.
-            </motion.p>
+              <p className="text-sm text-slate-600 mb-6 leading-relaxed max-w-md">
+                AI screening, applicant tracking, multi-round interviews, instant BGV, and job portal - all in one unified platform.
+              </p>
 
-            <motion.div variants={fadeIn} className="flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/login">
-                <motion.button
-                  whileHover={{ scale: 1.05, boxShadow: "0 25px 50px -12px rgba(59, 130, 246, 0.4)" }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-2xl text-lg font-bold transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-500/25 overflow-hidden group"
-                >
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                  <span className="relative z-10">Start Hiring Flow</span>
-                  <motion.div animate={{ x: [0, 4, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="relative z-10">
-                    <ArrowRight className="w-5 h-5" />
-                  </motion.div>
-                </motion.button>
-              </Link>
-              <Link href="/tfgjobs">
-                <motion.button
-                  whileHover={{ scale: 1.03, boxShadow: "0 20px 40px -12px rgba(100, 116, 139, 0.2)" }}
-                  whileTap={{ scale: 0.97 }}
-                  className="bg-white hover:bg-surface-100 text-slate-800 px-8 py-4 rounded-2xl text-lg font-bold transition-all flex items-center justify-center gap-2 border border-surface-200 shadow-xl shadow-slate-200/50"
-                >
-                  <Search className="w-5 h-5 text-accent-500" />
-                  Find Jobs (Seeker)
-                </motion.button>
-              </Link>
+              <div className="flex gap-3 mb-6">
+                <Link href="/login">
+                  <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 flex items-center gap-2">
+                    Start Hiring Flow <ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                </Link>
+                <Link href="/tfgjobs">
+                  <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                    className="bg-white text-slate-800 px-5 py-2.5 rounded-xl text-sm font-bold border border-slate-200 shadow-md flex items-center gap-2">
+                    <Search className="w-4 h-4 text-blue-500" /> Find Jobs
+                  </motion.button>
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-5 text-xs text-slate-500">
+                <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-green-500" /> SOC 2</span>
+                <span className="flex items-center gap-1.5"><Activity className="w-3.5 h-3.5 text-blue-500" /> 99.9% Uptime</span>
+                <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-indigo-500" /> Enterprise</span>
+              </div>
             </motion.div>
 
-            {/* Trust badges with stagger animation */}
-            <motion.div variants={fadeIn} className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mt-10">
-              {[
-                { icon: <ShieldCheck className="w-4 h-4 text-green-500" />, text: "SOC 2 Compliant" },
-                { icon: <ShieldCheck className="w-4 h-4 text-blue-500" />, text: "Bank-Grade Security" },
-                { icon: <Activity className="w-4 h-4 text-indigo-500" />, text: "99.9% Uptime" },
-              ].map((badge, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.2 + i * 0.15 }}
-                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/70 backdrop-blur-sm border border-slate-100 shadow-sm text-sm text-slate-600"
-                >
-                  {badge.icon}
-                  <span className="font-medium">{badge.text}</span>
-                </motion.div>
-              ))}
-            </motion.div>
-
-            {/* Animated scroll indicator */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2 }}
-              className="mt-14 flex justify-center"
-            >
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                className="w-8 h-12 rounded-full border-2 border-slate-300 flex items-start justify-center p-2"
-              >
-                <motion.div
-                  animate={{ y: [0, 12, 0], opacity: [1, 0.3, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  className="w-1.5 h-3 bg-slate-400 rounded-full"
-                />
-              </motion.div>
-            </motion.div>
-          </motion.div>
+            {/* Right - Auto-rotating Feature Screens */}
+            <HeroFeatureCarousel />
+          </div>
         </div>
       </div>
 

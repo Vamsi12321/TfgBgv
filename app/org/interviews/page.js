@@ -623,216 +623,362 @@ function DetailDrawer({ interview, onClose, onAction }) {
     onAction(msg, type);
   };
 
+  const passedCount = rounds.filter(r => r.status === "Passed").length;
+  const totalRounds = rounds.length;
+  const progressPercent = totalRounds > 0 ? Math.round((passedCount / totalRounds) * 100) : 0;
+
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="fixed right-0 top-0 h-full w-full max-w-lg z-50 bg-white shadow-2xl flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b bg-gradient-to-r from-slate-50 to-white flex-shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-              {(interview.candidateName || "C")[0].toUpperCase()}
+      <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-md" onClick={onClose} />
+      <div className="fixed right-0 top-0 h-full w-full max-w-lg z-50 bg-gradient-to-b from-white via-white to-slate-50 shadow-2xl flex flex-col overflow-hidden animate-[slideIn_0.3s_ease-out]">
+        {/* Header — Premium glassmorphism style */}
+        <div className="relative flex-shrink-0 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600" />
+          <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)" }} />
+          <div className="relative px-6 py-5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-13 h-13 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-extrabold text-lg flex-shrink-0 shadow-lg">
+                  {(interview.candidateName || "C")[0].toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-extrabold text-white truncate drop-shadow-sm">{interview.candidateName}</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold backdrop-blur-sm ${
+                      interview.overallStatus === "In Progress" ? "bg-white/20 text-white border border-white/30" :
+                      interview.overallStatus === "Offer Extended" ? "bg-green-400/20 text-green-100 border border-green-300/30" :
+                      interview.overallStatus === "Hired" ? "bg-emerald-400/20 text-emerald-100 border border-emerald-300/30" :
+                      interview.overallStatus === "Rejected" ? "bg-red-400/20 text-red-100 border border-red-300/30" :
+                      "bg-white/20 text-white border border-white/30"
+                    }`}>
+                      {interview.overallStatus}
+                    </span>
+                    <span className="text-white/60 text-xs">•</span>
+                    <span className="text-white/70 text-xs font-medium">{passedCount}/{totalRounds} rounds cleared</span>
+                  </div>
+                </div>
+              </div>
+              <button onClick={onClose} className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all border border-white/10 flex-shrink-0">
+                <X size={18} />
+              </button>
             </div>
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-gray-900 truncate">{interview.candidateName}</h2>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${OVERALL_STATUS_STYLES[interview.overallStatus] || "bg-gray-100 text-gray-600"}`}>
-                {interview.overallStatus}
-              </span>
+            {/* Mini progress bar in header */}
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex-1 h-1.5 bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
+                <div className="h-full bg-gradient-to-r from-green-300 to-emerald-400 rounded-full transition-all duration-700 ease-out shadow-sm shadow-green-400/50" style={{ width: `${progressPercent}%` }} />
+              </div>
+              <span className="text-[11px] text-white/70 font-semibold flex-shrink-0">{progressPercent}%</span>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-gray-700 transition flex-shrink-0">
-            <X size={20} />
-          </button>
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
 
-          {/* ── Candidate Contact Info ── */}
-          <div className="bg-slate-50 rounded-xl p-4 border border-slate-100 space-y-2">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Candidate Info</h3>
-            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-700">
-              {interview.candidateEmail && (
-                <a href={`mailto:${interview.candidateEmail}`} className="flex items-center gap-1.5 hover:text-blue-600 transition">
-                  <Mail size={13} className="text-gray-400" /> {interview.candidateEmail}
-                </a>
-              )}
-              {interview.candidatePhone && (
-                <a href={`tel:${interview.candidatePhone}`} className="flex items-center gap-1.5 hover:text-blue-600 transition">
-                  <Phone size={13} className="text-gray-400" /> {interview.candidatePhone}
-                </a>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {(interview.resumeUrl || interview.resumeDownloadUrl) && (
-                <button
-                  onClick={async () => {
-                    const url = interview.resumeUrl || interview.resumeDownloadUrl;
-                    try {
-                      const response = await fetch(url);
-                      const blob = await response.blob();
-                      const blobUrl = window.URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = blobUrl;
-                      a.download = `${interview.candidateName || "resume"}_resume.pdf`;
-                      document.body.appendChild(a);
-                      a.click();
-                      window.URL.revokeObjectURL(blobUrl);
-                      document.body.removeChild(a);
-                    } catch {
-                      window.open(url, "_blank");
-                    }
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-medium transition cursor-pointer"
-                >
-                  <FileText size={12} /> Download Resume
-                </button>
-              )}
-              {interview.jobId && (
-                <button
-                  onClick={async () => {
-                    try {
-                      const res = await fetch(`/api/proxy/secure/getScreeningResults?jobId=${interview.jobId}&applicationId=${interview.applicationId}`, { credentials: "include" });
-                      if (res.ok) {
-                        const data = await res.json();
-                        const r = data.results?.[0];
-                        if (r) {
-                          alert(`AI Score: ${r.finalScore || r.llmScore || "N/A"}\nRecommendation: ${r.recommendation || "N/A"}\n\nStrengths:\n${(r.strengths || []).join("\n")}\n\nWeaknesses:\n${(r.weaknesses || []).join("\n")}`);
-                        } else {
-                          alert("No AI screening results found for this candidate.");
-                        }
-                      } else {
-                        alert("No AI screening results available.");
+          {/* ── Candidate Contact Info — Glass card ── */}
+          <div className="relative bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-blue-50 to-transparent rounded-bl-full opacity-60" />
+            <div className="relative">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                  <User size={12} className="text-white" />
+                </div>
+                <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Candidate Info</h3>
+              </div>
+              <div className="flex flex-wrap gap-3 text-sm text-gray-700">
+                {interview.candidateEmail && (
+                  <a href={`mailto:${interview.candidateEmail}`} className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-blue-50 rounded-xl border border-gray-100 hover:border-blue-200 transition-all group">
+                    <div className="w-7 h-7 rounded-lg bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition">
+                      <Mail size={13} className="text-blue-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-600 group-hover:text-blue-700 transition">{interview.candidateEmail}</span>
+                  </a>
+                )}
+                {interview.candidatePhone && (
+                  <a href={`tel:${interview.candidatePhone}`} className="flex items-center gap-2 px-3 py-2 bg-gray-50 hover:bg-green-50 rounded-xl border border-gray-100 hover:border-green-200 transition-all group">
+                    <div className="w-7 h-7 rounded-lg bg-green-100 group-hover:bg-green-200 flex items-center justify-center transition">
+                      <Phone size={13} className="text-green-600" />
+                    </div>
+                    <span className="text-xs font-medium text-gray-600 group-hover:text-green-700 transition">{interview.candidatePhone}</span>
+                  </a>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {(interview.resumeUrl || interview.resumeDownloadUrl) && (
+                  <button
+                    onClick={async () => {
+                      const url = interview.resumeUrl || interview.resumeDownloadUrl;
+                      try {
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        const blobUrl = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = blobUrl;
+                        a.download = `${interview.candidateName || "resume"}_resume.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(blobUrl);
+                        document.body.removeChild(a);
+                      } catch {
+                        window.open(url, "_blank");
                       }
-                    } catch { alert("Failed to fetch screening results."); }
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 text-purple-600 hover:bg-purple-100 rounded-lg text-xs font-medium transition cursor-pointer"
-                >
-                  <Brain size={12} /> AI Screening Results
-                </button>
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 hover:from-blue-100 hover:to-indigo-100 rounded-xl text-xs font-bold transition-all border border-blue-100 hover:border-blue-200 hover:shadow-sm cursor-pointer"
+                  >
+                    <FileText size={13} /> Download Resume
+                  </button>
+                )}
+                {interview.jobId && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await fetch(`/api/proxy/secure/getScreeningResults?jobId=${interview.jobId}&applicationId=${interview.applicationId}`, { credentials: "include" });
+                        if (res.ok) {
+                          const data = await res.json();
+                          const r = data.results?.[0];
+                          if (r) {
+                            alert(`AI Score: ${r.finalScore || r.llmScore || "N/A"}\nRecommendation: ${r.recommendation || "N/A"}\n\nStrengths:\n${(r.strengths || []).join("\n")}\n\nWeaknesses:\n${(r.weaknesses || []).join("\n")}`);
+                          } else {
+                            alert("No AI screening results found for this candidate.");
+                          }
+                        } else {
+                          alert("No AI screening results available.");
+                        }
+                      } catch { alert("Failed to fetch screening results."); }
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-50 to-violet-50 text-purple-700 hover:from-purple-100 hover:to-violet-100 rounded-xl text-xs font-bold transition-all border border-purple-100 hover:border-purple-200 hover:shadow-sm cursor-pointer"
+                  >
+                    <Brain size={13} /> AI Screening
+                  </button>
+                )}
+              </div>
+              {interview.jobTitle && (
+                <div className="mt-3 flex items-center gap-2 px-3 py-2 bg-amber-50/60 rounded-xl border border-amber-100">
+                  <Briefcase size={13} className="text-amber-600" />
+                  <span className="text-xs text-gray-600">Applied for: <strong className="text-gray-800">{interview.jobTitle}</strong></span>
+                </div>
               )}
             </div>
-            {interview.jobTitle && (
-              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
-                <Briefcase size={12} className="text-gray-400" /> Applied for: <strong>{interview.jobTitle}</strong>
-              </p>
-            )}
           </div>
 
-          {/* ── Guidance Info Banner ── */}
+          {/* ── Guidance Info Banner — Enhanced ── */}
           {interview.overallStatus === "In Progress" && (
-            <div className="bg-blue-50 border border-blue-100 rounded-xl p-3.5 flex gap-3">
-              <Info size={16} className="text-blue-500 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-blue-700 space-y-1">
-                {allPending && (
-                  <p><strong>Next step:</strong> Schedule Round 1 (Tech Round) by selecting an interviewer and time slot.</p>
-                )}
-                {!allPending && currentRound?.status === "Pending" && (
-                  <p><strong>Next step:</strong> Schedule Round {currentRoundNum} ({currentRound.roundName}). Previous round must be passed first.</p>
-                )}
-                {currentRound?.status === "Scheduled" && (
-                  <p><strong>Next step:</strong> After the interview, mark Round {currentRoundNum} as Passed or Failed with rating & feedback.</p>
-                )}
-                <p className="text-blue-500">Rounds must be completed sequentially. You can extend an offer after any round passes.</p>
+            <div className="relative bg-gradient-to-r from-blue-50 via-indigo-50/50 to-blue-50 border border-blue-100/80 rounded-2xl p-4 overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-400 to-indigo-500 rounded-l-2xl" />
+              <div className="flex gap-3 pl-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <Info size={14} className="text-white" />
+                </div>
+                <div className="text-xs text-blue-800 space-y-1.5">
+                  {allPending && (
+                    <p className="font-medium"><span className="text-blue-600 font-bold">Next step:</span> Schedule Round 1 (Tech Round) by selecting an interviewer and time slot.</p>
+                  )}
+                  {!allPending && currentRound?.status === "Pending" && (
+                    <p className="font-medium"><span className="text-blue-600 font-bold">Next step:</span> Schedule Round {currentRoundNum} ({currentRound.roundName}). Previous round must be passed first.</p>
+                  )}
+                  {currentRound?.status === "Scheduled" && (
+                    <p className="font-medium"><span className="text-blue-600 font-bold">Next step:</span> After the interview, mark Round {currentRoundNum} as Passed or Failed with rating & feedback.</p>
+                  )}
+                  <p className="text-blue-500/80 text-[11px]">Rounds must be completed sequentially. You can extend an offer after any round passes.</p>
+                </div>
               </div>
             </div>
           )}
 
           {interview.overallStatus === "Offer Extended" && (
-            <div className="bg-green-50 border border-green-100 rounded-xl p-3.5 flex gap-3">
-              <Info size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-green-700 space-y-1">
-                <p><strong>Offer extended!</strong> Once the candidate accepts, click "Mark as Hired" below.</p>
-                <p className="text-green-500">After hiring, you can initiate Background Verification (BGV).</p>
+            <div className="relative bg-gradient-to-r from-green-50 via-emerald-50/50 to-green-50 border border-green-100/80 rounded-2xl p-4 overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-green-400 to-emerald-500 rounded-l-2xl" />
+              <div className="flex gap-3 pl-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <CheckCircle2 size={14} className="text-white" />
+                </div>
+                <div className="text-xs text-green-800 space-y-1.5">
+                  <p className="font-medium"><span className="text-green-600 font-bold">Offer extended!</span> Once the candidate accepts, click "Mark as Hired" below.</p>
+                  <p className="text-green-500/80 text-[11px]">After hiring, you can initiate Background Verification (BGV).</p>
+                </div>
               </div>
             </div>
           )}
 
           {interview.overallStatus === "Hired" && !interview.bgvInitiated && (
-            <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3.5 flex gap-3">
-              <Info size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
-              <div className="text-xs text-emerald-700">
-                <p><strong>Candidate hired!</strong> Click "Initiate BGV" to create a background verification entry for this candidate.</p>
+            <div className="relative bg-gradient-to-r from-emerald-50 via-teal-50/50 to-emerald-50 border border-emerald-100/80 rounded-2xl p-4 overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-emerald-400 to-teal-500 rounded-l-2xl" />
+              <div className="flex gap-3 pl-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <CheckCircle2 size={14} className="text-white" />
+                </div>
+                <div className="text-xs text-emerald-800">
+                  <p className="font-medium"><span className="text-emerald-600 font-bold">Candidate hired!</span> Click "Initiate BGV" to create a background verification entry for this candidate.</p>
+                </div>
               </div>
             </div>
           )}
 
-          {/* ── Round Cards ── */}
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Interview Rounds</h3>
+          {/* ── Round Cards — Premium Timeline Style ── */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <CalendarCheck size={12} className="text-white" />
+              </div>
+              <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Interview Rounds</h3>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold border border-indigo-100">
+              {totalRounds} Rounds
+            </span>
+          </div>
+
+          <div className="space-y-3">
           {rounds.map((round, idx) => {
             const isCurrentRound = round.roundNumber === currentRoundNum;
+            const isPassed = round.status === "Passed";
+            const isFailed = round.status === "Failed";
+            const isScheduled = round.status === "Scheduled";
+            const isPending = round.status === "Pending";
+
+            const numberBg = isPassed ? "bg-gradient-to-br from-green-400 to-emerald-500 shadow-green-200" :
+                             isFailed ? "bg-gradient-to-br from-red-400 to-rose-500 shadow-red-200" :
+                             isScheduled ? "bg-gradient-to-br from-blue-400 to-indigo-500 shadow-blue-200" :
+                             "bg-gradient-to-br from-gray-300 to-gray-400 shadow-gray-100";
+
+            const cardBorder = isPassed ? "border-green-200 hover:border-green-300" :
+                               isFailed ? "border-red-200 hover:border-red-300" :
+                               isScheduled ? "border-blue-200 hover:border-blue-300" :
+                               isCurrentRound ? "border-indigo-200 hover:border-indigo-300" :
+                               "border-gray-100 hover:border-gray-200";
+
+            const cardBg = isPassed ? "bg-gradient-to-r from-green-50/80 to-emerald-50/40" :
+                           isFailed ? "bg-gradient-to-r from-red-50/80 to-rose-50/40" :
+                           isScheduled ? "bg-gradient-to-r from-blue-50/80 to-indigo-50/40" :
+                           isCurrentRound ? "bg-gradient-to-r from-indigo-50/60 to-violet-50/30" :
+                           "bg-white";
+
             return (
-              <div key={idx} className={`rounded-xl p-4 border space-y-3 ${
-                isCurrentRound && interview.overallStatus === "In Progress"
-                  ? "bg-blue-50/50 border-blue-200"
-                  : "bg-gray-50 border-gray-100"
-              }`}>
+              <div key={idx} className={`relative rounded-2xl p-4 border ${cardBorder} ${cardBg} space-y-3 transition-all duration-300 hover:shadow-md group`}>
+                {/* Connector line between cards */}
+                {idx < rounds.length - 1 && (
+                  <div className="absolute -bottom-3 left-7 w-0.5 h-3 bg-gray-200 z-10" />
+                )}
+
                 <div className="flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-bold text-gray-900">{round.roundName || ROUND_NAMES[idx] || `Round ${round.roundNumber}`}</p>
-                      {isCurrentRound && interview.overallStatus === "In Progress" && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-500 text-white">CURRENT</span>
-                      )}
+                  <div className="flex items-center gap-3">
+                    {/* Round number badge */}
+                    <div className={`w-10 h-10 rounded-xl ${numberBg} flex items-center justify-center text-white font-extrabold text-sm shadow-md flex-shrink-0`}>
+                      {round.roundNumber}
                     </div>
-                    <p className="text-xs text-gray-400">Round {round.roundNumber}</p>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-gray-900">{round.roundName || ROUND_NAMES[idx] || `Round ${round.roundNumber}`}</p>
+                        {isCurrentRound && interview.overallStatus === "In Progress" && (
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-gradient-to-r from-indigo-500 to-purple-600 text-white uppercase tracking-wider shadow-sm">Current</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-gray-400 mt-0.5">Round {round.roundNumber} of {totalRounds}</p>
+                    </div>
                   </div>
-                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${ROUND_STATUS_STYLES[round.status] || "bg-gray-100 text-gray-500"}`}>
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-xl text-[11px] font-bold tracking-wide ${
+                    isPassed ? "bg-green-100 text-green-700 border border-green-200" :
+                    isFailed ? "bg-red-100 text-red-700 border border-red-200" :
+                    isScheduled ? "bg-blue-100 text-blue-700 border border-blue-200" :
+                    "bg-gray-100 text-gray-500 border border-gray-200"
+                  }`}>
+                    {isPassed && <CheckCircle2 size={11} className="mr-1" />}
+                    {isFailed && <XCircle size={11} className="mr-1" />}
+                    {isScheduled && <Clock size={11} className="mr-1" />}
                     {round.status}
                   </span>
                 </div>
 
                 {round.status === "Scheduled" && (
-                  <div className="space-y-1.5 text-xs text-gray-600">
-                    {round.interviewer && <div className="flex items-center gap-2"><User size={12} className="text-gray-400" /><span>{round.interviewer}</span></div>}
-                    {round.interviewerEmail && <div className="flex items-center gap-2"><Mail size={12} className="text-gray-400" /><span>{round.interviewerEmail}</span></div>}
-                    {round.scheduledAt && <div className="flex items-center gap-2"><Calendar size={12} className="text-gray-400" /><span>{fmtDate(round.scheduledAt)}</span></div>}
+                  <div className="ml-13 space-y-2 bg-white/60 rounded-xl p-3 border border-gray-100/80">
+                    {round.interviewer && (
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center"><User size={11} className="text-indigo-600" /></div>
+                        <span className="text-xs font-medium text-gray-700">{round.interviewer}</span>
+                      </div>
+                    )}
+                    {round.interviewerEmail && (
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center"><Mail size={11} className="text-blue-600" /></div>
+                        <span className="text-xs text-gray-600">{round.interviewerEmail}</span>
+                      </div>
+                    )}
+                    {round.scheduledAt && (
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-amber-100 flex items-center justify-center"><Calendar size={11} className="text-amber-600" /></div>
+                        <span className="text-xs font-medium text-gray-700">{fmtDate(round.scheduledAt)}</span>
+                      </div>
+                    )}
                     {round.interviewMode && (
-                      <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold ${round.interviewMode === "online" ? "bg-blue-50 text-blue-600" : "bg-indigo-50 text-indigo-600"}`}>
+                      <div className="flex items-center gap-2.5">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold ${round.interviewMode === "online" ? "bg-blue-50 text-blue-700 border border-blue-100" : "bg-indigo-50 text-indigo-700 border border-indigo-100"}`}>
                           {round.interviewMode === "online" ? "🖥️ Online" : "🏢 Offline"}
                         </span>
                       </div>
                     )}
-                    {round.interviewLink && <div className="flex items-center gap-2"><span className="text-blue-500 underline truncate cursor-pointer" onClick={() => window.open(round.interviewLink, "_blank")}>{round.interviewLink}</span></div>}
-                    {round.interviewAddress && <div className="flex items-center gap-2"><MapPin size={12} className="text-gray-400" /><span>{round.interviewAddress}</span></div>}
-                    {round.additionalNotes && <div className="mt-1 text-xs text-gray-500 italic bg-gray-50 rounded-lg px-2.5 py-1.5 border border-gray-100">📝 {round.additionalNotes}</div>}
+                    {round.interviewLink && (
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-blue-600 underline truncate cursor-pointer text-xs hover:text-blue-800 transition" onClick={() => window.open(round.interviewLink, "_blank")}>{round.interviewLink}</span>
+                      </div>
+                    )}
+                    {round.interviewAddress && (
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-purple-100 flex items-center justify-center"><MapPin size={11} className="text-purple-600" /></div>
+                        <span className="text-xs text-gray-600">{round.interviewAddress}</span>
+                      </div>
+                    )}
+                    {round.additionalNotes && (
+                      <div className="mt-1.5 text-xs text-gray-500 italic bg-amber-50/60 rounded-lg px-3 py-2 border border-amber-100/60">📝 {round.additionalNotes}</div>
+                    )}
                   </div>
                 )}
 
                 {(round.status === "Passed" || round.status === "Failed") && (
-                  <div className="space-y-2">
+                  <div className="ml-13 space-y-2.5 bg-white/60 rounded-xl p-3 border border-gray-100/80">
                     {round.rating > 0 && (
-                      <div className="flex items-center gap-2">
-                        <StarRating rating={round.rating} size={14} readOnly />
-                        <span className="text-xs text-gray-500">({round.rating}/5)</span>
+                      <div className="flex items-center gap-2.5">
+                        <StarRating rating={round.rating} size={15} readOnly />
+                        <span className="text-xs text-gray-500 font-medium bg-gray-100 px-2 py-0.5 rounded-md">({round.rating}/5)</span>
                       </div>
                     )}
-                    {round.feedback && <p className="text-xs text-gray-600 bg-white rounded-lg px-3 py-2 border border-gray-100">{round.feedback}</p>}
-                    {round.interviewer && <div className="flex items-center gap-2 text-xs text-gray-500"><User size={12} className="text-gray-400" /><span>{round.interviewer}</span></div>}
-                    {round.completedAt && <div className="flex items-center gap-2 text-xs text-gray-400"><Calendar size={12} /><span>Completed: {fmtDate(round.completedAt)}</span></div>}
+                    {round.feedback && (
+                      <p className="text-xs text-gray-700 bg-white rounded-xl px-3.5 py-2.5 border border-gray-100 shadow-sm leading-relaxed">{round.feedback}</p>
+                    )}
+                    {round.interviewer && (
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-indigo-100 flex items-center justify-center"><User size={11} className="text-indigo-600" /></div>
+                        <span className="text-xs text-gray-600">{round.interviewer}</span>
+                      </div>
+                    )}
+                    {round.completedAt && (
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center"><Calendar size={11} className="text-gray-500" /></div>
+                        <span className="text-xs text-gray-400">Completed: {fmtDate(round.completedAt)}</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Action buttons — only show for current round when In Progress */}
+                {/* Action buttons — enhanced */}
                 {interview.overallStatus === "In Progress" && (
-                  <div className="flex gap-2 pt-1">
+                  <div className="flex gap-2 pt-1 ml-13">
                     {round.status === "Pending" && round.roundNumber === currentRoundNum && (
-                      <button onClick={() => setScheduleModal(round)} className="px-3 py-1.5 rounded-lg bg-blue-500 text-white text-xs font-semibold hover:bg-blue-600 transition flex items-center gap-1.5">
-                        <Calendar size={12} /> Schedule
+                      <button onClick={() => setScheduleModal(round)} className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md shadow-blue-200 hover:shadow-lg hover:scale-[1.02] flex items-center gap-2">
+                        <Calendar size={12} /> Schedule Now
                       </button>
                     )}
                     {round.status === "Pending" && round.roundNumber !== currentRoundNum && (
-                      <span className="text-xs text-gray-400 italic">Complete Round {currentRoundNum} first</span>
+                      <span className="text-[11px] text-gray-400 italic flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                        <Clock size={11} /> Complete Round {currentRoundNum} first
+                      </span>
                     )}
                     {round.status === "Scheduled" && (
                       <>
                         <button onClick={() => { setUpdateModal(round); }}
-                          className="px-3 py-1.5 rounded-lg bg-green-500 text-white text-xs font-semibold hover:bg-green-600 transition">
-                          ✓ Mark Result
+                          className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs font-bold hover:from-green-600 hover:to-emerald-700 transition-all shadow-md shadow-green-200 hover:shadow-lg hover:scale-[1.02] flex items-center gap-1.5">
+                          <CheckCircle2 size={12} /> Mark Result
                         </button>
                         <button onClick={() => setRescheduleModal(round)}
-                          className="px-3 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-semibold hover:bg-amber-600 transition flex items-center gap-1">
+                          className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold hover:from-amber-500 hover:to-orange-600 transition-all shadow-md shadow-amber-200 hover:shadow-lg hover:scale-[1.02] flex items-center gap-1.5">
                           <Edit2 size={11} /> Reschedule
                         </button>
                       </>
@@ -842,82 +988,108 @@ function DetailDrawer({ interview, onClose, onAction }) {
               </div>
             );
           })}
+          </div>
 
-          {/* ── Final Decision Section ── */}
-          <div className="border-t border-gray-200 pt-5 space-y-3">
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Final Decision</h3>
+          {/* ── Final Decision Section — Premium ── */}
+          <div className="relative pt-6 space-y-4">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+                <CheckCircle2 size={12} className="text-white" />
+              </div>
+              <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Final Decision</h3>
+            </div>
 
             {hasPassedRound && interview.overallStatus === "In Progress" && (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <button onClick={handleExtendOffer} disabled={actionLoading === "offer"}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center justify-center gap-2 disabled:opacity-60">
-                  {actionLoading === "offer" && <Loader2 size={14} className="animate-spin" />}
-                  <CheckCircle2 size={16} /> Extend Offer
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white text-sm font-bold shadow-lg shadow-green-200 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:hover:scale-100">
+                  {actionLoading === "offer" && <Loader2 size={15} className="animate-spin" />}
+                  <CheckCircle2 size={17} /> Extend Offer
                 </button>
-                <p className="text-[11px] text-gray-400 text-center">Sends a formal job offer to the candidate. They haven't been hired yet.</p>
+                <p className="text-[11px] text-gray-400 text-center">Sends a formal job offer to the candidate. They haven&apos;t been hired yet.</p>
               </div>
             )}
 
             {!hasPassedRound && interview.overallStatus === "In Progress" && (
-              <p className="text-xs text-gray-400 text-center py-2 bg-gray-50 rounded-xl border border-gray-100">
-                At least 1 round must be passed before extending an offer.
-              </p>
+              <div className="text-center py-3 bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl border border-gray-100">
+                <p className="text-xs text-gray-400 font-medium">At least 1 round must be passed before extending an offer.</p>
+              </div>
             )}
 
             {(interview.overallStatus === "In Progress" || interview.overallStatus === "Offer Extended") && (
               <button onClick={() => setRejectModal(true)}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center justify-center gap-2">
-                <XCircle size={16} /> Reject Candidate
+                className="w-full py-3 rounded-2xl bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white text-sm font-bold shadow-lg shadow-red-200 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2.5">
+                <XCircle size={17} /> Reject Candidate
               </button>
             )}
 
             {interview.overallStatus === "Offer Extended" && !interview.hired && (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <button onClick={handleMarkHired} disabled={actionLoading === "hired"}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center justify-center gap-2 disabled:opacity-60">
-                  {actionLoading === "hired" && <Loader2 size={14} className="animate-spin" />}
-                  <CheckCircle2 size={16} /> Mark as Hired
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-emerald-200 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:hover:scale-100">
+                  {actionLoading === "hired" && <Loader2 size={15} className="animate-spin" />}
+                  <CheckCircle2 size={17} /> Mark as Hired
                 </button>
                 <p className="text-[11px] text-gray-400 text-center">Candidate accepted the offer. This confirms the hire and enables BGV.</p>
               </div>
             )}
 
             {interview.overallStatus === "Hired" && !interview.bgvInitiated && (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <button onClick={handleInitiateBGV} disabled={actionLoading === "bgv"}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold shadow hover:shadow-md transition flex items-center justify-center gap-2 disabled:opacity-60">
-                  {actionLoading === "bgv" && <Loader2 size={14} className="animate-spin" />}
-                  <Brain size={16} /> Initiate BGV
+                  className="w-full py-3 rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500 text-white text-sm font-bold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:hover:scale-100">
+                  {actionLoading === "bgv" && <Loader2 size={15} className="animate-spin" />}
+                  <Brain size={17} /> Initiate BGV
                 </button>
                 <p className="text-[11px] text-gray-400 text-center">Creates a background verification entry. Candidate details will be pre-filled from their profile.</p>
               </div>
             )}
 
             {interview.overallStatus === "Hired" && interview.bgvInitiated && (
-              <div className="text-center py-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                <p className="text-sm font-medium text-emerald-700">✓ Hired & BGV Initiated</p>
+              <div className="text-center py-4 bg-gradient-to-r from-emerald-50 via-teal-50 to-green-50 rounded-2xl border border-emerald-100 shadow-sm">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-md">
+                  <CheckCircle2 size={18} className="text-white" />
+                </div>
+                <p className="text-sm font-bold text-emerald-700">Hired & BGV Initiated</p>
+                <p className="text-[11px] text-emerald-500 mt-0.5">All steps completed successfully</p>
               </div>
             )}
 
             {interview.overallStatus === "Rejected" && (
-              <div className="text-center py-3 bg-red-50 rounded-xl border border-red-100">
-                <p className="text-sm font-medium text-red-700">Candidate Rejected</p>
-                {interview.rejectionReason && <p className="text-xs text-red-500 mt-1">{interview.rejectionReason}</p>}
+              <div className="text-center py-4 bg-gradient-to-r from-red-50 via-rose-50 to-pink-50 rounded-2xl border border-red-100 shadow-sm">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shadow-md">
+                  <XCircle size={18} className="text-white" />
+                </div>
+                <p className="text-sm font-bold text-red-700">Candidate Rejected</p>
+                {interview.rejectionReason && <p className="text-xs text-red-500 mt-1 max-w-xs mx-auto">{interview.rejectionReason}</p>}
                 {interview.rejectedAtRound && <p className="text-xs text-red-400 mt-0.5">Rejected at Round {interview.rejectedAtRound}</p>}
               </div>
             )}
 
-            {/* Flow explanation */}
-            <div className="mt-4 bg-slate-50 rounded-xl p-3 border border-slate-100">
-              <p className="text-[11px] text-gray-500 font-semibold mb-1.5">INTERVIEW FLOW</p>
-              <div className="flex items-center gap-1 text-[10px] text-gray-400 flex-wrap">
-                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded font-medium">Schedule Rounds</span>
-                <span>→</span>
-                <span className="px-2 py-0.5 bg-green-50 text-green-600 rounded font-medium">Extend Offer</span>
-                <span>→</span>
-                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded font-medium">Mark Hired</span>
-                <span>→</span>
-                <span className="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded font-medium">Initiate BGV</span>
+            {/* Flow explanation — Enhanced pipeline visual */}
+            <div className="mt-5 bg-gradient-to-r from-slate-50 via-gray-50 to-slate-50 rounded-2xl p-4 border border-gray-100 shadow-sm">
+              <p className="text-[11px] text-gray-500 font-bold mb-3 uppercase tracking-wider">Interview Pipeline</p>
+              <div className="flex items-center justify-between text-[10px] text-gray-400">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-100 flex items-center justify-center"><CalendarCheck size={14} className="text-blue-600" /></div>
+                  <span className="font-bold text-blue-600">Schedule</span>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-200 to-green-200 mx-2 rounded-full" />
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center"><CheckCircle2 size={14} className="text-green-600" /></div>
+                  <span className="font-bold text-green-600">Offer</span>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-green-200 to-emerald-200 mx-2 rounded-full" />
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center"><Users size={14} className="text-emerald-600" /></div>
+                  <span className="font-bold text-emerald-600">Hired</span>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-emerald-200 to-indigo-200 mx-2 rounded-full" />
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-100 flex items-center justify-center"><Brain size={14} className="text-indigo-600" /></div>
+                  <span className="font-bold text-indigo-600">BGV</span>
+                </div>
               </div>
             </div>
           </div>
