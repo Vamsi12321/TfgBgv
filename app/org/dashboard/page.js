@@ -13,6 +13,10 @@ import {
   XCircle,
   TrendingUp,
   Activity,
+  Briefcase,
+  Star,
+  CalendarCheck,
+  UserCheck,
 } from "lucide-react";
 
 import StatsCard from "../../components/StatsCard";
@@ -632,6 +636,181 @@ export default function OrgAdminDashboard() {
             );
           })()
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------
+   JOB & INTERVIEWER ANALYTICS COMPONENT
+--------------------------------------------------- */
+function JobInterviewerAnalytics() {
+  const [jobsData, setJobsData] = useState(null);
+  const [interviewers, setInterviewers] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [loadingInterviewers, setLoadingInterviewers] = useState(true);
+
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        const res = await fetch("/api/proxy/secure/jobsOverview?includeDetails=false", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setJobsData(data);
+        }
+      } catch {} finally { setLoadingJobs(false); }
+    };
+    const fetchInterviewers = async () => {
+      try {
+        const res = await fetch("/api/proxy/secure/getInterviewers", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          const list = data.interviewers || (Array.isArray(data) ? data : []);
+          setInterviewers(list.filter(i => i && i.name).slice(0, 5));
+        }
+      } catch {} finally { setLoadingInterviewers(false); }
+    };
+    fetchJobs();
+    fetchInterviewers();
+  }, []);
+
+  const summary = jobsData?.summary || {};
+  const jobs = jobsData?.jobs || [];
+
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+      {/* JOB ANALYTICS */}
+      <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-emerald-100 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300">
+        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-emerald-100">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <Briefcase size={22} className="text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Jobs Overview</h2>
+            <p className="text-xs text-gray-500">Hiring pipeline analytics</p>
+          </div>
+        </div>
+
+        {loadingJobs ? (
+          <div className="flex items-center justify-center py-8"><Loader2 size={20} className="animate-spin text-emerald-500" /></div>
+        ) : (
+          <>
+            {/* Summary stats */}
+            <div className="grid grid-cols-4 gap-2 mb-5">
+              {[
+                { label: "Jobs", value: summary.totalJobs || 0, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-100" },
+                { label: "Open", value: summary.openPositions || 0, color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-100" },
+                { label: "Applicants", value: summary.totalApplicants || 0, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-100" },
+                { label: "Hired", value: summary.totalHired || 0, color: "text-green-700", bg: "bg-green-50", border: "border-green-100" },
+              ].map((s, i) => (
+                <div key={i} className={`text-center p-2.5 ${s.bg} rounded-xl border ${s.border}`}>
+                  <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                  <p className="text-[9px] text-gray-500 font-medium">{s.label}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Job list with stage breakdown */}
+            {jobs.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">No jobs found</p>
+            ) : (
+              <div className="space-y-2.5">
+                {jobs.slice(0, 5).map((job, i) => (
+                  <div key={job.jobId || i} className="p-3 bg-gray-50 rounded-xl hover:bg-emerald-50/50 transition">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-bold text-gray-800 truncate flex-1">{job.title || "Untitled"}</p>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ml-2 ${job.status === "open" ? "bg-green-100 text-green-700" : job.status === "closed" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500"}`}>
+                        {job.status || "open"}
+                      </span>
+                    </div>
+                    {/* Stage breakdown mini bar */}
+                    {job.stageBreakdown && (
+                      <div className="flex items-center gap-1">
+                        {[
+                          { key: "Applied", color: "bg-blue-400" },
+                          { key: "Resume Shortlist", color: "bg-amber-400" },
+                          { key: "Interview", color: "bg-indigo-400" },
+                          { key: "Hired", color: "bg-emerald-500" },
+                          { key: "Rejected", color: "bg-red-400" },
+                        ].map(stage => {
+                          const count = job.stageBreakdown[stage.key] || 0;
+                          if (count === 0) return null;
+                          return (
+                            <span key={stage.key} className={`text-[8px] font-bold text-white ${stage.color} px-1.5 py-0.5 rounded`} title={stage.key}>
+                              {count}
+                            </span>
+                          );
+                        })}
+                        <span className="text-[8px] text-gray-400 ml-auto">{job.department || ""}</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <Link href="/org/jobs" className="flex items-center gap-1 text-xs font-bold text-emerald-600 mt-4 hover:underline">
+              View all jobs <ArrowRight size={12} />
+            </Link>
+          </>
+        )}
+      </div>
+
+      {/* INTERVIEWER ANALYTICS */}
+      <div className="bg-white/80 backdrop-blur-sm p-6 rounded-3xl shadow-2xl border border-amber-100 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300">
+        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-amber-100">
+          <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <UserCheck size={22} className="text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">Interviewer Stats</h2>
+            <p className="text-xs text-gray-500">Panel performance overview</p>
+          </div>
+        </div>
+
+        {loadingInterviewers ? (
+          <div className="flex items-center justify-center py-8"><Loader2 size={20} className="animate-spin text-amber-500" /></div>
+        ) : interviewers.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">No interviewers found</p>
+        ) : (
+          <div className="space-y-2.5">
+            {interviewers.map((iv, i) => {
+              const conducted = iv.stats?.totalInterviewsConducted || iv.totalConducted || 0;
+              const avgRating = iv.stats?.avgRating || iv.avgRating || 0;
+              const passRate = iv.stats?.passRate || 0;
+              return (
+                <div key={iv._id || i} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-amber-50/50 transition">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                      {(iv.name || "I")[0].toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-gray-800 truncate">{iv.name}</p>
+                      <p className="text-[10px] text-gray-400">{iv.designation || iv.department || "—"} • {conducted} interviews</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {avgRating > 0 && (
+                      <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-600">
+                        <Star size={10} className="fill-amber-400 text-amber-400" />
+                        {avgRating.toFixed(1)}
+                      </span>
+                    )}
+                    {passRate > 0 && (
+                      <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                        {Math.round(passRate * 100)}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <Link href="/org/interviews" className="flex items-center gap-1 text-xs font-bold text-amber-600 mt-4 hover:underline">
+          Manage interviewers <ArrowRight size={12} />
+        </Link>
       </div>
     </div>
   );

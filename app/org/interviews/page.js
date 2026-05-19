@@ -216,8 +216,8 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
 
           {form.interviewMode === "online" && (
             <div>
-              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Meeting Link</label>
-              <input type="url" value={form.interviewLink}
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Meeting Link *</label>
+              <input type="url" required value={form.interviewLink}
                 onChange={(e) => setForm({ ...form, interviewLink: e.target.value })}
                 placeholder="https://meet.google.com/..."
                 className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
@@ -226,8 +226,8 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
 
           {form.interviewMode === "offline" && (
             <div>
-              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Address</label>
-              <input value={form.interviewAddress}
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Address *</label>
+              <input required value={form.interviewAddress}
                 onChange={(e) => setForm({ ...form, interviewAddress: e.target.value })}
                 placeholder="Office address, floor, room"
                 className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
@@ -252,7 +252,7 @@ function ScheduleModal({ interview, round, onClose, onSuccess }) {
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-100 transition">
             Cancel
           </button>
-          <button onClick={handleSubmit} disabled={saving || !form.interviewerId || !form.scheduledAt} className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50">
+          <button onClick={handleSubmit} disabled={saving || !form.interviewerId || !form.scheduledAt || (form.interviewMode === "online" && !form.interviewLink) || (form.interviewMode === "offline" && !form.interviewAddress)} className="px-5 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50">
             {saving ? <Loader2 size={12} className="animate-spin" /> : <Calendar size={12} />} Schedule
           </button>
         </div>
@@ -382,8 +382,8 @@ function RescheduleModal({ interview, round, onClose, onSuccess }) {
 
           {form.interviewMode === "online" && (
             <div>
-              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Meeting Link</label>
-              <input type="url" value={form.interviewLink}
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Meeting Link *</label>
+              <input type="url" required value={form.interviewLink}
                 onChange={(e) => setForm({ ...form, interviewLink: e.target.value })}
                 placeholder="https://meet.google.com/..."
                 className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />
@@ -392,8 +392,8 @@ function RescheduleModal({ interview, round, onClose, onSuccess }) {
 
           {form.interviewMode === "offline" && (
             <div>
-              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Address</label>
-              <input value={form.interviewAddress}
+              <label className="block text-[11px] font-bold text-gray-600 mb-1.5">Address *</label>
+              <input required value={form.interviewAddress}
                 onChange={(e) => setForm({ ...form, interviewAddress: e.target.value })}
                 placeholder="Office address, floor, room"
                 className="w-full px-3 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent bg-gray-50 hover:border-gray-300 transition" />

@@ -103,7 +103,7 @@ export default function SuperAdminLayout({ children }) {
 
     // AI Services
     { name: "AI Screening", href: "/superadmin/AI-screening", icon: Brain },
-    { name: "Jobs Overview", href: "/superadmin/jobs", icon: Briefcase },
+    { name: "Jobs Overview", href: "/superadmin/jobs-overview", icon: Briefcase },
     { name: "Interviews", href: "/superadmin/interviews", icon: CalendarCheck },
     {
       name: "AI CV Check",

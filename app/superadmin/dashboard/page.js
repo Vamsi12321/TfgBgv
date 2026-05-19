@@ -13,7 +13,10 @@ import {
   XCircle,
   TrendingUp,
   Activity,
-  LayoutDashboard
+  LayoutDashboard,
+  Briefcase,
+  Users,
+  Star,
 } from "lucide-react";
 import StatsCard from "../../components/StatsCard";
 import PageHeader from "../../components/PageHeader";
@@ -629,6 +632,109 @@ export default function SuperAdminDashboard() {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ================================================
+   SUPER ADMIN JOBS OVERVIEW COMPONENT
+================================================ */
+function SuperAdminJobsOverview() {
+  const [jobsData, setJobsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/api/proxy/secure/jobsOverview?includeDetails=false", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setJobsData(data);
+        }
+      } catch {} finally { setLoading(false); }
+    };
+    fetchData();
+  }, []);
+
+  const summary = jobsData?.summary || {};
+  const jobs = jobsData?.jobs || [];
+
+  return (
+    <div className="bg-white rounded-2xl p-6 shadow-xl border-2 border-gray-100 mb-8">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+          <Briefcase size={24} className="text-white" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">Jobs Overview</h2>
+          <p className="text-xs text-gray-500">Hiring pipeline across all organizations</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-8"><Loader2 size={24} className="animate-spin text-emerald-500" /></div>
+      ) : (
+        <>
+          {/* Summary row */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            {[
+              { label: "Total Jobs", value: summary.totalJobs || 0, color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-100", icon: Briefcase },
+              { label: "Open Positions", value: summary.openPositions || 0, color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-100", icon: CheckCircle2 },
+              { label: "Total Applicants", value: summary.totalApplicants || 0, color: "text-amber-700", bg: "bg-amber-50", border: "border-amber-100", icon: Users },
+              { label: "Total Hired", value: summary.totalHired || 0, color: "text-green-700", bg: "bg-green-50", border: "border-green-100", icon: Star },
+            ].map((s, i) => (
+              <div key={i} className={`p-4 ${s.bg} rounded-2xl border ${s.border} flex items-center gap-3`}>
+                <div className={`w-10 h-10 rounded-xl ${s.bg} flex items-center justify-center`}>
+                  <s.icon size={18} className={s.color} />
+                </div>
+                <div>
+                  <p className={`text-xl font-bold ${s.color}`}>{s.value}</p>
+                  <p className="text-[10px] text-gray-500 font-medium">{s.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Jobs table */}
+          {jobs.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-100">
+                    <th className="text-left py-2.5 px-3 text-xs font-bold text-gray-500">Job Title</th>
+                    <th className="text-left py-2.5 px-3 text-xs font-bold text-gray-500">Org</th>
+                    <th className="text-center py-2.5 px-2 text-xs font-bold text-gray-500">Applied</th>
+                    <th className="text-center py-2.5 px-2 text-xs font-bold text-gray-500">Shortlist</th>
+                    <th className="text-center py-2.5 px-2 text-xs font-bold text-gray-500">Interview</th>
+                    <th className="text-center py-2.5 px-2 text-xs font-bold text-gray-500">Hired</th>
+                    <th className="text-center py-2.5 px-2 text-xs font-bold text-gray-500">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {jobs.slice(0, 8).map((job, i) => (
+                    <tr key={job.jobId || i} className="border-b border-gray-50 hover:bg-gray-50 transition">
+                      <td className="py-2.5 px-3">
+                        <p className="text-xs font-bold text-gray-800 truncate max-w-[160px]">{job.title}</p>
+                        <p className="text-[10px] text-gray-400">{job.department || ""} {job.location ? `• ${job.location}` : ""}</p>
+                      </td>
+                      <td className="py-2.5 px-3 text-[10px] text-gray-500 font-medium">{job.orgName || "—"}</td>
+                      <td className="py-2.5 px-2 text-center text-xs font-bold text-blue-600">{job.stageBreakdown?.Applied || 0}</td>
+                      <td className="py-2.5 px-2 text-center text-xs font-bold text-amber-600">{job.stageBreakdown?.["Resume Shortlist"] || 0}</td>
+                      <td className="py-2.5 px-2 text-center text-xs font-bold text-indigo-600">{job.stageBreakdown?.Interview || 0}</td>
+                      <td className="py-2.5 px-2 text-center text-xs font-bold text-emerald-600">{job.stageBreakdown?.Hired || 0}</td>
+                      <td className="py-2.5 px-2 text-center">
+                        <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${job.status === "open" ? "bg-green-100 text-green-700" : job.status === "closed" ? "bg-red-100 text-red-600" : "bg-gray-100 text-gray-500"}`}>
+                          {job.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }

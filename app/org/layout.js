@@ -112,6 +112,7 @@ export default function OrgAdminLayout({ children }) {
     { name: "Users & Roles", href: "/org/users", icon: Users },
     { name: "AI Screening", href: "/org/AI-screening", icon: Brain },
     { name: "Jobs & ATS", href: "/org/jobs", icon: Briefcase },
+    { name: "Jobs Overview", href: "/org/jobs-overview", icon: FileBarChart },
     { name: "Interviews", href: "/org/interviews", icon: CalendarCheck },
     {
       name: "Manage Candidates",
