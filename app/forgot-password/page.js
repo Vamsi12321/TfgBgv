@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { validateEmail } from "@/utils/validators";
 import { Mail, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function ForgotPasswordPage() {
@@ -18,13 +19,18 @@ export default function ForgotPasswordPage() {
     setLoading(true);
     setErrorMsg("");
 
+    // Client-side validation
+    if (!email.trim()) { setErrorMsg("Email is required"); setLoading(false); return; }
+    const emailErr = validateEmail(email);
+    if (emailErr) { setErrorMsg(emailErr); setLoading(false); return; }
+
     try {
       const res = await fetch("/api/proxy/public/forgot-password", {
         method: "POST",
         credentials: "include",
         body: (() => {
           const fd = new FormData();
-          fd.append("email", email);
+          fd.append("email", email.trim().toLowerCase());
           return fd;
         })(),
       });

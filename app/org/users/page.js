@@ -1,6 +1,7 @@
 // app/(whatever)/OrgUsersPage.jsx
 "use client";
 import { useState, useEffect } from "react";
+import { validateEmail, validatePhone, validatePassword } from "@/utils/validators";
 import {
   PlusCircle,
   Edit,
@@ -419,11 +420,28 @@ function AddEditUserModal({ onClose, onSave, editData }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Client-side validation
+    if (!form.userName.trim() || form.userName.trim().length < 3) {
+      showPopup("error", "Full Name must be at least 3 characters");
+      return;
+    }
+    if (!form.email.trim()) { showPopup("error", "Email is required"); return; }
+    const emailErr = validateEmail(form.email);
+    if (emailErr) { showPopup("error", emailErr); return; }
+    if (!form.phoneNumber.trim()) { showPopup("error", "Phone number is required"); return; }
+    const phoneErr = validatePhone(form.phoneNumber);
+    if (phoneErr) { showPopup("error", phoneErr); return; }
+    if (!isEdit && form.password) {
+      const pwErr = validatePassword(form.password);
+      if (pwErr) { showPopup("error", pwErr); return; }
+    }
+
     setSaving(true);
 
     const payload = {
       userName: form.userName.trim(),
-      email: form.email.trim(),
+      email: form.email.trim().toLowerCase(),
       phoneNumber: form.phoneNumber.trim(),
       role: form.role,
       permissions: form.permissions,

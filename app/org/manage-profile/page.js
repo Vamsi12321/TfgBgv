@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 
 import { UserCircle2 } from "lucide-react";
+import { validateEmail, validatePhone, validatePassword } from "@/utils/validators";
 
 export default function ManageProfilePage() {
   const [user, setUser] = useState(null);
@@ -54,6 +55,16 @@ export default function ManageProfilePage() {
   const handleResetPassword = async () => {
     setLoading(true);
     setMessage({ type: "", text: "" });
+
+    // Client-side validation
+    const emailErr = validateEmail(email);
+    if (emailErr) { setMessage({ type: "error", text: emailErr }); setLoading(false); return; }
+    const phoneErr = validatePhone(phone);
+    if (phone && phoneErr) { setMessage({ type: "error", text: phoneErr }); setLoading(false); return; }
+    if (!currentPassword) { setMessage({ type: "error", text: "Current password is required" }); setLoading(false); return; }
+    if (!newPassword) { setMessage({ type: "error", text: "New password is required" }); setLoading(false); return; }
+    const pwErr = validatePassword(newPassword);
+    if (pwErr) { setMessage({ type: "error", text: pwErr }); setLoading(false); return; }
 
     try {
       const res = await fetch(`/api/proxy/auth/resetPassword`, {

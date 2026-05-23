@@ -2,6 +2,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState, useEffect, useMemo } from "react";
+import { validateEmail, validatePhone, validatePassword } from "@/utils/validators";
 import {
   PlusCircle,
   Edit,
@@ -875,12 +876,13 @@ function AddEditUserModal({
     }
 
     if (key === "email") {
-      const reg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!reg.test(value)) msg = "Enter a valid email address.";
+      const err = validateEmail(value);
+      if (err) msg = err;
     }
 
     if (key === "phoneNumber") {
-      if (value.length !== 10) msg = "Phone number must be exactly 10 digits.";
+      const err = validatePhone(value);
+      if (err) msg = err;
     }
 
     if (key === "organizationId") {

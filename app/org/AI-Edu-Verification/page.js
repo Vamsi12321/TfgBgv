@@ -3,95 +3,83 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Upload,
-  Loader2,
-  Sparkles,
-  CheckCircle,
-  XCircle,
-  FileDown,
-  ChevronDown,
-  ChevronUp,
-  AlertCircle,
-  X,
-  User,
-  FileText,
-  GraduationCap,
+  Upload, Loader2, Sparkles, CheckCircle, XCircle, FileDown,
+  ChevronDown, ChevronUp, AlertCircle, X, User, FileText,
+  GraduationCap, Brain, Shield, BarChart3, Award,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { safeHtml2Canvas } from "@/utils/safeHtml2Canvas";
 import { useOrgState } from "../../context/OrgStateContext";
 
-// -------------------------------------------------
-// MODALS
-// -------------------------------------------------
+/* ----- MODALS ----- */
 function Modal({ isOpen, onClose, children, title }) {
   if (!isOpen) return null;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden"
-      >
-        <div className="flex justify-between items-center p-6 border-b">
-          <h3 className="text-xl font-bold">{title}</h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X size={24} />
-          </button>
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+        <div className="flex justify-between items-center p-6 border-b bg-gradient-to-r from-indigo-50 to-blue-50">
+          <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition"><X size={24} /></button>
         </div>
-        <div className="p-6 max-h-[70vh] overflow-y-auto">{children}</div>
+        <div className="p-6 overflow-y-auto max-h-[calc(90vh-80px)]">{children}</div>
       </motion.div>
     </div>
   );
 }
-
 function SuccessModal({ isOpen, onClose, message }) {
-  return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Success">
-      <div className="text-center space-y-4">
-        <CheckCircle size={70} className="text-green-500 mx-auto" />
-        <p className="text-2xl font-semibold">{message}</p>
-        <button
-          onClick={onClose}
-          className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600"
-        >
-          Continue
-        </button>
-      </div>
-    </Modal>
-  );
+  return (<Modal isOpen={isOpen} onClose={onClose} title="Success"><div className="text-center space-y-4">
+    <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-green-500 flex items-center justify-center shadow-lg shadow-green-200"><CheckCircle size={40} className="text-white" /></div>
+    <h4 className="text-2xl font-bold text-gray-900">{message}</h4>
+    <button onClick={onClose} className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all">Continue</button>
+  </div></Modal>);
 }
-
 function ErrorModal({ isOpen, onClose, message, details }) {
+  return (<Modal isOpen={isOpen} onClose={onClose} title="Error"><div className="text-center space-y-4">
+    <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-red-400 to-rose-500 flex items-center justify-center shadow-lg shadow-red-200"><XCircle size={40} className="text-white" /></div>
+    <h4 className="text-2xl font-bold text-gray-900">{message}</h4>
+    {details && <div className="text-left bg-red-50 p-4 rounded-xl border border-red-200"><p className="text-sm text-red-700">{details}</p></div>}
+    <button onClick={onClose} className="bg-gradient-to-r from-red-500 to-rose-600 text-white px-8 py-3 rounded-xl font-semibold hover:shadow-lg transition-all">Close</button>
+  </div></Modal>);
+}
+
+/* ----- CERTIFICATE FOR PDF ----- */
+function EducationCertificateBase({ id, candidate, orgName, ai }) {
+  const positives = ai?.positive_findings || [];
+  const redflags = ai?.red_flags || [];
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Error">
-      <div className="text-center space-y-4">
-        <XCircle size={70} className="text-red-500 mx-auto" />
-        <p className="text-xl font-bold">{message}</p>
-        {details && (
-          <p className="text-sm bg-red-50 border p-3 rounded text-red-700 text-left">
-            {details}
-          </p>
-        )}
-        <button
-          onClick={onClose}
-          className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600"
-        >
-          Close
-        </button>
+    <div id={id} style={{ width: "794px", minHeight: "1123px", padding: "10px 50px 80px 50px", background: "#fff", fontFamily: "Arial, sans-serif", color: "#000", position: "relative" }}>
+      <img src="/logos/tfgLogo.jpeg" alt="watermark" style={{ position: "absolute", top: "320px", left: "50%", transform: "translateX(-50%)", opacity: 0.08, width: "750px", height: "750px", objectFit: "contain", pointerEvents: "none", zIndex: 1 }} />
+      <div style={{ position: "relative", zIndex: 2 }}>
+        <div style={{ display: "flex", gap: "35px", alignItems: "flex-start", marginBottom: "25px" }}>
+          <img src="/logos/tfgLogo.jpeg" alt="logo" style={{ maxHeight: "180px", maxWidth: "450px", objectFit: "contain", marginTop: "10px" }} />
+          <div style={{ marginTop: "55px" }}><h1 style={{ fontSize: "26px", fontWeight: 900, margin: 0, fontFamily: "Arial Black" }}>Education</h1><h2 style={{ fontSize: "26px", fontWeight: 900, margin: 0, fontFamily: "Arial Black" }}>Verification Report</h2></div>
+        </div>
+        <div style={{ fontSize: "15px", lineHeight: "28px", marginBottom: "40px" }}>
+          <p><b>Candidate Name:</b> {candidate?.firstName} {candidate?.lastName}</p>
+          <p><b>Candidate ID:</b> {candidate?._id}</p>
+          <p><b>Organization:</b> {orgName}</p>
+          <p><b>Degree:</b> {ai?.degree_type || "N/A"}</p>
+          <p><b>Field of Study:</b> {ai?.field_of_study || "N/A"}</p>
+          <p><b>Institution:</b> {ai?.institution_name || "N/A"}</p>
+          <p><b>Board/University:</b> {ai?.board_university || "N/A"}</p>
+          <p><b>Duration:</b> {ai?.start_date || "-"} to {ai?.end_date || "-"} ({ai?.duration_years || "N/A"} years)</p>
+          <p style={{ display: "flex", gap: "10px", alignItems: "center" }}><b>Status:</b><span style={{ color: "#5cb85c", fontWeight: "bold" }}>✓ Completed</span></p>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "18px" }}><div style={{ width: "38px", height: "18px", background: "#5cb85c", borderRadius: "5px" }} /><div style={{ height: "4px", background: "#5cb85c", width: "22%", marginLeft: "10px", borderRadius: "2px" }} /></div>
+        {positives.length > 0 && <div style={{ marginBottom: "35px" }}>{positives.map((item, i) => <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}><span style={{ fontSize: "18px" }}>✓</span><span>{item}</span></div>)}</div>}
+        {redflags.length > 0 && (<><div style={{ display: "flex", alignItems: "center", marginBottom: "18px" }}><div style={{ width: "38px", height: "18px", background: "#d9534f", borderRadius: "5px" }} /><div style={{ height: "4px", background: "#d9534f", width: "22%", marginLeft: "10px", borderRadius: "2px" }} /></div>
+        {redflags.map((rf, i) => <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}><span style={{ color: "#d9534f", fontSize: "18px" }}>•</span><span>{rf.issue || rf.description || rf}</span></div>)}</>)}
       </div>
-    </Modal>
+      <div style={{ position: "absolute", bottom: "20px", left: "50px", right: "50px", textAlign: "center" }}>
+        <div style={{ height: "2px", background: "#dc3545", marginBottom: "10px" }} />
+        <p style={{ fontSize: "12px", color: "#dc3545", fontWeight: 600, margin: 0 }}>TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081<br />📞 8886099008 | ✉ naresh@tfgorg.com | 🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style={{ color: "#dc3545", textDecoration: "underline" }}>LinkedIn</a> | 🌐 <a href="https://www.tfgorg.com" target="_blank" style={{ color: "#dc3545", textDecoration: "underline" }}>www.tfgorg.com</a></p>
+      </div>
+    </div>
   );
 }
 
-// -------------------------------------------------
-// MAIN PAGE
-// -------------------------------------------------
+/* ----- MAIN PAGE ----- */
 export default function OrgAIEducationValidationPage() {
   const router = useRouter();
   const { aiEduVerificationState = {}, setAiEduVerificationState = () => {} } = useOrgState();
@@ -101,553 +89,189 @@ export default function OrgAIEducationValidationPage() {
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [verificationId, setVerificationId] = useState("");
   const [documentFile, setDocumentFile] = useState(null);
-
   const [analysis, setAnalysis] = useState(aiEduVerificationState.analysis || null);
   const [finalRemarks, setFinalRemarks] = useState(aiEduVerificationState.finalRemarks || "");
-  const [checkStatus, setCheckStatus] = useState("PENDING"); // Track verification status
-
+  const [checkStatus, setCheckStatus] = useState("PENDING");
   const [loadingCandidates, setLoadingCandidates] = useState(false);
   const [loadingValidation, setLoadingValidation] = useState(false);
   const [loadingResults, setLoadingResults] = useState(false);
   const [submittingFinal, setSubmittingFinal] = useState(false);
   const [navigating, setNavigating] = useState(false);
-  const [generatingPDF, setGeneratingPDF] = useState(false);
-
   const [expanded, setExpanded] = useState({});
-
-  const [successModal, setSuccessModal] = useState({
-    isOpen: false,
-    message: "",
-  });
-  const [errorModal, setErrorModal] = useState({
-    isOpen: false,
-    message: "",
-    details: "",
-  });
-
+  const [successModal, setSuccessModal] = useState({ isOpen: false, message: "" });
+  const [errorModal, setErrorModal] = useState({ isOpen: false, message: "", details: "" });
   const pdfRef = useRef(null);
 
-  // Save state on unmount
-  useEffect(() => {
-    return () => {
-      setAiEduVerificationState({
-        analysis,
-        finalRemarks,
-      });
-    };
-  }, [analysis, finalRemarks, setAiEduVerificationState]);
+  useEffect(() => { return () => { setAiEduVerificationState({ analysis, finalRemarks }); }; }, [analysis, finalRemarks]);
+  useEffect(() => { fetch(`/api/proxy/secure/getOrganizations`, { credentials: "include" }).then(r => r.json()).then(d => { if (d.organizations?.length) setCurrentOrg(d.organizations[0]); }).catch(() => {}); }, []);
+  useEffect(() => { setLoadingCandidates(true); fetch(`/api/proxy/secure/getCandidates`, { credentials: "include" }).then(r => r.json()).then(d => setCandidates(d.candidates || [])).catch(err => setErrorModal({ isOpen: true, message: "Failed to load candidates", details: err.message })).finally(() => setLoadingCandidates(false)); }, []);
 
-  // Load Current Organization
-  useEffect(() => {
-    const fetchOrg = async () => {
-      try {
-        const res = await fetch(`/api/proxy/secure/getOrganizations`, {
-          credentials: "include",
-        });
-        const data = await res.json();
-        if (res.ok && data.organizations?.length) {
-          setCurrentOrg(data.organizations[0]);
-        }
-      } catch (err) {
-        console.error("Org fetch error:", err);
-      }
-    };
-    fetchOrg();
-  }, []);
-
-  // Load Candidates
-  useEffect(() => {
-    setLoadingCandidates(true);
-    fetch(`/api/proxy/secure/getCandidates`, {
-      credentials: "include",
-    })
-      .then((res) => res.json())
-      .then((data) => setCandidates(data.candidates || []))
-      .catch((err) =>
-        setErrorModal({
-          isOpen: true,
-          message: "Failed to load candidates",
-          details: err.message,
-        })
-      )
-      .finally(() => setLoadingCandidates(false));
-  }, []);
-
-  // Fetch Verification
   const fetchVerification = async (candId) => {
-    setAnalysis(null);
-    setLoadingResults(true);
-
+    setAnalysis(null); setLoadingResults(true);
     try {
-      const res = await fetch(
-        `/api/proxy/secure/getVerifications?candidateId=${candId}`,
-        { credentials: "include" }
-      );
-
+      const res = await fetch(`/api/proxy/secure/getVerifications?candidateId=${candId}`, { credentials: "include" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
       const data = await res.json();
       const ver = data.verifications?.[0];
-
-      if (!ver) {
-        setErrorModal({
-          isOpen: true,
-          message: "No verification found",
-          details: "This candidate has no active verification workflow.",
-        });
-        return;
-      }
-
+      if (!ver) { setErrorModal({ isOpen: true, message: "No verification found", details: "This candidate has no active verification." }); return; }
       setVerificationId(ver._id);
-
-      const allChecks = [
-        ...(ver.stages?.primary || []),
-        ...(ver.stages?.secondary || []),
-        ...(ver.stages?.final || []),
-      ];
-
-      const eduCheck = allChecks.find(
-        (c) => c.check === "ai_education_validation"
-      );
-
-      if (eduCheck) {
-        setCheckStatus(eduCheck.status); // Store the check status
-        if (eduCheck.status !== "PENDING") {
-          loadResults(ver._id);
-        }
-      }
-    } catch (err) {
-      setErrorModal({
-        isOpen: true,
-        message: "Failed to load verification",
-        details: err.message,
-      });
-    } finally {
-      setLoadingResults(false);
-    }
+      const allChecks = [...(ver.stages?.primary || []), ...(ver.stages?.secondary || []), ...(ver.stages?.final || [])];
+      const eduCheck = allChecks.find(c => c.check === "ai_education_validation");
+      if (eduCheck) { setCheckStatus(eduCheck.status); if (eduCheck.status !== "PENDING") loadResults(ver._id); }
+    } catch (err) { setErrorModal({ isOpen: true, message: "Failed to load verification", details: err.message }); }
+    finally { setLoadingResults(false); }
   };
 
-  // Run Validation
   const runValidation = async () => {
-    if (!selectedCandidate) {
-      return setErrorModal({
-        isOpen: true,
-        message: "No Candidate Selected",
-        details: "Select candidate first.",
-      });
-    }
-
-    if (!documentFile) {
-      return setErrorModal({
-        isOpen: true,
-        message: "Upload Required",
-        details: "Please upload the education document.",
-      });
-    }
-
-    if (!verificationId) {
-      return setErrorModal({
-        isOpen: true,
-        message: "Missing Verification",
-        details: "No verification found for this candidate.",
-      });
-    }
-
+    if (!selectedCandidate) return setErrorModal({ isOpen: true, message: "No Candidate Selected", details: "Select candidate first." });
+    if (!documentFile) return setErrorModal({ isOpen: true, message: "Upload Required", details: "Please upload the education document." });
+    if (!verificationId) return setErrorModal({ isOpen: true, message: "Missing Verification", details: "No verification found for this candidate." });
     setLoadingValidation(true);
-
     try {
-      const fd = new FormData();
-      fd.append("verificationId", verificationId);
-      fd.append("educationDocument", documentFile);
-
-      const res = await fetch(`/api/proxy/secure/ai_education_validation`, {
-        method: "POST",
-        credentials: "include",
-        body: fd,
-      });
-
+      const fd = new FormData(); fd.append("verificationId", verificationId); fd.append("educationDocument", documentFile);
+      const res = await fetch(`/api/proxy/secure/ai_education_validation`, { method: "POST", credentials: "include", body: fd });
       if (!res.ok) throw new Error(await res.text());
-
       const data = await res.json();
       setAnalysis({ analysis: data.analysis });
-
-      setSuccessModal({
-        isOpen: true,
-        message: "Education Validation Completed!",
-      });
-    } catch (err) {
-      setErrorModal({
-        isOpen: true,
-        message: "Validation Failed",
-        details: err.message,
-      });
-    } finally {
-      setLoadingValidation(false);
-    }
+      setSuccessModal({ isOpen: true, message: "Education Validation Completed!" });
+    } catch (err) { setErrorModal({ isOpen: true, message: "Validation Failed", details: err.message }); }
+    finally { setLoadingValidation(false); }
   };
 
-  // Load Results
   const loadResults = async (vId) => {
     setLoadingResults(true);
-
-    try {
-      const res = await fetch(
-        `/api/proxy/secure/ai_education_validation_results/${vId}`,
-        { credentials: "include" }
-      );
-
-      if (!res.ok) throw new Error(await res.text());
-
-      const data = await res.json();
-      setAnalysis(data);
-    } catch (err) {
-      setErrorModal({
-        isOpen: true,
-        message: "Failed to load results",
-        details: err.message,
-      });
-    } finally {
-      setLoadingResults(false);
-    }
+    try { const res = await fetch(`/api/proxy/secure/ai_education_validation_results/${vId}`, { credentials: "include" }); if (!res.ok) throw new Error(await res.text()); setAnalysis(await res.json()); }
+    catch (err) { setErrorModal({ isOpen: true, message: "Failed to load results", details: err.message }); }
+    finally { setLoadingResults(false); }
   };
 
-  // Submit Final Decision
   const submitDecision = async (status) => {
-    if (!verificationId) {
-      return setErrorModal({
-        isOpen: true,
-        message: "Missing Verification ID",
-        details: "Cannot submit decision.",
-      });
-    }
-
+    if (!verificationId) return setErrorModal({ isOpen: true, message: "Missing Verification ID", details: "Cannot submit decision." });
     setSubmittingFinal(true);
-
     try {
-      const body = new URLSearchParams();
-      body.append("verificationId", verificationId);
-      body.append("final_status", status);
-      body.append("staff_remarks", finalRemarks);
-
-      const res = await fetch(
-        `/api/proxy/secure/submit_ai_education_validation`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body,
-        }
-      );
-
+      const body = new URLSearchParams(); body.append("verificationId", verificationId); body.append("final_status", status); body.append("staff_remarks", finalRemarks);
+      const res = await fetch(`/api/proxy/secure/submit_ai_education_validation`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body });
       if (!res.ok) throw new Error(await res.text());
-
-      setCheckStatus(status); // Update status after approval
-      setSuccessModal({
-        isOpen: true,
-        message: `Education Validation Marked as ${status}`,
-      });
-      
-      // Redirect after a short delay
-      setTimeout(() => {
-        setNavigating(true);
-        router.push("/org/bgv-requests");
-      }, 1500);
-      
-    } catch (err) {
-      setErrorModal({
-        isOpen: true,
-        message: "Submission Failed",
-        details: err.message,
-      });
-    } finally {
-      setSubmittingFinal(false);
-    }
+      setCheckStatus(status);
+      setSuccessModal({ isOpen: true, message: `Education Validation Marked as ${status}` });
+    } catch (err) { setErrorModal({ isOpen: true, message: "Submission Failed", details: err.message }); }
+    finally { setSubmittingFinal(false); }
   };
 
-  // Export PDF
   const exportPDF = async () => {
     try {
-      const input = pdfRef.current;
-      if (!input) return;
-
+      const input = pdfRef.current; if (!input) return;
       const canvas = await safeHtml2Canvas(input, { scale: 2 });
       const img = canvas.toDataURL("image/jpeg", 1.0);
-
       const pdf = new jsPDF("p", "pt", "a4");
       const width = pdf.internal.pageSize.getWidth();
-      const height = (canvas.height * width) / canvas.width;
-
-      pdf.addImage(img, "JPEG", 0, 0, width, height);
+      pdf.addImage(img, "JPEG", 0, 0, width, (canvas.height * width) / canvas.width);
       pdf.save("AI-Education-Report.pdf");
-
-      setSuccessModal({
-        isOpen: true,
-        message: "PDF Exported Successfully!",
-      });
-    } catch (err) {
-      setErrorModal({
-        isOpen: true,
-        message: "PDF Export Failed",
-        details: err.message,
-      });
-    }
+      setSuccessModal({ isOpen: true, message: "PDF Exported!" });
+    } catch (err) { setErrorModal({ isOpen: true, message: "PDF Export Failed", details: err.message }); }
   };
 
-  // JSX UI
+  const aiData = analysis?.analysis || analysis?.aiAnalysis || analysis;
+
   return (
     <>
-      <SuccessModal
-        isOpen={successModal.isOpen}
-        onClose={() => setSuccessModal({ isOpen: false, message: "" })}
-        message={successModal.message}
-      />
+      <SuccessModal isOpen={successModal.isOpen} onClose={() => setSuccessModal({ isOpen: false, message: "" })} message={successModal.message} />
+      <ErrorModal isOpen={errorModal.isOpen} onClose={() => setErrorModal({ isOpen: false, message: "", details: "" })} message={errorModal.message} details={errorModal.details} />
+      {navigating && (<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"><div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-4"><Loader2 className="animate-spin text-indigo-600" size={48} /><p className="text-lg font-semibold">Please wait...</p></div></div>)}
 
-      <ErrorModal
-        isOpen={errorModal.isOpen}
-        onClose={() =>
-          setErrorModal({ isOpen: false, message: "", details: "" })
-        }
-        message={errorModal.message}
-        details={errorModal.details}
-      />
-
-      {/* NAVIGATING OVERLAY */}
-      {navigating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center gap-4">
-            <Loader2 className="animate-spin text-[#ff004f]" size={48} />
-            <p className="text-lg font-semibold text-gray-900">Please wait...</p>
-            <p className="text-sm text-gray-600">Redirecting to BGV Requests</p>
-          </div>
+      {analysis && selectedCandidate && (
+        <div style={{ position: "fixed", top: 0, left: 0, width: "794px", minHeight: "1123px", opacity: 0, pointerEvents: "none", zIndex: -9999 }}>
+          <div ref={pdfRef}><EducationCertificateBase id="edu-cert" candidate={selectedCandidate} orgName={currentOrg?.organizationName || "Organization"} ai={aiData} /></div>
         </div>
       )}
 
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 md:p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <GraduationCap size={24} />
-              AI Education Validation
-            </h1>
-            <p className="text-gray-600 text-sm mt-1">
-              Validate education certificates using AI-powered analysis
-            </p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <GraduationCap className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  AI Education Verification
+                  <span className="px-2 py-0.5 bg-gradient-to-r from-indigo-100 to-violet-100 text-indigo-700 text-[10px] font-bold rounded-md border border-indigo-200">
+                    <Sparkles className="w-3 h-3 inline mr-0.5" />AI
+                  </span>
+                </h1>
+                <p className="text-xs text-gray-400">Validate education certificates using AI-powered analysis</p>
+              </div>
+            </div>
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 rounded-full border border-emerald-100">
+              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-[9px] font-bold text-emerald-700">System Online</span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* LEFT PANEL */}
             <div className="lg:col-span-1">
-              <div className="bg-white p-6 rounded-2xl shadow-lg border space-y-6 sticky top-6">
-                <h2 className="text-xl font-bold text-black flex items-center gap-2">
-                  <Sparkles className="text-[#ff004f]" />
+              <div className="bg-white/80 backdrop-blur-sm p-5 rounded-2xl shadow-sm border border-gray-100/80 space-y-5 sticky top-6">
+                <h2 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center"><User size={12} className="text-white" /></div>
                   Selection Panel
                 </h2>
 
                 <div>
-                  <label className="font-semibold flex items-center gap-2 mb-2 text-black">
-                    <User size={16} className="text-[#ff004f]" />
-                    Candidate
-                  </label>
-
-                  <select
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">Candidate <span className="text-red-500">*</span></label>
+                  <select className="w-full p-2.5 border border-gray-200 rounded-xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:outline-none transition text-sm text-gray-900 bg-gray-50/50"
                     value={selectedCandidate?._id || ""}
-                    onChange={(e) => {
-                      const c = candidates.find(
-                        (x) => x._id === e.target.value
-                      );
-                      setSelectedCandidate(c);
-                      setAnalysis(null);
-                      setDocumentFile(null);
-                      if (c) fetchVerification(c._id);
-                    }}
-                    className="w-full p-3 border-2 border-gray-200 rounded-xl focus:border-[#ff004f] focus:ring-2 focus:ring-[#ff004f]/20 transition text-black bg-white"
-                    disabled={loadingCandidates}
-                  >
-                    <option value="" className="text-gray-500">
-                      {loadingCandidates
-                        ? "Loading..."
-                        : "-- Select Candidate --"}
-                    </option>
-                    {candidates.map((c) => (
-                      <option key={c._id} value={c._id} className="text-black">
-                        {c.firstName} {c.lastName}
-                      </option>
-                    ))}
+                    onChange={(e) => { const c = candidates.find(x => x._id === e.target.value); setSelectedCandidate(c); setAnalysis(null); setDocumentFile(null); if (c) fetchVerification(c._id); }}
+                    disabled={loadingCandidates}>
+                    <option value="">{loadingCandidates ? "Loading..." : "-- Select Candidate --"}</option>
+                    {candidates.map(c => <option key={c._id} value={c._id}>{c.firstName} {c.lastName}</option>)}
                   </select>
                 </div>
 
                 {selectedCandidate && (
-                  <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                    <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-                      Selected Candidate
-                    </p>
-                    <p className="font-bold text-black">
-                      {selectedCandidate.firstName} {selectedCandidate.lastName}
-                    </p>
-                    {selectedCandidate.email && (
-                      <p className="text-sm text-black mt-1">
-                        {selectedCandidate.email}
-                      </p>
-                    )}
-                  </div>
+                  <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                    className="bg-gradient-to-br from-indigo-50/50 to-blue-50/50 p-4 border border-indigo-100 rounded-xl text-xs space-y-1.5">
+                    <h3 className="font-bold text-gray-800 text-xs flex items-center gap-1.5"><FileText size={12} className="text-indigo-500" /> Details</h3>
+                    <p className="text-gray-600"><span className="font-semibold text-gray-700">Name:</span> {selectedCandidate.firstName} {selectedCandidate.lastName}</p>
+                    {selectedCandidate.email && <p className="text-gray-600"><span className="font-semibold text-gray-700">Email:</span> {selectedCandidate.email}</p>}
+                  </motion.div>
                 )}
 
                 <div>
-                  <label className="font-semibold mb-3 flex items-center gap-2 text-black">
-                    <FileText size={16} className="text-[#ff004f]" />
-                    Upload Education Certificate
-                  </label>
-
-                  <label className="cursor-pointer flex flex-col gap-2 items-center p-5 border-2 border-dashed border-gray-300 rounded-xl hover:border-[#ff004f] hover:bg-pink-50 transition group">
-                    <Upload
-                      size={32}
-                      className="text-gray-400 group-hover:text-[#ff004f] transition"
-                    />
-                    <span className="text-sm text-center text-black">
-                      {documentFile ? (
-                        <span className="font-semibold text-[#ff004f] break-all text-black">
-                          {documentFile.name}
-                        </span>
-                      ) : (
-                        <>
-                          <span className="font-semibold block">
-                            Click to upload
-                          </span>
-                          <span className="text-gray-500 text-xs">
-                            PDF, JPG, PNG (Max 10MB)
-                          </span>
-                        </>
-                      )}
+                  <label className="block text-xs font-bold text-gray-600 mb-1.5">Upload Education Certificate <span className="text-red-500">*</span></label>
+                  <label className="cursor-pointer flex flex-col items-center gap-2 bg-gray-50/80 border-2 border-dashed border-gray-200 p-4 rounded-xl hover:border-indigo-300 hover:bg-indigo-50/30 transition group">
+                    <Upload size={20} className="text-gray-400 group-hover:text-indigo-500 transition" />
+                    <span className="text-xs text-gray-500 group-hover:text-indigo-600 font-medium text-center transition">
+                      {documentFile ? <span className="text-indigo-600 font-semibold">{documentFile.name}</span> : <><span className="font-semibold block">Click to upload</span><span className="text-[10px] text-gray-400">PDF, JPG, PNG (Max 10MB)</span></>}
                     </span>
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.png,.jpeg"
-                      className="hidden"
-                      onChange={(e) => setDocumentFile(e.target.files[0])}
-                    />
+                    <input type="file" accept=".pdf,.jpg,.png,.jpeg" className="hidden" onChange={(e) => setDocumentFile(e.target.files[0])} />
                   </label>
-
-                  {documentFile && (
-                    <button
-                      onClick={() => setDocumentFile(null)}
-                      className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
-                    >
-                      Remove file
-                    </button>
-                  )}
+                  {documentFile && <button onClick={() => setDocumentFile(null)} className="mt-1.5 text-[10px] text-red-500 hover:text-red-700 font-medium">Remove file</button>}
                 </div>
 
-                <button
-                  onClick={runValidation}
-                  disabled={
-                    loadingValidation || !selectedCandidate || !documentFile
-                  }
-                  className="w-full bg-gradient-to-r from-[#ff004f] to-[#ff6f6f] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 hover:from-[#e6003d] hover:to-[#ff5555] disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl"
-                >
-                  {loadingValidation ? (
-                    <>
-                      <Loader2 className="animate-spin" size={20} />
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles size={20} />
-                      Run AI Validation
-                    </>
-                  )}
+                <button onClick={runValidation} disabled={loadingValidation || !selectedCandidate || !documentFile}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-blue-600 to-indigo-700 text-white text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-200 hover:shadow-xl hover:scale-[1.01] transition-all disabled:opacity-50 disabled:hover:scale-100 disabled:shadow-md">
+                  {loadingValidation ? (<><Loader2 className="animate-spin" size={16} /> Processing...</>) : (<><Sparkles size={16} /> Run AI Validation</>)}
                 </button>
               </div>
             </div>
 
-            <div className="lg:col-span-2 space-y-6">
-              {!analysis && !loadingResults && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white p-12 md:p-16 rounded-2xl shadow-lg border text-center"
-                >
-                  <div className="flex justify-center mb-6">
-                    <div className="p-6 bg-gray-100 rounded-full">
-                      <AlertCircle size={48} className="text-gray-400" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    No Analysis Available
-                  </h3>
-                  <p className="text-gray-500 max-w-md mx-auto">
-                    Select a candidate, upload their education certificate, then run the AI validation to see results here.
-                  </p>
-                </motion.div>
-              )}
-
-              {loadingResults && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="bg-white p-12 md:p-16 rounded-2xl shadow-lg border flex flex-col items-center gap-6"
-                >
-                  <div className="relative">
-                    <Loader2
-                      size={64}
-                      className="animate-spin text-[#ff004f]"
-                    />
-                    <div className="absolute inset-0 animate-ping">
-                      <Loader2
-                        size={64}
-                        className="text-[#ff004f] opacity-20"
-                      />
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-lg font-semibold text-gray-900 mb-1">
-                      Analyzing Education Certificate
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      AI is processing the document...
-                    </p>
-                  </div>
-                </motion.div>
-              )}
-
-              {/* Hidden Certificate for PDF Generation */}
-              {analysis && selectedCandidate && (
-                <div style={{
-                  position: "fixed",
-                  top: 0,
-                  left: 0,
-                  width: "794px",
-                  minHeight: "1123px",
-                  opacity: 0,
-                  pointerEvents: "none",
-                  zIndex: -9999,
-                }}>
-                  <div ref={pdfRef}>
-                    <EducationCertificateBase
-                      id="edu-cert"
-                      candidate={selectedCandidate}
-                      orgName={currentOrg?.organizationName || "Organization"}
-                      ai={
-                        analysis?.analysis ||
-                        analysis?.aiAnalysis ||
-                        analysis
-                      }
-                    />
-                  </div>
+            {/* RIGHT PANEL */}
+            <div className="lg:col-span-2">
+              {loadingResults ? (
+                <div className="bg-white/80 backdrop-blur-sm p-12 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-4">
+                  <Loader2 className="animate-spin text-indigo-500" size={40} /><p className="text-sm text-gray-500 font-medium">Loading results...</p>
                 </div>
-              )}
-
-              {analysis && (
-                <ResultsSection
-                  analysis={analysis}
-                  expanded={expanded}
-                  setExpanded={setExpanded}
-                  finalRemarks={finalRemarks}
-                  setFinalRemarks={setFinalRemarks}
-                  submitDecision={submitDecision}
-                  exportPDF={exportPDF}
-                  submittingFinal={submittingFinal}
-                  generatingPDF={generatingPDF}
-                  checkStatus={checkStatus}
-                />
+              ) : analysis && aiData ? (
+                <ResultsSection ai={aiData} expanded={expanded} setExpanded={setExpanded} finalRemarks={finalRemarks} setFinalRemarks={setFinalRemarks} submitDecision={submitDecision} exportPDF={exportPDF} submittingFinal={submittingFinal} checkStatus={checkStatus} />
+              ) : (
+                <div className="bg-white/80 backdrop-blur-sm p-12 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center space-y-4 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-blue-100 flex items-center justify-center"><GraduationCap className="text-indigo-400" size={28} /></div>
+                  <h3 className="text-base font-bold text-gray-900">No Analysis Yet</h3>
+                  <p className="text-xs text-gray-400 max-w-sm">Select a candidate, upload their education certificate, then run AI validation.</p>
+                </div>
               )}
             </div>
           </div>
@@ -657,574 +281,139 @@ export default function OrgAIEducationValidationPage() {
   );
 }
 
-// Results Section Component
-function ResultsSection({
-  analysis,
-  expanded,
-  setExpanded,
-  finalRemarks,
-  setFinalRemarks,
-  submitDecision,
-  exportPDF,
-  submittingFinal,
-  generatingPDF,
-  checkStatus,
-}) {
-  let ai;
+/* ----- RESULTS SECTION ----- */
+function ResultsSection({ ai, expanded, setExpanded, finalRemarks, setFinalRemarks, submitDecision, exportPDF, submittingFinal, checkStatus }) {
+  const toggle = (key) => setExpanded(prev => ({ ...prev, [key]: !prev[key] }));
 
-  if (analysis?.aiAnalysis && typeof analysis.aiAnalysis === "object") {
-    ai = analysis.aiAnalysis;
-  } else if (analysis?.analysis && typeof analysis.analysis === "object") {
-    ai = analysis.analysis;
-  } else if (typeof analysis === "object") {
-    ai = analysis;
-  } else {
-    return (
-      <div className="p-6 border rounded-xl bg-red-50 text-red-700">
-        Invalid analysis response format.
-      </div>
-    );
-  }
-
-  const toggle = (key) =>
-    setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
-
-  const authenticityScore = ai.authenticity_score ?? ai.score ?? 0;
-  const verificationStatus = ai.verification_status || ai.status || "PENDING";
-  const summary = ai.summary || ai.recommendation || "";
-  const recommendation = ai.recommendation || "";
-  const positiveFindings =
-    ai.positive_findings || ai.verifiedDetails || ai.strengths || [];
-  const redFlags = ai.red_flags || ai.weaknesses || [];
-  const degreeType = ai.degree_type || "Not Specified";
-  const fieldOfStudy = ai.field_of_study || "Not Specified";
-  const institutionName = ai.institution_name || "Not Specified";
-  const startDate = ai.start_date || "Not Specified";
-  const endDate = ai.end_date || "Not Specified";
-  const durationYears = ai.duration_years ?? 0;
-  const grade = ai.grade || "Not Specified";
-  const boardUniversity = ai.board_university || "Not Specified";
-  const documentType = ai.document_type || "Not Specified";
-  const extractedTextQuality = ai.extracted_text_quality || "Not Specified";
-
-  const statusColor =
-    verificationStatus === "VERIFIED"
-      ? "bg-green-50 text-black border border-green-200"
-      : verificationStatus === "FAILED" || verificationStatus === "REJECT"
-      ? "bg-red-50 text-black border border-red-200"
-      : "bg-yellow-50 text-black border border-yellow-200";
-
-  const scoreColor =
-    authenticityScore >= 80
-      ? "bg-green-50 text-black border border-green-200"
-      : authenticityScore >= 60
-      ? "bg-yellow-50 text-black border border-yellow-200"
-      : "bg-red-50 text-black border border-red-200";
+  const score = ai?.authenticity_score ?? ai?.score ?? 0;
+  const status = ai?.verification_status || ai?.status || "PENDING";
+  const summary = ai?.summary || ai?.recommendation || "";
+  const recommendation = ai?.recommendation || "";
+  const positives = ai?.positive_findings || ai?.verifiedDetails || ai?.strengths || [];
+  const redFlags = ai?.red_flags || ai?.weaknesses || [];
+  const scoreColor = score >= 70 ? "emerald" : score >= 40 ? "amber" : "red";
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white p-6 md:p-8 rounded-2xl shadow-lg border space-y-6"
-    >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-black flex items-center gap-2">
-            <FileText className="text-[#ff004f]" />
-            Education Analysis
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">
-            AI-powered validation results
-          </p>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+
+      {/* Score Header */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-violet-600 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-white text-base font-bold flex items-center gap-2"><GraduationCap size={18} /> Education Analysis</h2>
+              <p className="text-indigo-100 text-xs mt-0.5">AI-powered education certificate validation</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className={`px-3 py-1 rounded-full text-xs font-bold border backdrop-blur-sm ${checkStatus === "COMPLETED" ? "bg-emerald-400/20 text-emerald-100 border-emerald-300/30" : checkStatus === "FAILED" ? "bg-red-400/20 text-red-100 border-red-300/30" : "bg-white/20 text-white border-white/30"}`}>
+                {checkStatus === "COMPLETED" ? "✓ Approved" : checkStatus === "FAILED" ? "✗ Rejected" : "⏳ Pending"}
+              </div>
+              {checkStatus === "COMPLETED" && (
+                <button onClick={exportPDF} className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white text-xs font-bold rounded-lg border border-white/20 transition"><FileDown size={14} /> PDF</button>
+              )}
+            </div>
+          </div>
         </div>
 
-        {/* Show Download Report button only after approval */}
-        {checkStatus === "COMPLETED" && (
-          <button
-            onClick={exportPDF}
-            disabled={generatingPDF}
-            className="flex items-center justify-center gap-2 bg-gradient-to-r from-[#ff004f] to-[#ff3366] text-white px-4 py-2.5 rounded-lg hover:shadow-lg transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
-          >
-            {generatingPDF ? (
-              <>
-                <Loader2 className="animate-spin" size={18} />
-                Generating PDF...
-              </>
-            ) : (
-              <>
-                <FileDown size={18} />
-                Download Report
-              </>
-            )}
-          </button>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        <span
-          className={`px-4 py-2 rounded-lg font-semibold text-sm ${scoreColor} block text-center`}
-        >
-          Authenticity Score: {authenticityScore}/100
-        </span>
-        <span
-          className={`px-4 py-2 rounded-lg font-semibold text-sm ${statusColor} block text-center`}
-        >
-          Status: {verificationStatus}
-        </span>
-        <span className="px-4 py-2 bg-blue-50 text-black border border-blue-200 rounded-lg font-semibold text-sm block text-center">
-          Text Quality: {extractedTextQuality}
-        </span>
-        {recommendation && (
-          <span className="px-4 py-2 bg-purple-50 text-black border border-purple-200 rounded-lg font-semibold text-sm block text-center">
-            Recommendation: {recommendation}
-          </span>
-        )}
-      </div>
-
-      <div className="p-5 bg-gray-50 rounded-xl border border-gray-200">
-        <h3 className="font-bold text-lg text-black mb-4 flex items-center gap-2">
-          <FileText size={18} className="text-[#ff004f]" />
-          Education Details
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Degree Type
-          </p>
-          <p className="font-semibold text-black">{degreeType}</p>
-        </div>
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Field of Study
-          </p>
-          <p className="font-semibold text-black">{fieldOfStudy}</p>
-        </div>
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Institution Name
-          </p>
-          <p className="font-semibold text-black">{institutionName}</p>
-        </div>
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Board/University
-          </p>
-          <p className="font-semibold text-black">{boardUniversity}</p>
-        </div>
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Start Date
-          </p>
-          <p className="font-semibold text-black">{startDate}</p>
-        </div>
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            End Date
-          </p>
-          <p className="font-semibold text-black">{endDate}</p>
-        </div>
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Duration (Years)
-          </p>
-          <p className="font-semibold text-black">
-            {durationYears} {durationYears === 1 ? "year" : "years"}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Grade/Class
-          </p>
-          <p className="font-semibold text-black">{grade}</p>
-        </div>
-
-        <div className="sm:col-span-2">
-          <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">
-            Document Type
-          </p>
-          <p className="font-semibold text-black">
-            {documentType.replace(/_/g, " ")}
-          </p>
-        </div>
+        <div className="px-6 py-5">
+          <div className="flex items-center gap-6 mb-4">
+            <div className="relative w-20 h-20 flex-shrink-0">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15" fill="none" stroke="#f1f5f9" strokeWidth="3" />
+                <circle cx="18" cy="18" r="15" fill="none" stroke={score >= 70 ? "#10b981" : score >= 40 ? "#f59e0b" : "#ef4444"} strokeWidth="3" strokeDasharray={`${(score / 100) * 94.2} 94.2`} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className={`text-lg font-black text-${scoreColor}-600`}>{score}</span>
+                <span className="text-[8px] text-gray-400 font-bold">/100</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className={`px-2.5 py-1 rounded-lg text-[10px] font-bold border ${status === "VERIFIED" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : status === "FAILED" ? "bg-red-50 text-red-700 border-red-200" : "bg-amber-50 text-amber-700 border-amber-200"}`}>{status}</span>
+              {recommendation && <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200">{recommendation}</span>}
+              {ai?.extracted_text_quality && <span className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">Quality: {ai.extracted_text_quality}</span>}
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Education Details */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2"><BarChart3 size={14} className="text-indigo-500" /> Education Details</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            { label: "Degree Type", value: ai?.degree_type },
+            { label: "Field of Study", value: ai?.field_of_study },
+            { label: "Institution", value: ai?.institution_name },
+            { label: "Board/University", value: ai?.board_university },
+            { label: "Start Date", value: ai?.start_date },
+            { label: "End Date", value: ai?.end_date },
+            { label: "Duration", value: ai?.duration_years ? `${ai.duration_years} years` : null },
+            { label: "Grade/Class", value: ai?.grade },
+            { label: "Document Type", value: ai?.document_type?.replace(/_/g, " ") },
+          ].filter(f => f.value && f.value !== "Not Specified").map((f, i) => (
+            <div key={i} className="bg-gray-50/50 p-3 rounded-lg border border-gray-100">
+              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-0.5">{f.label}</p>
+              <p className="text-xs font-semibold text-gray-800">{f.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary */}
       {summary && (
-        <div className="p-5 bg-blue-50 rounded-xl border border-blue-200">
-          <h3 className="font-bold text-black mb-2 flex items-center gap-2">
-            <AlertCircle size={18} className="text-blue-600" />
-            Summary & Recommendation
-          </h3>
-          <p className="text-sm text-black leading-relaxed">{summary}</p>
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-2"><FileText size={14} className="text-indigo-500" /> Summary</h3>
+          <p className="text-sm text-gray-700 leading-relaxed">{summary}</p>
         </div>
       )}
 
-      {positiveFindings && positiveFindings.length > 0 && (
-        <CollapsibleSection
-          title="Positive Findings"
-          list={positiveFindings}
-          expanded={expanded}
-          toggle={toggle}
-          keyName="positiveFindings"
-          color="green"
-          icon={<CheckCircle size={18} />}
-        />
-      )}
-
-      {redFlags && redFlags.length > 0 && (
-        <CollapsibleSection
-          title="Red Flags & Issues"
-          list={redFlags.map((f) =>
-            typeof f === "string"
-              ? f
-              : `[${f.severity}] ${f.issue || f.description}`
-          )}
-          expanded={expanded}
-          toggle={toggle}
-          keyName="redFlags"
-          color="red"
-          icon={<XCircle size={18} />}
-        />
-      )}
-
-      <div className="space-y-2">
-        <label className="font-bold text-black flex items-center gap-2">
-          <FileText size={16} className="text-[#ff004f]" />
-          Admin Remarks
-        </label>
-        <textarea
-          rows={4}
-          className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-[#ff004f] focus:ring-2 focus:ring-[#ff004f]/20 transition text-black"
-          placeholder="Add your remarks here..."
-          value={finalRemarks}
-          onChange={(e) => setFinalRemarks(e.target.value)}
-        />
+      {/* Findings */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CollapsibleSection title="Positive Findings" list={positives} keyName="positive" expanded={expanded} toggle={toggle} color="green" />
+        <CollapsibleSection title="Red Flags & Issues" list={redFlags.map(f => typeof f === "string" ? f : `[${f.severity}] ${f.issue || f.description}`)} keyName="redFlags" expanded={expanded} toggle={toggle} color="red" />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 pt-4">
-        <button
-          onClick={() => submitDecision("COMPLETED")}
-          disabled={submittingFinal}
-          className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white py-3.5 rounded-xl font-bold hover:from-green-600 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-        >
-          {submittingFinal ? (
-            <Loader2 className="animate-spin" size={20} />
-          ) : (
-            <>
-              <CheckCircle size={20} />
-              Approve & Complete
-            </>
-          )}
-        </button>
-
-        <button
-          onClick={() => submitDecision("FAILED")}
-          disabled={submittingFinal}
-          className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-3.5 rounded-xl font-bold hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-        >
-          {submittingFinal ? (
-            <Loader2 className="animate-spin" size={20} />
-          ) : (
-            <>
-              <XCircle size={20} />
-              Reject
-            </>
-          )}
-        </button>
+      {/* Remarks + Actions */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-gray-100 p-5 space-y-4">
+        <div>
+          <label className="text-xs font-bold text-gray-700 mb-1.5 block">Admin Remarks</label>
+          <textarea rows={3} className="w-full p-3 border border-gray-200 rounded-xl text-sm text-gray-900 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 focus:outline-none transition resize-none" value={finalRemarks} onChange={(e) => setFinalRemarks(e.target.value)} placeholder="Write your review notes…" />
+        </div>
+        <div className="flex gap-3">
+          <button onClick={() => submitDecision("COMPLETED")} disabled={submittingFinal}
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 text-white text-sm font-bold shadow-lg shadow-emerald-200 hover:shadow-xl hover:scale-[1.01] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2">
+            {submittingFinal ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />} Approve
+          </button>
+          <button onClick={() => submitDecision("FAILED")} disabled={submittingFinal}
+            className="flex-1 py-3 rounded-xl bg-gradient-to-r from-red-500 to-rose-600 text-white text-sm font-bold shadow-lg shadow-red-200 hover:shadow-xl hover:scale-[1.01] transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2">
+            {submittingFinal ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />} Reject
+          </button>
+        </div>
       </div>
     </motion.div>
   );
 }
 
-// Collapsible Section Component
-function CollapsibleSection({
-  title,
-  list,
-  expanded,
-  toggle,
-  keyName,
-  color,
-  icon,
-}) {
+/* ----- COLLAPSIBLE SECTION ----- */
+function CollapsibleSection({ title, list, expanded, toggle, keyName, color }) {
   if (!list || list.length === 0) return null;
-
-  const bgColor =
-    color === "red"
-      ? "bg-red-50 border-red-200"
-      : "bg-green-50 border-green-200";
-
-  const iconColor = color === "red" ? "text-red-500" : "text-green-500";
-  const badgeBg = color === "red" ? "bg-red-100" : "bg-green-100";
-
+  const isOpen = expanded[keyName];
+  const styles = {
+    green: { bg: "bg-emerald-50/50", border: "border-emerald-100", text: "text-emerald-700", dot: "bg-emerald-400", header: "text-emerald-800" },
+    red: { bg: "bg-red-50/50", border: "border-red-100", text: "text-red-700", dot: "bg-red-400", header: "text-red-800" },
+  };
+  const c = styles[color] || styles.green;
   return (
-    <div className={`border rounded-xl p-5 ${bgColor} transition-all`}>
-      <div
-        className="flex justify-between items-center cursor-pointer group"
-        onClick={() => toggle(keyName)}
-      >
-        <h3 className="font-bold text-black flex items-center gap-2">
-          {icon && <span className={iconColor}>{icon}</span>}
-          {title}
-          <span
-            className={`text-xs text-black font-semibold px-2 py-0.5 rounded ${badgeBg}`}
-          >
-            {list.length}
-          </span>
-        </h3>
-        <div className="text-gray-500 group-hover:text-black transition">
-          {expanded[keyName] ? (
-            <ChevronUp size={20} />
-          ) : (
-            <ChevronDown size={20} />
-          )}
-        </div>
+    <div className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border ${c.border} overflow-hidden`}>
+      <div className={`flex justify-between items-center cursor-pointer p-4 ${c.bg} hover:opacity-80 transition`} onClick={() => toggle(keyName)}>
+        <h3 className={`text-xs font-bold ${c.header} flex items-center gap-2`}><div className={`w-2 h-2 rounded-full ${c.dot}`} />{title} ({list.length})</h3>
+        {isOpen ? <ChevronUp size={16} className="text-gray-400" /> : <ChevronDown size={16} className="text-gray-400" />}
       </div>
-
-      {expanded[keyName] && (
-        <ul className="mt-4 space-y-2">
-          {list.map((item, index) => (
-            <li
-              key={index}
-              className="flex items-start gap-3 text-sm text-black bg-white p-3 rounded-lg border border-gray-200"
-            >
-              <span className="mt-0.5 font-bold">•</span>
-              <span className="flex-1">{item}</span>
-            </li>
-          ))}
-        </ul>
+      {isOpen && (
+        <div className="p-4 pt-2 space-y-1.5">
+          {list.map((item, i) => <div key={i} className={`text-xs ${c.text} flex items-start gap-2`}><div className={`w-1.5 h-1.5 rounded-full ${c.dot} mt-1.5 flex-shrink-0`} />{item}</div>)}
+        </div>
       )}
-    </div>
-  );
-}
-
-// Education Certificate Component for PDF Generation
-function EducationCertificateBase({ id, candidate, orgName, ai }) {
-  const degree = ai.degree_type || "Not Specified";
-  const field = ai.field_of_study || "Not Specified";
-  const institution = ai.institution_name || "Not Specified";
-  const board = ai.board_university || "Not Specified";
-  const startDate = ai.start_date || "-";
-  const endDate = ai.end_date || "-";
-  const durationYears = ai.duration_years || "N/A";
-
-  const positives = ai.positive_findings || [];
-  const redflags = ai.red_flags || [];
-
-  return (
-    <div
-      id={id}
-      style={{
-        width: "794px",
-        minHeight: "1123px",
-        padding: "10px 50px 80px 50px", // ⬅ Increased bottom padding for footer visibility
-        background: "#fff",
-        fontFamily: "Arial, sans-serif",
-        color: "#000",
-        position: "relative",
-      }}
-    >
-      {/* WATERMARK */}
-      <img
-        src="/logos/tfgLogo.jpeg"
-        alt="watermark"
-        style={{
-          position: "absolute",
-          top: "320px",
-          left: "50%",
-          transform: "translateX(-50%)",
-          opacity: 0.08,
-          width: "750px",
-          height: "750px",
-          objectFit: "contain",
-          pointerEvents: "none",
-          zIndex: 1,
-        }}
-      />
-
-      {/* MAIN CONTENT */}
-      <div style={{ position: "relative", zIndex: 2 }}>
-        {/* HEADER */}
-        <div
-          style={{
-            display: "flex",
-            gap: "35px",
-            alignItems: "flex-start",
-            marginBottom: "25px",
-          }}
-        >
-          <img
-            src="/logos/tfgLogo.jpeg"
-            alt="logo"
-            style={{
-              maxHeight: "180px",
-              maxWidth: "450px",
-              objectFit: "contain",
-              marginTop: "10px",
-            }}
-          />
-
-          <div style={{ marginTop: "55px" }}>
-            <h1
-              style={{
-                fontSize: "26px",
-                fontWeight: 900,
-                margin: 0,
-                fontFamily: "Arial Black",
-              }}
-            >
-              Education
-            </h1>
-            <h2
-              style={{
-                fontSize: "26px",
-                fontWeight: 900,
-                margin: 0,
-                fontFamily: "Arial Black",
-              }}
-            >
-              Verification Report
-            </h2>
-          </div>
-        </div>
-
-        {/* CANDIDATE DETAILS */}
-        <div style={{ fontSize: "15px", lineHeight: "28px", marginBottom: "40px" }}>
-          <p><b>Candidate Name:</b> {candidate.firstName} {candidate.lastName}</p>
-          <p><b>Candidate ID:</b> {candidate._id}</p>
-          <p><b>Organization:</b> {orgName}</p>
-
-          <p><b>Degree:</b> {degree}</p>
-          <p><b>Field of Study:</b> {field}</p>
-          <p><b>Institution:</b> {institution}</p>
-          <p><b>Board/University:</b> {board}</p>
-
-          <p><b>Start Date:</b> {startDate}</p>
-          <p><b>End Date:</b> {endDate}</p>
-          <p><b>Duration:</b> {durationYears} years</p>
-
-          <p style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <b>Status:</b>
-            <span style={{ color: "#5cb85c", fontWeight: "bold" }}>✓ Completed</span>
-          </p>
-        </div>
-
-       {/* SHORT GREEN BAR (Indicator Bar) */}
-<div
-  style={{
-    display: "flex",
-    alignItems: "center",
-    marginBottom: "18px", // reduced gap
-  }}
->
-  <div
-    style={{
-      width: "38px",
-      height: "18px", // increased thickness
-      background: "#5cb85c",
-      borderRadius: "5px",
-    }}
-  />
-  <div
-    style={{
-      height: "4px", // thicker line
-      background: "#5cb85c",
-      width: "22%",  // shorter length
-      marginLeft: "10px",
-      borderRadius: "2px",
-    }}
-  />
-</div>
-
-{/* POSITIVE FINDINGS (NO HEADING) */}
-{positives.length > 0 && (
-  <div style={{ marginBottom: "35px" }}>
-    {positives.map((item, i) => (
-      <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-        <span style={{ fontSize: "18px" }}>✓</span>
-        <span>{item}</span>
-      </div>
-    ))}
-  </div>
-)}
-
-{/* SHORT RED BAR (Indicator Bar) */}
-{redflags.length > 0 && (
-  <div
-    style={{
-      display: "flex",
-      alignItems: "center",
-      marginBottom: "18px",
-    }}
-  >
-    <div
-      style={{
-        width: "38px",
-        height: "18px", // thicker
-        background: "#d9534f",
-        borderRadius: "5px",
-      }}
-    />
-    <div
-      style={{
-        height: "4px",
-        background: "#d9534f",
-        width: "22%",   // shorter line
-        marginLeft: "10px",
-        borderRadius: "2px",
-      }}
-    />
-  </div>
-)}
-
-{/* RED FLAGS (NO HEADING) */}
-{redflags.length > 0 &&
-  redflags.map((rf, i) => (
-    <div key={i} style={{ display: "flex", gap: "10px", marginBottom: "10px" }}>
-      <span style={{ color: "#d9534f", fontSize: "18px" }}>•</span>
-      <span>{rf.issue || rf.description}</span>
-    </div>
-  ))}
-
-      </div>
-
-      {/* FOOTER - ALWAYS VISIBLE */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: "20px",
-          left: "50px",
-          right: "50px",
-          textAlign: "center",
-        }}
-      >
-        <div
-          style={{
-            height: "2px",
-            background: "#dc3545",
-            marginBottom: "10px",
-          }}
-        />
-
-        <p
-          style={{
-            fontSize: "12px",
-            color: "#dc3545",
-            fontWeight: 600,
-          }}
-        >
-          TFG AI powered IT solutions, T-Hub 4th floor Plot No 1/C, Sy No 83/1, Raidurgam panmaktha Hyderabad Knowledge City, Serilingampally, Hyderabad, Telangana 500081
-          <br />
-          📞 8886099008 | ✉ naresh@tfgorg.com | 🔗 <a href="https://www.linkedin.com/company/threshing-floor-group/" target="_blank" style={{ color: "#dc3545", textDecoration: "underline" }}>LinkedIn</a> | 🌐 <a href="https://www.tfgorg.com" target="_blank" style={{ color: "#dc3545", textDecoration: "underline" }}>www.tfgorg.com</a>
-        </p>
-      </div>
     </div>
   );
 }

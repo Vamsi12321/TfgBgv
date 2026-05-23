@@ -106,15 +106,18 @@ async function proxyRequest(req, params) {
       if (
         key !== "content-encoding" &&
         key !== "transfer-encoding" &&
-        key !== "content-length"
+        key !== "content-length" &&
+        key !== "set-cookie" // Handle set-cookie separately below
       ) {
         responseHeaders.set(key, value);
       }
     });
 
-    // Handle set-cookie headers specially
+    // Handle set-cookie headers — only forward for auth endpoints, not for all requests
+    // This prevents jobseeker session cookies from contaminating org sessions and vice versa
+    const isAuthEndpoint = path.includes("auth/login") || path.includes("jobseeker/login") || path.includes("jobseeker/register");
     const setCookie = backendRes.headers.get("set-cookie");
-    if (setCookie) {
+    if (setCookie && isAuthEndpoint) {
       responseHeaders.set("set-cookie", setCookie);
     }
 

@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { validateEmail, validatePassword } from "@/utils/validators";
 import Link from "next/link";
 import {
   Eye,
@@ -69,12 +70,18 @@ export default function LoginPage() {
     setLoading(true);
     setErrorMsg("");
 
+    // Client-side validation
+    const emailErr = validateEmail(email);
+    if (!email.trim()) { setErrorMsg("Email is required"); setLoading(false); return; }
+    if (emailErr) { setErrorMsg(emailErr); setLoading(false); return; }
+    if (!password) { setErrorMsg("Password is required"); setLoading(false); return; }
+
     try {
       const res = await fetch("/api/proxy/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
       });
 
       const data = await res.json();

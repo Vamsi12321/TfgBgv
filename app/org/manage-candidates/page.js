@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { PlusCircle, X, Edit, Trash2, Loader2, Users, ChevronDown, Upload, Download, FileSpreadsheet } from "lucide-react";
 import { motion } from "framer-motion";
+import { validatePhone, validateEmail, validateAadhaar, validatePAN, validatePincode, validateFile, FILE_PRESETS, sanitizeAadhaar, sanitizePAN } from "@/utils/validators";
 
 
 

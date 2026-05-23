@@ -7,6 +7,7 @@ import {
   Calendar, Loader2, Brain, Edit2, Trash2, UserPlus, Tag,
   Info, FileText, MapPin,
 } from "lucide-react";
+import { validateEmail, validatePhone } from "@/utils/validators";
 
 /* ─────────────────────────────────────────────
    HELPERS
@@ -57,6 +58,7 @@ const ROUND_STATUS_STYLES = {
 
 const OVERALL_STATUS_STYLES = {
   "In Progress":     "bg-blue-100 text-blue-700",
+  "Completed":       "bg-green-100 text-green-700",
   "Offer Extended":  "bg-green-100 text-green-700",
   "Rejected":        "bg-red-100 text-red-700",
   "Hired":           "bg-emerald-100 text-emerald-800",
@@ -646,6 +648,7 @@ function DetailDrawer({ interview, onClose, onAction }) {
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold backdrop-blur-sm ${
                       interview.overallStatus === "In Progress" ? "bg-white/20 text-white border border-white/30" :
+                      interview.overallStatus === "Completed" ? "bg-green-400/20 text-green-100 border border-green-300/30" :
                       interview.overallStatus === "Offer Extended" ? "bg-green-400/20 text-green-100 border border-green-300/30" :
                       interview.overallStatus === "Hired" ? "bg-emerald-400/20 text-emerald-100 border border-emerald-300/30" :
                       interview.overallStatus === "Rejected" ? "bg-red-400/20 text-red-100 border border-red-300/30" :
@@ -732,17 +735,28 @@ function DetailDrawer({ interview, onClose, onAction }) {
                   <button
                     onClick={async () => {
                       try {
-                        const res = await fetch(`/api/proxy/secure/getScreeningResults?jobId=${interview.jobId}&applicationId=${interview.applicationId}`, { credentials: "include" });
-                        if (res.ok) {
-                          const data = await res.json();
-                          const r = data.results?.[0];
-                          if (r) {
-                            alert(`AI Score: ${r.finalScore || r.llmScore || "N/A"}\nRecommendation: ${r.recommendation || "N/A"}\n\nStrengths:\n${(r.strengths || []).join("\n")}\n\nWeaknesses:\n${(r.weaknesses || []).join("\n")}`);
-                          } else {
-                            alert("No AI screening results found for this candidate.");
+                        const seekerId = interview.jobSeekerId || interview.seekerId;
+                        let r = null;
+                        if (seekerId) {
+                          const res = await fetch(`/api/proxy/secure/getScreeningResult/${interview.jobId}/${seekerId}`, { credentials: "include" });
+                          if (res.ok) {
+                            const data = await res.json();
+                            r = data.result;
                           }
+                        }
+                        if (!r) {
+                          const res = await fetch(`/api/proxy/secure/getScreeningResults/${interview.jobId}?source=JOB_PORTAL`, { credentials: "include" });
+                          if (res.ok) {
+                            const data = await res.json();
+                            const allResults = data.results || [];
+                            const candidateResults = allResults.filter(x => x.applicationId === interview.applicationId);
+                            r = candidateResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+                          }
+                        }
+                        if (r) {
+                          alert(`AI Score: ${r.finalScore || r.matchScore || "N/A"}\nRecommendation: ${r.recommendation || r.recruiterVerdict || "N/A"}\n\nStrengths:\n${(r.strengths || []).join("\n")}\n\nWeaknesses:\n${(r.weaknesses || []).join("\n")}`);
                         } else {
-                          alert("No AI screening results available.");
+                          alert("No AI screening results found for this candidate.");
                         }
                       } catch { alert("Failed to fetch screening results."); }
                     }}
@@ -762,7 +776,7 @@ function DetailDrawer({ interview, onClose, onAction }) {
           </div>
 
           {/* ── Guidance Info Banner — Enhanced ── */}
-          {interview.overallStatus === "In Progress" && (
+          {(interview.overallStatus === "In Progress" || interview.overallStatus === "Completed") && (
             <div className="relative bg-gradient-to-r from-blue-50 via-indigo-50/50 to-blue-50 border border-blue-100/80 rounded-2xl p-4 overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-blue-400 to-indigo-500 rounded-l-2xl" />
               <div className="flex gap-3 pl-2">
@@ -868,7 +882,7 @@ function DetailDrawer({ interview, onClose, onAction }) {
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-gray-900">{round.roundName || ROUND_NAMES[idx] || `Round ${round.roundNumber}`}</p>
-                        {isCurrentRound && interview.overallStatus === "In Progress" && (
+                        {isCurrentRound && (interview.overallStatus === "In Progress" || interview.overallStatus === "Completed") && (
                           <span className="px-2 py-0.5 rounded-md text-[9px] font-extrabold bg-gradient-to-r from-indigo-500 to-purple-600 text-white uppercase tracking-wider shadow-sm">Current</span>
                         )}
                       </div>
@@ -959,7 +973,7 @@ function DetailDrawer({ interview, onClose, onAction }) {
                 )}
 
                 {/* Action buttons — enhanced */}
-                {interview.overallStatus === "In Progress" && (
+                {(interview.overallStatus === "In Progress" || interview.overallStatus === "Completed") && (
                   <div className="flex gap-2 pt-1 ml-13">
                     {round.status === "Pending" && round.roundNumber === currentRoundNum && (
                       <button onClick={() => setScheduleModal(round)} className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-xs font-bold hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md shadow-blue-200 hover:shadow-lg hover:scale-[1.02] flex items-center gap-2">
@@ -1000,7 +1014,7 @@ function DetailDrawer({ interview, onClose, onAction }) {
               <h3 className="text-xs font-bold text-gray-700 uppercase tracking-wider">Final Decision</h3>
             </div>
 
-            {hasPassedRound && interview.overallStatus === "In Progress" && (
+            {hasPassedRound && (interview.overallStatus === "In Progress" || interview.overallStatus === "Completed") && (
               <div className="space-y-2.5">
                 <button onClick={handleExtendOffer} disabled={actionLoading === "offer"}
                   className="w-full py-3 rounded-2xl bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white text-sm font-bold shadow-lg shadow-green-200 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 disabled:hover:scale-100">
@@ -1011,13 +1025,13 @@ function DetailDrawer({ interview, onClose, onAction }) {
               </div>
             )}
 
-            {!hasPassedRound && interview.overallStatus === "In Progress" && (
+            {!hasPassedRound && (interview.overallStatus === "In Progress" || interview.overallStatus === "Completed") && (
               <div className="text-center py-3 bg-gradient-to-r from-gray-50 to-slate-50 rounded-2xl border border-gray-100">
                 <p className="text-xs text-gray-400 font-medium">At least 1 round must be passed before extending an offer.</p>
               </div>
             )}
 
-            {(interview.overallStatus === "In Progress" || interview.overallStatus === "Offer Extended") && (
+            {(interview.overallStatus === "In Progress" || interview.overallStatus === "Completed" || interview.overallStatus === "Offer Extended") && (
               <button onClick={() => setRejectModal(true)}
                 className="w-full py-3 rounded-2xl bg-gradient-to-r from-red-500 via-rose-500 to-pink-500 text-white text-sm font-bold shadow-lg shadow-red-200 hover:shadow-xl hover:scale-[1.01] transition-all flex items-center justify-center gap-2.5">
                 <XCircle size={17} /> Reject Candidate
@@ -1122,6 +1136,7 @@ function InterviewerFormModal({ interviewer, onClose, onSuccess }) {
     isAvailable: interviewer?.isAvailable !== false,
   });
   const [saving, setSaving] = useState(false);
+  const [formErrors, setFormErrors] = useState({});
 
   const toggleRound = (r) => {
     setForm(prev => ({
@@ -1134,11 +1149,27 @@ function InterviewerFormModal({ interviewer, onClose, onSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate
+    const errors = {};
+    const emailErr = validateEmail(form.email);
+    if (emailErr) errors.email = emailErr;
+    if (!form.email.trim()) errors.email = "Email is required";
+    const phoneErr = validatePhone(form.phone);
+    if (phoneErr) errors.phone = phoneErr;
+    if (!form.name.trim()) errors.name = "Name is required";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+    setFormErrors({});
+
     setSaving(true);
     try {
       const payload = {
         name: form.name.trim(),
-        email: form.email.trim(),
+        email: form.email.trim().toLowerCase(),
         phone: form.phone.trim(),
         designation: form.designation.trim(),
         department: form.department.trim(),

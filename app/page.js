@@ -484,39 +484,40 @@ export default function HomePage() {
       </div>
 
       {/* Problem → Solution Section */}
-      <section className="py-16 bg-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-16 bg-gradient-to-b from-white to-blue-50/30 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-100/30 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12">
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-50 text-red-600 text-xs font-bold border border-red-100 mb-4">
-              <XCircle className="w-3.5 h-3.5" /> Industry Problems We Solve
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-600 text-xs font-bold border border-blue-100 mb-4 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5" /> Why TFG HireShield
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-3">Traditional Hiring is <span className="text-red-500">Broken</span></h2>
-            <p className="text-sm text-slate-500 max-w-xl mx-auto">Companies lose time, money, and quality hires due to fragmented processes. Here is how TFG fixes it.</p>
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-3">We Fix What&apos;s <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Broken in Hiring</span></h2>
+            <p className="text-sm text-slate-500 max-w-xl mx-auto">Companies lose time, money, and quality hires due to fragmented processes. Here&apos;s how TFG fixes it.</p>
           </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { problem: "Manual resume screening takes weeks", solution: "AI screens 100+ resumes in 60 seconds", icon: <Brain className="w-5 h-5" />, color: "blue" },
-              { problem: "BGV takes 15-30 days with vendors", solution: "Instant API checks + 48hr full report", icon: <ShieldCheck className="w-5 h-5" />, color: "indigo" },
-              { problem: "Fake resumes slip through undetected", solution: "98% fraud detection with ML models", icon: <FileSearch className="w-5 h-5" />, color: "purple" },
-              { problem: "Unstructured interview process", solution: "Dynamic multi-round interviews with ratings", icon: <Users className="w-5 h-5" />, color: "cyan" },
-              { problem: "Manual onboarding after hire takes days", solution: "BGV done → Auto-added to HRMS instantly", icon: <UserCheck className="w-5 h-5" />, color: "amber" },
-              { problem: "Hard to find right candidates for roles", solution: "TFG Jobs portal brings candidates directly to you", icon: <Briefcase className="w-5 h-5" />, color: "green" }
+              { problem: "Manual resume screening takes weeks", solution: "AI screens 100+ resumes in 60 seconds", icon: <Brain className="w-5 h-5" />, gradient: "from-blue-500 to-cyan-500", bg: "bg-blue-50" },
+              { problem: "BGV takes 15-30 days with vendors", solution: "Instant API checks + 48hr full report", icon: <ShieldCheck className="w-5 h-5" />, gradient: "from-indigo-500 to-violet-500", bg: "bg-indigo-50" },
+              { problem: "Fake resumes slip through undetected", solution: "98% fraud detection with ML models", icon: <FileSearch className="w-5 h-5" />, gradient: "from-purple-500 to-pink-500", bg: "bg-purple-50" },
+              { problem: "Unstructured interview process", solution: "Dynamic multi-round interviews with ratings", icon: <Users className="w-5 h-5" />, gradient: "from-blue-500 to-indigo-500", bg: "bg-blue-50" },
+              { problem: "Manual onboarding after hire takes days", solution: "BGV done → Auto-added to HRMS instantly", icon: <UserCheck className="w-5 h-5" />, gradient: "from-emerald-500 to-teal-500", bg: "bg-emerald-50" },
+              { problem: "Hard to find right candidates for roles", solution: "TFG Jobs portal brings candidates directly to you", icon: <Briefcase className="w-5 h-5" />, gradient: "from-amber-500 to-orange-500", bg: "bg-amber-50" }
             ].map((item, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all group"
+                className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
               >
                 <div className="flex items-start gap-3 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
-                    <XCircle className="w-4 h-4 text-red-400" />
+                  <div className="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center flex-shrink-0">
+                    <XCircle className="w-3.5 h-3.5 text-slate-400" />
                   </div>
-                  <p className="text-sm text-red-500 font-medium">{item.problem}</p>
+                  <p className="text-xs text-slate-400 font-medium line-through decoration-slate-300">{item.problem}</p>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className={`w-8 h-8 rounded-lg bg-${item.color}-50 flex items-center justify-center flex-shrink-0 text-${item.color}-600`}>
+                  <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center flex-shrink-0 text-white shadow-md group-hover:scale-110 transition-transform`}>
                     {item.icon}
                   </div>
-                  <p className="text-sm text-slate-900 font-bold">{item.solution}</p>
+                  <p className="text-sm text-slate-800 font-bold">{item.solution}</p>
                 </div>
               </motion.div>
             ))}
@@ -525,13 +526,13 @@ export default function HomePage() {
           {/* Stats bar */}
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { val: "10x", label: "Faster Hiring", color: "text-blue-600" },
-              { val: "95%", label: "Cost Reduction in BGV", color: "text-indigo-600" },
-              { val: "Zero", label: "Manual Errors", color: "text-purple-600" },
-              { val: "48hrs", label: "Complete BGV Report", color: "text-green-600" }
+              { val: "10x", label: "Faster Hiring", gradient: "from-blue-500 to-indigo-600" },
+              { val: "95%", label: "Cost Reduction in BGV", gradient: "from-indigo-500 to-violet-600" },
+              { val: "Zero", label: "Manual Errors", gradient: "from-purple-500 to-pink-600" },
+              { val: "48hrs", label: "Complete BGV Report", gradient: "from-emerald-500 to-teal-600" }
             ].map((s, i) => (
-              <div key={i} className="text-center p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <div className={`text-2xl font-black ${s.color}`}>{s.val}</div>
+              <div key={i} className="text-center p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                <div className={`text-2xl font-black bg-gradient-to-r ${s.gradient} bg-clip-text text-transparent`}>{s.val}</div>
                 <div className="text-xs text-slate-500 font-medium mt-0.5">{s.label}</div>
               </div>
             ))}

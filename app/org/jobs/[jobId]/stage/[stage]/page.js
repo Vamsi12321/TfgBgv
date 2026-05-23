@@ -100,11 +100,10 @@ export default function StageCandidatesPage() {
     setShowAIModal(false);
     try {
       const body = { jobId };
-      if (aiConfig.minScore) body.minScorePercentage = parseInt(aiConfig.minScore);
       if (aiConfig.topN) body.topN = parseInt(aiConfig.topN);
       if (selectedIds.length > 0) body.applicationIds = selectedIds;
 
-      const res = await fetch("/api/proxy/secure/runAIScreening", {
+      const res = await fetch("/api/proxy/secure/jobseekerAiScreening", {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
@@ -113,11 +112,14 @@ export default function StageCandidatesPage() {
         const data = await res.json();
         const results = data.results || [];
         const map = {};
-        results.forEach(r => { map[r.applicationId] = r; });
+        results.forEach(r => {
+          const appId = r.applicationId || r.metadata?.applicationId;
+          if (appId) map[appId] = r;
+        });
         setAiResultsMap(prev => ({ ...prev, ...map }));
         setCandidates(prev => prev.map(c => {
-          const match = results.find(r => r.applicationId === c.id);
-          return match ? { ...c, score: Math.round(match.finalScore || match.llmScore || 0), name: match.jobSeekerName || c.name } : c;
+          const match = results.find(r => (r.applicationId || r.metadata?.applicationId) === c.id);
+          return match ? { ...c, score: Math.round(match.finalScore || match.matchScore || 0), name: match.jobSeekerName || match.name || c.name } : c;
         }));
         showToast(`AI Screening done! ${data.totalProcessed || results.length} processed, ${results.length} results returned.`);
       } else {
@@ -201,12 +203,25 @@ export default function StageCandidatesPage() {
     setSelectedCandidate(c);
     if (!aiResultsMap[c.id]) {
       try {
-        const res = await fetch(`/api/proxy/secure/getScreeningResults?jobId=${jobId}&applicationId=${c.id}`, { credentials: "include" });
+        // Use single person endpoint if jobSeekerId is available
+        const seekerId = c.jobSeekerId || c.seekerId;
+        let res;
+        if (seekerId) {
+          res = await fetch(`/api/proxy/secure/getScreeningResult/${jobId}/${seekerId}`, { credentials: "include" });
+        } else {
+          res = await fetch(`/api/proxy/secure/getScreeningResults/${jobId}?source=JOB_PORTAL`, { credentials: "include" });
+        }
         if (res.ok) {
           const data = await res.json();
-          const results = data.results || [];
-          if (results.length > 0) {
-            setAiResultsMap(prev => ({ ...prev, [c.id]: results[0] }));
+          if (seekerId && data.result) {
+            setAiResultsMap(prev => ({ ...prev, [c.id]: data.result }));
+          } else {
+            const results = data.results || [];
+            const candidateResults = results.filter(r => r.applicationId === c.id);
+            if (candidateResults.length > 0) {
+              const latest = candidateResults.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+              setAiResultsMap(prev => ({ ...prev, [c.id]: latest }));
+            }
           }
         }
       } catch {}
@@ -432,7 +447,7 @@ export default function StageCandidatesPage() {
           <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedCandidate(null)} />
           <div className="fixed right-0 top-0 h-full w-full max-w-md z-50 bg-white shadow-2xl flex flex-col overflow-hidden">
             {/* Drawer Header */}
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-5 text-white flex-shrink-0">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-5 text-white flex-shrink-0">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center text-white text-xl font-bold">
@@ -440,24 +455,28 @@ export default function StageCandidatesPage() {
                   </div>
                   <div>
                     <h2 className="font-bold text-lg">{selectedCandidate.name}</h2>
-                    <p className="text-purple-100 text-sm">{selectedCandidate.email}</p>
+                    <p className="text-blue-100 text-sm">{selectedCandidate.email}</p>
                   </div>
                 </div>
                 <button onClick={() => setSelectedCandidate(null)} className="text-white/70 hover:text-white"><X className="w-5 h-5" /></button>
               </div>
               {/* Score + Recommendation */}
-              {aiResultsMap[selectedCandidate.id] && (
-                <div className="flex items-center gap-3 mt-3">
-                  <span className="text-2xl font-bold">{Math.round(aiResultsMap[selectedCandidate.id].finalScore || 0)}%</span>
-                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                    aiResultsMap[selectedCandidate.id].recommendation === "GOOD_FIT" ? "bg-green-400/30 text-green-100" :
-                    aiResultsMap[selectedCandidate.id].recommendation === "MODERATE_FIT" ? "bg-amber-400/30 text-amber-100" :
-                    "bg-red-400/30 text-red-100"
-                  }`}>
-                    {aiResultsMap[selectedCandidate.id].recommendation?.replace("_", " ")}
-                  </span>
-                </div>
-              )}
+              {aiResultsMap[selectedCandidate.id] && (() => {
+                const ar = aiResultsMap[selectedCandidate.id];
+                const score = Math.round(ar.finalScore || ar.matchScore || 0);
+                const rec = (ar.recommendation || ar.recruiterVerdict || "").toLowerCase().replace("_", " ");
+                const recStyle = rec.includes("shortlist") || rec.includes("good") ? "bg-green-400/30 text-green-100" :
+                                 rec.includes("moderate") ? "bg-amber-400/30 text-amber-100" :
+                                 "bg-red-400/30 text-red-100";
+                return (
+                  <div className="flex items-center gap-3 mt-3">
+                    <span className="text-2xl font-bold">{score}%</span>
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase ${recStyle}`}>
+                      {rec || "pending"}
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Drawer Body */}
@@ -471,32 +490,79 @@ export default function StageCandidatesPage() {
                     <p className="text-sm text-gray-700 leading-relaxed">{r.summary}</p>
                   </div>
 
-                  {/* Scores breakdown */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-purple-50 rounded-xl p-3 text-center">
-                      <p className="text-lg font-bold text-purple-700">{Math.round(r.finalScore || 0)}</p>
-                      <p className="text-xs text-purple-500">Final Score</p>
-                    </div>
-                    <div className="bg-blue-50 rounded-xl p-3 text-center">
-                      <p className="text-lg font-bold text-blue-700">{Math.round((r.embeddingScore || 0) * 100)}</p>
-                      <p className="text-xs text-blue-500">Embedding</p>
-                    </div>
-                    <div className="bg-indigo-50 rounded-xl p-3 text-center">
-                      <p className="text-lg font-bold text-indigo-700">{r.llmScore || 0}</p>
-                      <p className="text-xs text-indigo-500">LLM Score</p>
+                  {/* Score Breakdown — 7 Factor */}
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Score Breakdown</h4>
+                    <div className="space-y-2">
+                      {[
+                        { label: "Semantic Match", value: r.semanticScore || r.embeddingScore || 0, weight: "30%" },
+                        { label: "Skills Match", value: r.skillsScore || 0, weight: "25%" },
+                        { label: "Experience", value: r.experienceScore || 0, weight: "18%" },
+                        { label: "Achievements", value: r.achievementScore || 0, weight: "12%" },
+                        { label: "Education", value: r.educationScore || 0, weight: "8%" },
+                        { label: "Certifications", value: r.certificationScore || 0, weight: "7%" },
+                      ].map((item, i) => {
+                        // Normalize: if value > 1, it's already a percentage; if <= 1, multiply by 100
+                        const pct = item.value > 1 ? Math.round(item.value) : Math.round(item.value * 100);
+                        return (
+                          <div key={i} className="flex items-center gap-2">
+                            <span className="text-[10px] text-gray-500 w-24 flex-shrink-0">{item.label}</span>
+                            <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full ${pct >= 70 ? "bg-emerald-500" : pct >= 40 ? "bg-blue-500" : "bg-amber-500"}`}
+                                style={{ width: `${Math.min(pct, 100)}%` }} />
+                            </div>
+                            <span className="text-[10px] font-bold text-gray-600 w-8 text-right">{pct}%</span>
+                            <span className="text-[9px] text-gray-300 w-7">({item.weight})</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
 
+                  {/* Matched & Missing Skills */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <h4 className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide mb-1.5">Matched Skills ({(r.matchedSkills || []).length})</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {(r.matchedSkills || []).map((s, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[9px] rounded-md border border-emerald-100 font-medium">{s}</span>
+                        ))}
+                        {(r.matchedSkills || []).length === 0 && <span className="text-[10px] text-gray-400">None</span>}
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-1.5">Missing Skills ({(r.missingSkills || []).length})</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {(r.missingSkills || []).map((s, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-red-50 text-red-600 text-[9px] rounded-md border border-red-100 font-medium">{s}</span>
+                        ))}
+                        {(r.missingSkills || []).length === 0 && <span className="text-[10px] text-gray-400">None</span>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Inferred Skills */}
+                  {(r.inferredSkills || []).length > 0 && (
+                    <div>
+                      <h4 className="text-[10px] font-bold text-purple-700 uppercase tracking-wide mb-1.5">Inferred Skills</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {r.inferredSkills.map((s, i) => (
+                          <span key={i} className="px-2 py-0.5 bg-purple-50 text-purple-700 text-[9px] rounded-md border border-purple-100 font-medium">{s}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Strengths */}
                   {r.strengths && r.strengths.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-bold text-green-700 uppercase tracking-wide mb-2 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Strengths
+                    <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+                      <h4 className="text-[10px] font-bold text-emerald-700 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <CheckCircle2 className="w-3 h-3" /> Strengths
                       </h4>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {r.strengths.map((s, i) => (
-                          <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
-                            <span className="text-green-500 mt-0.5 flex-shrink-0">✓</span>
+                          <div key={i} className="flex items-start gap-2 text-[11px] text-gray-700">
+                            <span className="text-emerald-500 mt-0.5 flex-shrink-0">✓</span>
                             <span>{s}</span>
                           </div>
                         ))}
@@ -506,13 +572,13 @@ export default function StageCandidatesPage() {
 
                   {/* Weaknesses */}
                   {r.weaknesses && r.weaknesses.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-bold text-red-600 uppercase tracking-wide mb-2 flex items-center gap-1">
-                        <X className="w-3.5 h-3.5" /> Weaknesses
+                    <div className="bg-red-50 rounded-xl p-3 border border-red-100">
+                      <h4 className="text-[10px] font-bold text-red-600 uppercase tracking-wide mb-2 flex items-center gap-1">
+                        <X className="w-3 h-3" /> Weaknesses
                       </h4>
-                      <div className="space-y-1.5">
+                      <div className="space-y-1">
                         {r.weaknesses.map((w, i) => (
-                          <div key={i} className="flex items-start gap-2 text-sm text-gray-700">
+                          <div key={i} className="flex items-start gap-2 text-[11px] text-gray-700">
                             <span className="text-red-400 mt-0.5 flex-shrink-0">✗</span>
                             <span>{w}</span>
                           </div>
@@ -521,20 +587,17 @@ export default function StageCandidatesPage() {
                     </div>
                   )}
 
-                  {/* Explanation */}
-                  {r.explanation && (
-                    <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
-                      <h4 className="text-xs font-bold text-indigo-700 uppercase tracking-wide mb-2">AI Explanation</h4>
-                      <p className="text-sm text-indigo-900 leading-relaxed">{r.explanation}</p>
+                  {/* Fraud Detection */}
+                  {(r.fraudFlags || []).length > 0 && (
+                    <div className="bg-amber-50 rounded-xl p-3 border border-amber-200">
+                      <h4 className="text-[10px] font-bold text-amber-700 uppercase tracking-wide mb-1.5">⚠ Fraud Signals</h4>
+                      <div className="space-y-1">
+                        {r.fraudFlags.map((f, i) => (
+                          <p key={i} className="text-[11px] text-amber-700">• {f}</p>
+                        ))}
+                      </div>
                     </div>
                   )}
-
-                  {/* Critical Requirements */}
-                  <div className="flex items-center gap-2">
-                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${r.meetsCriticalRequirements ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
-                      {r.meetsCriticalRequirements ? "✓ Meets Critical Requirements" : "✗ Does NOT Meet Critical Requirements"}
-                    </span>
-                  </div>
 
                   {/* Resume Link */}
                   {r.resumeUrl && (
@@ -601,7 +664,7 @@ export default function StageCandidatesPage() {
             <div className="bg-gradient-to-r from-purple-500 to-pink-500 px-5 py-4 flex items-center justify-between">
               <div className="flex items-center gap-2 text-white">
                 <Brain size={18} />
-                <h3 className="text-base font-bold">AI Screening Config</h3>
+                <h3 className="text-base font-bold">AI Screening</h3>
               </div>
               <button onClick={() => setShowAIModal(false)} className="text-white/70 hover:text-white"><X size={18} /></button>
             </div>
@@ -617,26 +680,12 @@ export default function StageCandidatesPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-2">Minimum Score (%)</label>
-                <div className="flex gap-2">
-                  {[0, 30, 40, 50, 60, 75, 85].map(v => (
-                    <button key={v} onClick={() => setAiConfig(p => ({ ...p, minScore: v }))}
-                      className={`flex-1 py-2 rounded-lg text-xs font-semibold transition ${
-                        aiConfig.minScore === v ? "bg-purple-600 text-white shadow" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                      }`}>
-                      {v === 0 ? "All" : `${v}%+`}
-                    </button>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 mt-1">Only return candidates scoring above this threshold</p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Max Results (optional)</label>
+                <label className="block text-xs font-semibold text-gray-600 mb-1.5">Top N Results (optional)</label>
                 <input type="number" min={1} max={100} value={aiConfig.topN}
                   onChange={e => setAiConfig(p => ({ ...p, topN: e.target.value }))}
                   placeholder="Leave empty for all results"
                   className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 text-black placeholder-gray-400" />
+                <p className="text-xs text-gray-400 mt-1">Return only the top N ranked candidates</p>
               </div>
 
               <button onClick={handleRunAIScreening} disabled={aiScreening}

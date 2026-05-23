@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { validateEmail, validatePassword } from "@/utils/validators";
 
 export default function ResetPasswordClient() {
   const searchParams = useSearchParams();
@@ -43,8 +44,19 @@ export default function ResetPasswordClient() {
     if (!form.email.trim()) {
       return setMessage({ error: "Email is required" });
     }
+    const emailErr = validateEmail(form.email);
+    if (emailErr) {
+      return setMessage({ error: emailErr });
+    }
     if (!form.organizationId.trim()) {
       return setMessage({ error: "Organization ID is required" });
+    }
+    if (!form.new_password) {
+      return setMessage({ error: "New password is required" });
+    }
+    const pwErr = validatePassword(form.new_password);
+    if (pwErr) {
+      return setMessage({ error: pwErr });
     }
     if (form.new_password !== form.confirm_password) {
       return setMessage({ error: "Passwords do not match" });
