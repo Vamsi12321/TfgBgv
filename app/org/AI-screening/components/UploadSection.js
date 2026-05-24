@@ -148,7 +148,7 @@ export default function UploadSection({ jdFile, setJdFile, resumeFiles, setResum
           {resumeFiles.length > 1 ? (
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-semibold text-gray-400">Show Top:</span>
-              {[0, 3, 5, 10].map((n) => (
+              {[0, 2, 5, 10].map((n) => (
                 <button key={n} onClick={() => setTopN(n)}
                   className={`px-2 py-0.5 text-[9px] font-bold rounded-md transition ${
                     topN === n ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
@@ -156,6 +156,18 @@ export default function UploadSection({ jdFile, setJdFile, resumeFiles, setResum
                   {n === 0 ? "All" : n}
                 </button>
               ))}
+              <input
+                type="number"
+                min="1"
+                max={resumeFiles.length}
+                placeholder="Custom"
+                value={topN > 0 && ![0, 2, 5, 10].includes(topN) ? topN : ""}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value) || 0;
+                  setTopN(val > 0 ? val : 0);
+                }}
+                className="w-14 px-1.5 py-0.5 text-[9px] font-bold text-center border border-gray-200 rounded-md focus:border-indigo-400 focus:outline-none focus:ring-1 focus:ring-indigo-100 text-gray-700"
+              />
             </div>
           ) : <div />}
 
